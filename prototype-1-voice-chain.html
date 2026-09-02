@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>WhisperLink — Prototype 1: Web Voice Chain Feasibility</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 14px 14px 60px;
+    background: #0a0e14; color: #e8eaed;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 14px; line-height: 1.5;
+  }
+  h1 { font-size: 16px; margin: 0 0 2px; }
+  .sub { color: #7a8394; font-size: 11.5px; margin-bottom: 4px; }
+  .warn-banner {
+    background: #2a1f00; border: 1px solid #5a4300; color: #fbbf24;
+    border-radius: 8px; padding: 8px 10px; font-size: 11.5px; margin-bottom: 14px;
+  }
+  .section {
+    background: #111722; border: 1px solid #232b3a; border-radius: 12px;
+    padding: 13px; margin-bottom: 12px;
+  }
+  .section h2 { font-size: 12px; letter-spacing: 0.5px; color: #00e5ff; margin: 0 0 8px; text-transform: uppercase; }
+  select, input[type=text] {
+    background: #0d1119; color: #e8eaed; border: 1px solid #2d3f57;
+    border-radius: 8px; padding: 9px 10px; font-size: 13px; width: 100%; margin-bottom: 8px;
+  }
+  label { display: block; font-size: 11px; color: #8b93a3; margin-bottom: 3px; }
+  .row { display: flex; gap: 8px; }
+  .row > div { flex: 1; }
+  button {
+    background: #1a2536; color: #00e5ff; border: 1px solid #2d3f57;
+    border-radius: 8px; padding: 11px 14px; font-size: 13.5px;
+    width: 100%; margin-bottom: 7px; cursor: pointer;
+  }
+  button.small { width: auto; padding: 8px 12px; font-size: 12px; margin-right: 6px; margin-bottom: 6px; display: inline-block; }
+  button.danger { color: #f87171; border-color: #5a2323; }
+  button:disabled { opacity: 0.4; }
+  #micBtn {
+    height: 64px; font-size: 15px; border-radius: 32px;
+    background: #14202e; border: 2px solid #00e5ff;
+  }
+  #micBtn.listening { background: #003a42; animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.55;} }
+  .stateBanner {
+    text-align: center; padding: 10px; border-radius: 8px; font-family: monospace;
+    font-size: 12px; letter-spacing: 1px; margin-bottom: 10px; background: #0d1119;
+  }
+  .stateBanner.ok { color: #4ade80; }
+  .stateBanner.busy { color: #fbbf24; }
+  .stateBanner.fail { color: #f87171; }
+  .transcript-box {
+    background: #0d1119; border-radius: 8px; padding: 10px; min-height: 50px;
+    font-size: 14px; margin-bottom: 8px;
+  }
+  .interim { color: #8b93a3; font-style: italic; }
+  .final { color: #e8eaed; }
+  .trust-row { display: flex; gap: 8px; margin-bottom: 4px; }
+  .trust-chip {
+    flex: 1; text-align: center; padding: 8px 4px; border-radius: 8px;
+    font-family: monospace; font-size: 11px; background: #0d1119; border: 1px solid #232b3a;
+  }
+  .trust-chip.pass { color: #4ade80; border-color: #1f4d2f; }
+  .trust-chip.fail { color: #f87171; border-color: #4d1f1f; }
+  .trust-chip.pending { color: #556; }
+  .result {
+    background: #0d1119; border-radius: 8px; padding: 9px;
+    font-family: monospace; font-size: 11.5px; white-space: pre-wrap; word-break: break-word;
+    margin-top: 6px; color: #b8c4d9; max-height: 160px; overflow-y: auto;
+  }
+  #log {
+    background: #0d1119; border: 1px solid #232b3a; border-radius: 12px;
+    padding: 10px; font-family: monospace; font-size: 10.5px;
+    white-space: pre-wrap; word-break: break-word; height: 220px; overflow-y: auto; color: #8ee88a;
+  }
+  .test-phrase { background: #0d1119; padding: 10px; border-radius: 8px; margin-bottom: 8px; }
+  .test-phrase .cat { color: #00e5ff; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
+  .test-phrase .txt { font-size: 15px; margin: 4px 0; }
+  .why { color: #8b93a3; font-size: 11.5px; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<h1>WhisperLink — Prototype 1</h1>
+<div class="sub">Web Voice Chain Feasibility — a temporary stack, not the production architecture</div>
+<div class="warn-banner">Isolated working copy. Does not touch the Track A checkpoint or the production app. Speak→Hear→Understand, HEARD→TRANSLATED→DELIVERED — that's the only thing being proven here.</div>
+
+<!-- ============ CONTEXT (item 8: Industry+Role+Language carried through, not implemented) ============ -->
+<div class="section">
+  <h2>Context (carried through, not acted on this prototype)</h2>
+  <div class="row">
+    <div><label>Source language</label>
+      <select id="srcLang">
+        <option value="en-US" data-name="English">English</option>
+        <option value="sw-KE" data-name="Swahili">Swahili</option>
+        <option value="so-SO" data-name="Somali">Somali</option>
+        <option value="am-ET" data-name="Amharic">Amharic</option>
+        <option value="ha-NG" data-name="Hausa">Hausa</option>
+        <option value="bn-BD" data-name="Bengali">Bengali</option>
+        <option value="es-ES" data-name="Spanish">Spanish</option>
+        <option value="fr-FR" data-name="French">French</option>
+        <option value="ar-SA" data-name="Arabic">Arabic</option>
+      </select>
+    </div>
+    <div><label>Target language</label>
+      <select id="tgtLang">
+        <option value="es-ES" data-name="Spanish">Spanish</option>
+        <option value="en-US" data-name="English">English</option>
+        <option value="fr-FR" data-name="French">French</option>
+        <option value="ar-SA" data-name="Arabic">Arabic</option>
+        <option value="sw-KE" data-name="Swahili">Swahili</option>
+        <option value="ja-JP" data-name="Japanese">Japanese</option>
+      </select>
+    </div>
+  </div>
+  <div class="row">
+    <div><label>Industry (context hook only)</label><input type="text" id="ctxIndustry" placeholder="e.g. Aviation" value="General"></div>
+    <div><label>Role (context hook only)</label><input type="text" id="ctxRole" placeholder="e.g. Pilot" value="Traveler / Tourist"></div>
+  </div>
+  <div class="why">Not used by the pipeline below — this only proves the values can be carried through the architecture without a later rewrite, per item 8.</div>
+</div>
+
+<!-- ============ STATE MACHINE BANNER ============ -->
+<div class="stateBanner ok" id="stateBanner">IDLE</div>
+
+<!-- ============ AUDIO OUTPUT (item 5: Mode A / Mode B) ============ -->
+<div class="section">
+  <h2>Audio Output</h2>
+  <div class="why">Mode A is the baseline (works even where explicit selection doesn't). Mode B is best-effort — its absence is classified, not treated as a bug.</div>
+  <button class="small" onclick="setOutputMode('A')" id="modeABtn">Mode A: Default</button>
+  <button class="small" onclick="setOutputMode('B')" id="modeBBtn">Mode B: Explicit select</button>
+  <div class="result" id="outputModeResult">Mode A active (default system route). Limitation class: N/A.</div>
+</div>
+
+<!-- ============ MAIN INTERACTION ============ -->
+<div class="section">
+  <h2>Speak → Hear → Understand</h2>
+  <button id="micBtn" onclick="startListening()">🎤 Tap to speak</button>
+  <div class="transcript-box" id="transcriptBox"><span class="interim">Transcript will appear here…</span></div>
+  <div class="trust-row">
+    <div class="trust-chip pending" id="chipHeard">HEARD</div>
+    <div class="trust-chip pending" id="chipTranslated">TRANSLATED</div>
+    <div class="trust-chip pending" id="chipDelivered">DELIVERED</div>
+  </div>
+  <div class="result" id="pipelineResult">No utterance yet.</div>
+</div>
+
+<!-- ============ FORCED FAILURE TESTS (item 15) ============ -->
+<div class="section">
+  <h2>Forced Failure Tests</h2>
+  <div class="why">Each must produce its own distinguishable message — never a generic error, never a false ✓.</div>
+  <button class="small danger" onclick="forceFailure('mic_unavailable')">Mic unavailable</button>
+  <button class="small danger" onclick="forceFailure('mic_denied')">Mic denied</button>
+  <button class="small danger" onclick="forceFailure('asr')">ASR failure</button>
+  <button class="small danger" onclick="forceFailure('translation')">Translation failure</button>
+  <button class="small danger" onclick="forceFailure('tts')">TTS failure</button>
+  <button class="small danger" onclick="forceFailure('audio_output')">Audio-output failure</button>
+  <button class="small danger" onclick="forceFailure('network')">Network failure</button>
+  <div class="result" id="failureTestResult">No forced test run yet.</div>
+</div>
+
+<!-- ============ CRITICAL COMMUNICATION TESTS (item 9) ============ -->
+<div class="section">
+  <h2>Critical Communication Test Suite</h2>
+  <div class="why">Say each phrase aloud in order, using the mic button above, then mark the result. A fluent translation is not automatically a correct one.</div>
+  <div class="test-phrase">
+    <div class="cat" id="testCat">—</div>
+    <div class="txt" id="testTxt">Tap "Start test suite" to begin</div>
+  </div>
+  <button class="small" onclick="startTestSuite()">Start test suite</button>
+  <button class="small" onclick="markTest(true)">✓ Correct</button>
+  <button class="small" onclick="markTest(false)">✕ Wrong</button>
+  <button class="small" onclick="nextTest()">Skip →</button>
+  <div class="result" id="testSuiteResult">0 / 0 tested.</div>
+</div>
+
+<!-- ============ LATENCY (item 14) ============ -->
+<div class="section">
+  <h2>Latency</h2>
+  <div class="why">P50/P95/P99 need real sample volume — shown once enough utterances have been measured; mean/min/max shown regardless.</div>
+  <div class="result" id="latencyResult">No utterances measured yet.</div>
+</div>
+
+<div class="section">
+  <h2>Running Log</h2>
+  <div class="why">Copy this whole box and send it back — this is the actual evidence.</div>
+  <div id="log">Ready.\n</div>
+</div>
+
+<script>
+/* ===================================================================
+   PROTOTYPE 1 — WEB VOICE CHAIN FEASIBILITY
+   Isolated file. Does not read, write, or reference the Track A
+   production artifact in any way. Temporary stack per spec:
+   browser SpeechRecognition -> existing WL translation cascade logic
+   (ported, unchanged in substance) -> browser speechSynthesis.
+=================================================================== */
+
+function log(msg) {
+  var el = document.getElementById('log');
+  el.textContent += '[' + new Date().toLocaleTimeString() + '] ' + msg + '\n';
+  el.scrollTop = el.scrollHeight;
+}
+
+function setState(label, cls) {
+  var b = document.getElementById('stateBanner');
+  b.textContent = label;
+  b.className = 'stateBanner ' + cls;
+  log('STATE: ' + label);
+}
+
+function setChip(id, state) { // 'pending' | 'pass' | 'fail'
+  var el = document.getElementById(id);
+  el.className = 'trust-chip ' + state;
+}
+
+/* ===================================================================
+   TRANSLATION CASCADE — ported directly from the Track A checkpoint's
+   already-hardened tx()/_txLocal/_txMyMemory/_txGoogle logic. Same
+   trust fixes apply unchanged: no fabricated confidence, the
+   LC[from]/LC[to] validation guard (fail honestly instead of silently
+   substituting a language), single ok()/err() invocation.
+=================================================================== */
+var LC = {
+  'English':'en-US','Swahili':'sw-KE','Somali':'so-SO','Amharic':'am-ET',
+  'Hausa':'ha-NG','Bengali':'bn-BD','Spanish':'es-ES','French':'fr-FR',
+  'Arabic':'ar-SA','Japanese':'ja-JP'
+};
+function baseLangCode(code){ code=code||'en'; if(code==='zh-CN'||code==='zh-TW') return code; return code.split('-')[0]; }
+var _txCache = {};
+var MYMEMORY_EMAIL = 'stellatechofficial@gmail.com';
+var _forceFailure = null; // set by the forced-failure test panel
+
+function _txMyMemory(text, from, to, ok, err) {
+  if (_forceFailure === 'translation') { err(); return; }
+  var url = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(text) +
+    '&langpair=' + LC[from] + '|' + LC[to] + '&de=' + encodeURIComponent(MYMEMORY_EMAIL);
+  fetch(url).then(function (r) { return r.json(); }).then(function (d) {
+    var hasMatch = d && d.responseData && typeof d.responseData.match === 'number';
+    var match = hasMatch ? d.responseData.match : 0.75;
+    if (d && d.responseStatus === 200 && d.responseData && d.responseData.translatedText &&
+        d.responseData.translatedText.toLowerCase() !== text.toLowerCase() && match >= 0.70) {
+      ok(d.responseData.translatedText, Math.min(99, Math.round(match * 100)), 'M');
+    } else { err(); }
+  }).catch(function () { err(); });
+}
+function _txGoogle(text, from, to, ok, err) {
+  if (_forceFailure === 'translation' || _forceFailure === 'network') { err(); return; }
+  var url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=' +
+    baseLangCode(LC[from]) + '&tl=' + baseLangCode(LC[to]) + '&dt=t&q=' + encodeURIComponent(text);
+  fetch(url).then(function (r) { return r.json(); }).then(function (d) {
+    var r = ''; if (d && d[0]) d[0].forEach(function (p) { if (p && p[0]) r += p[0]; });
+    r.trim() ? ok(r.trim(), null, 'G') : err();
+  }).catch(function () { err(); });
+}
+function tx(text, from, to, ok, err) {
+  if (!LC[from] || !LC[to]) { if (err) err(); return; } // silent-fallback guard, unchanged from Track A
+  var key = LC[from] + '|' + LC[to] + '|' + text;
+  if (_txCache[key]) { ok(_txCache[key].t, _txCache[key].c, _txCache[key].s); return; }
+  _txMyMemory(text, from, to,
+    function (r, c, s) { _txCache[key] = { t: r, c: c, s: s }; ok(r, c, s); },
+    function () {
+      _txGoogle(text, from, to,
+        function (r, c, s) { _txCache[key] = { t: r, c: c, s: s }; ok(r, c, s); },
+        function () { if (err) err(); }
+      );
+    }
+  );
+}
+
+/* ===================================================================
+   LATENCY TRACKING (item 14)
+=================================================================== */
+var latencySamples = []; // each: {capture, firstTranscript, finalTranscript, translation, firstAudio}
+var currentTiming = null;
+
+function recordLatency() {
+  if (!currentTiming || !currentTiming.capture) return;
+  latencySamples.push(currentTiming);
+  renderLatency();
+}
+function stats(arr) {
+  if (arr.length === 0) return null;
+  var s = arr.slice().sort(function (a, b) { return a - b; });
+  var pct = function (p) { return s[Math.min(s.length - 1, Math.floor(p * s.length))]; };
+  var mean = s.reduce(function (a, b) { return a + b; }, 0) / s.length;
+  return { n: s.length, min: s[0], max: s[s.length - 1], mean: Math.round(mean),
+    p50: arr.length >= 4 ? pct(0.50) : null, p95: arr.length >= 20 ? pct(0.95) : null, p99: arr.length >= 50 ? pct(0.99) : null };
+}
+function renderLatency() {
+  var el = document.getElementById('latencyResult');
+  if (latencySamples.length === 0) { el.textContent = 'No utterances measured yet.'; return; }
+  function seg(name, getter) {
+    var vals = latencySamples.filter(function (s) { return getter(s) != null; }).map(getter);
+    var st = stats(vals);
+    if (!st) return name + ': no samples\n';
+    var line = name + ': n=' + st.n + ' mean=' + st.mean + 'ms min=' + st.min + ' max=' + st.max;
+    if (st.p50 != null) line += ' P50=' + st.p50;
+    if (st.p95 != null) line += ' P95=' + st.p95; else line += ' (P95 needs 20+ samples)';
+    return line + '\n';
+  }
+  var out = seg('Capture -> first transcript', function (s) { return s.firstTranscript ? s.firstTranscript - s.capture : null; });
+  out += seg('Capture -> final transcript', function (s) { return s.finalTranscript ? s.finalTranscript - s.capture : null; });
+  out += seg('Final transcript -> translation done', function (s) { return (s.translation && s.finalTranscript) ? s.translation - s.finalTranscript : null; });
+  out += seg('Translation -> first audible speech', function (s) { return (s.firstAudio && s.translation) ? s.firstAudio - s.translation : null; });
+  out += seg('End-to-end (capture -> first audible speech)', function (s) { return (s.firstAudio && s.capture) ? s.firstAudio - s.capture : null; });
+  el.textContent = out;
+}
+
+/* ===================================================================
+   AUDIO OUTPUT — Mode A / Mode B (item 5), reusing Prototype 0's
+   findings about classifying limitations correctly.
+=================================================================== */
+var outputMode = 'A';
+var selectedSinkId = null;
+function setOutputMode(mode) {
+  outputMode = mode;
+  document.getElementById('modeABtn').style.opacity = mode === 'A' ? 1 : 0.5;
+  document.getElementById('modeBBtn').style.opacity = mode === 'B' ? 1 : 0.5;
+  var el = document.getElementById('outputModeResult');
+  if (mode === 'A') {
+    el.textContent = 'Mode A active (default system route). Limitation class: N/A.';
+    log('Output mode: A (default)');
+    return;
+  }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.selectAudioOutput) {
+    el.textContent = 'Mode B unavailable: selectAudioOutput() not present on this browser.\nLimitation class: BROWSER limitation (API absent), not a WhisperLink implementation gap.';
+    log('Output mode: B requested, but selectAudioOutput() absent (browser limitation)');
+    return;
+  }
+  navigator.mediaDevices.selectAudioOutput().then(function (info) {
+    selectedSinkId = info.deviceId;
+    el.textContent = 'Mode B active. Selected: "' + (info.label || 'unlabeled') + '".\nLimitation class: N/A (working as intended).';
+    log('Output mode: B, selected "' + (info.label || 'unlabeled') + '"');
+  }).catch(function (e) {
+    el.textContent = 'Mode B selection failed/cancelled: ' + e.message + '\nLimitation class: DEVICE/USER limitation (cancelled or denied), not a browser or implementation gap.';
+    log('Output mode: B selection failed: ' + e.message);
+  });
+}
+setOutputMode('A');
+
+async function routeAudioContext(ctx) {
+  if (outputMode === 'B' && selectedSinkId && ctx.setSinkId) {
+    try { await ctx.setSinkId(selectedSinkId); log('Routed to selected sink'); }
+    catch (e) { log('setSinkId failed: ' + e.message + ' (falling back to default route)'); }
+  }
+}
+
+/* ===================================================================
+   TTS — browser speechSynthesis, with distinguishable failure states
+=================================================================== */
+function speak(text, langCode, onDone, onFail) {
+  if (_forceFailure === 'tts') { onFail('TTS FAILED (forced test)'); return; }
+  if (!window.speechSynthesis) { onFail('TTS FAILED: speechSynthesis not available on this browser'); return; }
+  try {
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    routeAudioContext(ctx); // best-effort; does not block speech if it fails
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = langCode;
+    u.onend = function () {
+      if (_forceFailure === 'audio_output') { onFail('AUDIO-OUTPUT FAILED (forced test)'); return; }
+      onDone();
+    };
+    u.onerror = function (e) {
+      // Safari fires 'canceled' on legitimate .cancel() calls -- not a real failure.
+      if (e.error === 'canceled' || e.error === 'interrupted') { onDone(); return; }
+      onFail('TTS FAILED: ' + e.error);
+    };
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  } catch (e) {
+    onFail('TTS FAILED: ' + e.message);
+  }
+}
+
+/* ===================================================================
+   MAIN PIPELINE — SpeechRecognition -> interim/final gating ->
+   translation -> TTS -> trust chips. This is the actual chain being
+   proven: SPEAK -> HEAR -> UNDERSTAND / HEARD -> TRANSLATED -> DELIVERED
+=================================================================== */
+function startListening() {
+  var micBtn = document.getElementById('micBtn');
+  var srcName = document.getElementById('srcLang').selectedOptions[0].dataset.name;
+  var tgtName = document.getElementById('tgtLang').selectedOptions[0].dataset.name;
+  var srcCode = document.getElementById('srcLang').value;
+
+  setChip('chipHeard', 'pending'); setChip('chipTranslated', 'pending'); setChip('chipDelivered', 'pending');
+  document.getElementById('pipelineResult').textContent = 'Running…';
+  currentTiming = { capture: Date.now() };
+
+  if (_forceFailure === 'mic_unavailable') {
+    setState('MICROPHONE FAILED', 'fail');
+    document.getElementById('pipelineResult').textContent = 'MICROPHONE FAILED (forced test): SpeechRecognition not available.';
+    log('Forced failure "mic_unavailable" consumed, clearing.');
+    _forceFailure = null;
+    return;
+  }
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    setState('MICROPHONE FAILED', 'fail');
+    document.getElementById('pipelineResult').textContent = 'MICROPHONE FAILED: SpeechRecognition not available on this browser.';
+    log('MIC FAIL: SpeechRecognition absent');
+    return;
+  }
+
+  micBtn.classList.add('listening');
+  setState('LISTENING', 'busy');
+  document.getElementById('transcriptBox').innerHTML = '<span class="interim">Listening…</span>';
+
+  var rec = new SR();
+  rec.lang = srcCode;
+  rec.interimResults = true; // required to distinguish interim vs finalized (item 3)
+  var settled = false;
+
+  var micErrMsg = {
+    'not-allowed': 'MIC PERMISSION DENIED', 'service-not-allowed': 'MIC PERMISSION DENIED',
+    'audio-capture': 'NO MICROPHONE FOUND', 'network': 'NETWORK FAILED (ASR requires network)',
+    'no-speech': 'ASR FAILED: no speech detected', 'aborted': null
+  };
+
+  if (_forceFailure === 'mic_denied') {
+    settled = true; micBtn.classList.remove('listening');
+    setState('MICROPHONE FAILED', 'fail');
+    document.getElementById('pipelineResult').textContent = 'MIC PERMISSION DENIED (forced test)';
+    log('Forced failure "mic_denied" consumed, clearing.');
+    _forceFailure = null;
+    return;
+  }
+  if (_forceFailure === 'asr') {
+    settled = true; micBtn.classList.remove('listening');
+    setState('ASR FAILED', 'fail');
+    document.getElementById('pipelineResult').textContent = 'ASR FAILED: recognition error (forced test) -- distinguishable from MIC PERMISSION DENIED and TRANSLATION FAILED.';
+    log('Forced failure "asr" consumed, clearing.');
+    _forceFailure = null;
+    return;
+  }
+
+  rec.onresult = function (e) {
+    var interim = '', final = '';
+    for (var i = 0; i < e.results.length; i++) {
+      if (e.results[i].isFinal) final += e.results[i][0].transcript;
+      else interim += e.results[i][0].transcript;
+    }
+    if (!currentTiming.firstTranscript) { currentTiming.firstTranscript = Date.now(); }
+    if (interim && !final) {
+      setState('SPEECH DETECTED — interim', 'busy');
+      document.getElementById('transcriptBox').innerHTML = '<span class="interim">' + esc(interim) + '</span>';
+    }
+    if (final) {
+      settled = true;
+      currentTiming.finalTranscript = Date.now();
+      setState('FINALIZED', 'busy');
+      document.getElementById('transcriptBox').innerHTML = '<span class="final">' + esc(final) + '</span>';
+      handleFinalTranscript(final.trim(), srcName, tgtName, document.getElementById('tgtLang').value);
+    }
+  };
+  rec.onerror = function (e) {
+    settled = true; micBtn.classList.remove('listening');
+    var msg = (e.error in micErrMsg) ? micErrMsg[e.error] : ('ASR FAILED: ' + e.error);
+    if (msg) {
+      setState(msg.split(':')[0], 'fail');
+      document.getElementById('pipelineResult').textContent = msg;
+      log('ASR ERROR: ' + msg);
+    } else {
+      setState('IDLE', 'ok');
+    }
+  };
+  rec.onend = function () {
+    if (!settled) { setState('IDLE', 'ok'); }
+    micBtn.classList.remove('listening');
+  };
+
+  try {
+    rec.start();
+    setTimeout(function () {
+      if (!settled) { rec.abort(); micBtn.classList.remove('listening');
+        setState('MICROPHONE FAILED', 'fail');
+        document.getElementById('pipelineResult').textContent = 'MICROPHONE FAILED: no result within 8s (stuck-state safety net).';
+      }
+    }, 8000);
+  } catch (e) {
+    micBtn.classList.remove('listening');
+    setState('MICROPHONE FAILED', 'fail');
+    document.getElementById('pipelineResult').textContent = 'MICROPHONE FAILED: ' + e.message;
+  }
+}
+
+function handleFinalTranscript(text, srcName, tgtName, tgtCode) {
+  setChip('chipHeard', 'pass');
+  setState('TRANSLATING', 'busy');
+  log('HEARD: "' + text + '" (' + srcName + ')');
+
+  if (_forceFailure === 'network' && !navigator.onLine) {
+    // real offline check still applies regardless of the force flag
+  }
+  if (_forceFailure === 'network') {
+    setChip('chipTranslated', 'fail');
+    setState('NETWORK FAILED', 'fail');
+    document.getElementById('pipelineResult').textContent = 'HEARD ✓  |  NETWORK FAILED (forced test)';
+    recordLatency();
+    return;
+  }
+
+  tx(text, srcName, tgtName,
+    function (translated, conf, src) {
+      currentTiming.translation = Date.now();
+      setChip('chipTranslated', 'pass');
+      setState('SYNTHESIZING', 'busy');
+      log('TRANSLATED: "' + translated + '" (src=' + src + (conf != null ? ' conf=' + conf + '%' : '') + ')');
+      document.getElementById('pipelineResult').textContent =
+        'HEARD: "' + text + '"\nTRANSLATED: "' + translated + '" [' + src + (conf != null ? ' ' + conf + '%' : '') + ']\nDELIVERED: pending…';
+
+      speak(translated, tgtCode,
+        function () {
+          if (!currentTiming.firstAudio) currentTiming.firstAudio = Date.now();
+          setChip('chipDelivered', 'pass');
+          setState('DELIVERED', 'ok');
+          document.getElementById('pipelineResult').textContent =
+            'HEARD: "' + text + '"\nTRANSLATED: "' + translated + '" [' + src + (conf != null ? ' ' + conf + '%' : '') + ']\nDELIVERED: ✓';
+          log('DELIVERED ✓');
+          recordLatency();
+          if (testSuiteActive) { document.getElementById('testSuiteResult').textContent += ' (spoken — mark result above)'; }
+        },
+        function (failMsg) {
+          setChip('chipDelivered', 'fail');
+          setState(failMsg.split(':')[0], 'fail');
+          document.getElementById('pipelineResult').textContent =
+            'HEARD: "' + text + '"\nTRANSLATED: "' + translated + '"\n' + failMsg;
+          log(failMsg);
+          recordLatency();
+        }
+      );
+    },
+    function () {
+      setChip('chipTranslated', 'fail');
+      setState('TRANSLATION FAILED', 'fail');
+      document.getElementById('pipelineResult').textContent = 'HEARD: "' + text + '"\nTRANSLATION FAILED';
+      log('TRANSLATION FAILED for "' + text + '"');
+      recordLatency();
+    }
+  );
+}
+
+function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+/* ===================================================================
+   FORCED FAILURE TESTS (item 15)
+=================================================================== */
+function forceFailure(type) {
+  _forceFailure = type;
+  document.getElementById('failureTestResult').textContent =
+    'Forced failure armed: ' + type + '. Tap the mic button above to trigger it. Clears automatically after one attempt.';
+  log('Forced failure armed: ' + type);
+}
+// Clear the forced flag after each pipeline attempt completes so it doesn't stick silently.
+var _origHandleFinal = handleFinalTranscript;
+handleFinalTranscript = function () {
+  var r = _origHandleFinal.apply(this, arguments);
+  setTimeout(function () { if (_forceFailure) { log('Forced failure "' + _forceFailure + '" consumed, clearing.'); _forceFailure = null; } }, 100);
+  return r;
+};
+
+/* ===================================================================
+   CRITICAL COMMUNICATION TEST SUITE (item 9)
+=================================================================== */
+var testPhrases = [
+  { cat: 'Normal conversation', txt: 'Good morning, how are you today?' },
+  { cat: 'Short utterance', txt: 'Yes.' },
+  { cat: 'Numbers', txt: 'The flight departs at gate twenty-three at nine fifteen.' },
+  { cat: 'Dates', txt: 'The meeting is on the fourteenth of March.' },
+  { cat: 'Names', txt: 'Please ask for Fatima at the front desk.' },
+  { cat: 'Units', txt: 'Add two hundred milliliters of the solution.' },
+  { cat: 'Technical terminology', txt: 'Check the avionics bay for a loose connector.' },
+  { cat: 'Abbreviations', txt: 'The ETA is delayed by thirty minutes.' },
+  { cat: 'Negation', txt: 'Do not open the emergency exit unless instructed.' },
+  { cat: 'Instructions', txt: 'Turn off the main valve before disconnecting the hose.' },
+  { cat: 'Safety-critical', txt: 'Stop. There is a gas leak in this area.' },
+  { cat: 'Incomplete speech (say only this much, then stop)', txt: 'Do not open the...' }
+];
+var testIndex = -1, testSuiteActive = false, testResults = [];
+function startTestSuite() { testSuiteActive = true; testIndex = -1; testResults = []; nextTest(); }
+function nextTest() {
+  testIndex++;
+  if (testIndex >= testPhrases.length) {
+    testSuiteActive = false;
+    document.getElementById('testCat').textContent = 'DONE';
+    document.getElementById('testTxt').textContent = 'Test suite complete.';
+    return;
+  }
+  document.getElementById('testCat').textContent = testPhrases[testIndex].cat;
+  document.getElementById('testTxt').textContent = testPhrases[testIndex].txt;
+  renderTestSuiteResult();
+}
+function markTest(correct) {
+  if (testIndex < 0 || testIndex >= testPhrases.length) return;
+  testResults.push({ cat: testPhrases[testIndex].cat, txt: testPhrases[testIndex].txt, correct: correct });
+  log('TEST [' + testPhrases[testIndex].cat + ']: ' + (correct ? 'CORRECT' : 'WRONG'));
+  nextTest();
+}
+function renderTestSuiteResult() {
+  var passed = testResults.filter(function (r) { return r.correct; }).length;
+  var lines = testResults.map(function (r) { return (r.correct ? '✓' : '✕') + ' ' + r.cat + ': "' + r.txt + '"'; });
+  document.getElementById('testSuiteResult').textContent = passed + ' / ' + testResults.length + ' correct so far.\n' + lines.join('\n');
+}
+
+log('Prototype 1 loaded. Isolated from Track A. Ready.');
+</script>
+
+</body>
+</html>

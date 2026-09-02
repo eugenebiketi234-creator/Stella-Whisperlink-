@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>WhisperLink — Prototype 0: Audio Output Capability Spike</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 16px 16px 60px;
+    background: #0a0e14; color: #e8eaed;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 15px; line-height: 1.5;
+  }
+  h1 { font-size: 17px; margin: 0 0 4px; }
+  .sub { color: #7a8394; font-size: 12px; margin-bottom: 20px; }
+  .section {
+    background: #111722; border: 1px solid #232b3a; border-radius: 12px;
+    padding: 14px; margin-bottom: 14px;
+  }
+  .section h2 { font-size: 13px; letter-spacing: 0.5px; color: #00e5ff; margin: 0 0 4px; text-transform: uppercase; }
+  .section .why { color: #8b93a3; font-size: 12.5px; margin-bottom: 10px; }
+  button {
+    background: #1a2536; color: #00e5ff; border: 1px solid #2d3f57;
+    border-radius: 8px; padding: 12px 16px; font-size: 14px;
+    width: 100%; margin-bottom: 8px; cursor: pointer;
+  }
+  button:active { background: #223349; }
+  button:disabled { opacity: 0.4; }
+  .result {
+    background: #0d1119; border-radius: 8px; padding: 10px;
+    font-family: 'SF Mono', Menlo, monospace; font-size: 12px;
+    white-space: pre-wrap; word-break: break-word; margin-top: 8px;
+    max-height: 220px; overflow-y: auto; color: #b8c4d9;
+  }
+  .ok { color: #4ade80; }
+  .no { color: #f87171; }
+  .warn { color: #fbbf24; }
+  #log {
+    background: #0d1119; border: 1px solid #232b3a; border-radius: 12px;
+    padding: 12px; font-family: 'SF Mono', Menlo, monospace; font-size: 11.5px;
+    white-space: pre-wrap; word-break: break-word; height: 260px; overflow-y: auto;
+    color: #8ee88a;
+  }
+  .tag { display:inline-block; font-size:10px; padding:2px 6px; border-radius:5px; margin-left:6px; vertical-align:middle; }
+  .tag.action { background:#3b2f00; color:#fbbf24; }
+</style>
+</head>
+<body>
+
+<h1>WhisperLink — Prototype 0</h1>
+<div class="sub">Audio Output / Earbud Capability Spike · run this on the actual phone, with earbuds paired, over a real HTTPS connection</div>
+
+<div class="section">
+  <h2>0 · Environment</h2>
+  <div class="why">Confirms this is actually a secure context — most of the APIs below silently refuse to work otherwise.</div>
+  <div class="result" id="envResult">Not run yet.</div>
+</div>
+
+<div class="section">
+  <h2>1 · Bluetooth (Web Bluetooth)</h2>
+  <div class="why">Important distinction up front: Web Bluetooth talks to BLE (Bluetooth Low Energy) devices via GATT services — it is NOT how classic Bluetooth audio (A2DP, what earbuds actually use for audio) is exposed to a web page. This section exists to confirm that directly, not because it's expected to find your earbuds as an audio device.</div>
+  <button onclick="checkBluetooth()">Check navigator.bluetooth</button>
+  <div class="result" id="btResult">Not run yet.</div>
+</div>
+
+<div class="section">
+  <h2>2 · Enumerate audio outputs (before mic permission)</h2>
+  <div class="why">Per the spec discussion, output devices are often only revealed AFTER mic permission is granted or selectAudioOutput() is used. Running this first establishes the baseline.</div>
+  <button onclick="enumerateOutputs('pre')">List audio outputs now</button>
+  <div class="result" id="enumPreResult">Not run yet.</div>
+</div>
+
+<div class="section">
+  <h2>3 · Grant mic permission, then re-enumerate</h2>
+  <div class="why">This is expected to reveal more (or labeled) output devices, since granting mic access can also reveal the paired output device info.</div>
+  <button onclick="grantMicThenEnumerate()">Grant mic + re-check outputs <span class="tag action">permission prompt</span></button>
+  <div class="result" id="enumPostResult">Not run yet.</div>
+</div>
+
+<div class="section">
+  <h2>4 · Explicit output selection (selectAudioOutput)</h2>
+  <div class="why">Experimental API. This SHOULD show a picker of your available outputs, including Bluetooth earbuds if the browser exposes them this way. This is the main test of whether WhisperLink could ever explicitly route audio to your earbuds specifically.</div>
+  <button onclick="trySelectOutput()">Select audio output <span class="tag action">permission prompt</span></button>
+  <div class="result" id="selectResult">Not run yet.</div>
+</div>
+
+<div class="section">
+  <h2>5 · Play a test tone through the selected output</h2>
+  <div class="why">The only real proof: does sound actually come out of your earbuds, or the phone speaker? Listen and answer honestly when you report back — this page cannot know what you actually heard.</div>
+  <button onclick="playTestTone()">Play 1-second test tone</button>
+  <div class="result" id="toneResult">Not run yet. <b>Where did you hear it — earbuds or phone speaker?</b></div>
+</div>
+
+<div class="section">
+  <h2>6 · Disconnect / reconnect watch</h2>
+  <div class="why">Leave this running, then physically disconnect your earbuds (take them out / turn off / disable Bluetooth), wait a few seconds, then reconnect. Everything the browser tells us gets logged below with a timestamp — including nothing happening at all, which is itself an important result.</div>
+  <button onclick="startWatching()" id="watchBtn">Start watching for device changes</button>
+  <div class="result" id="watchResult">Not started.</div>
+</div>
+
+<div class="section">
+  <h2>Running Log</h2>
+  <div class="why">Copy this whole box and send it back — this is the actual evidence.</div>
+  <div id="log">Ready.\n</div>
+</div>
+
+<script>
+function log(msg, cls) {
+  var el = document.getElementById('log');
+  var time = new Date().toLocaleTimeString();
+  var line = '[' + time + '] ' + msg;
+  el.textContent += line + '\n';
+  el.scrollTop = el.scrollHeight;
+  console.log(line);
+}
+
+// ---- 0. Environment ----
+(function () {
+  var el = document.getElementById('envResult');
+  var lines = [];
+  lines.push('Secure context (isSecureContext): ' + (window.isSecureContext ? 'YES ✓' : 'NO — most APIs below will fail'));
+  lines.push('URL scheme: ' + location.protocol);
+  lines.push('User agent: ' + navigator.userAgent);
+  el.textContent = lines.join('\n');
+  log('Environment check: secure=' + window.isSecureContext + ', scheme=' + location.protocol);
+})();
+
+// ---- 1. Bluetooth ----
+function checkBluetooth() {
+  var el = document.getElementById('btResult');
+  if (navigator.bluetooth) {
+    el.innerHTML = '<span class="ok">navigator.bluetooth EXISTS.</span>\nThis only means Web Bluetooth (BLE/GATT) is present — it does not mean the browser can see your earbuds as an audio device. Not directly useful for audio routing, logging for completeness.';
+    log('Web Bluetooth: present (BLE/GATT only, not audio-relevant)');
+  } else {
+    el.innerHTML = '<span class="no">navigator.bluetooth NOT present.</span>\nExpected on some browsers/contexts (e.g. iOS Safari never supports it). Not a blocker for audio routing either way — that goes through the Audio Output Devices API tested below, not this.';
+    log('Web Bluetooth: absent');
+  }
+}
+
+// ---- 2 & 3. Enumerate ----
+async function enumerateOutputs(phase) {
+  var elId = phase === 'pre' ? 'enumPreResult' : 'enumPostResult';
+  var el = document.getElementById(elId);
+  try {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+      el.innerHTML = '<span class="no">enumerateDevices() not available on this browser.</span>';
+      log('enumerateDevices (' + phase + '): API missing');
+      return;
+    }
+    var devices = await navigator.mediaDevices.enumerateDevices();
+    var outputs = devices.filter(function (d) { return d.kind === 'audiooutput'; });
+    if (outputs.length === 0) {
+      el.innerHTML = '<span class="warn">Found 0 audiooutput devices.</span>\n' +
+        (phase === 'pre' ? 'Expected before permission — try step 3.' : 'Even after mic permission, none were revealed — worth noting.');
+    } else {
+      var lines = outputs.map(function (d, i) {
+        return (i + 1) + '. label="' + (d.label || '(no label — permission-limited)') + '" deviceId=' + (d.deviceId ? d.deviceId.slice(0, 12) + '…' : '(empty)');
+      });
+      el.innerHTML = '<span class="ok">Found ' + outputs.length + ' audiooutput device(s):</span>\n' + lines.join('\n');
+    }
+    log('enumerateDevices (' + phase + '): ' + outputs.length + ' audiooutput device(s) found');
+  } catch (e) {
+    el.innerHTML = '<span class="no">Error: ' + e.message + '</span>';
+    log('enumerateDevices (' + phase + ') ERROR: ' + e.message);
+  }
+}
+
+async function grantMicThenEnumerate() {
+  var el = document.getElementById('enumPostResult');
+  try {
+    log('Requesting microphone permission…');
+    var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream.getTracks().forEach(function (t) { t.stop(); });
+    log('Microphone permission GRANTED');
+    await enumerateOutputs('post');
+  } catch (e) {
+    el.innerHTML = '<span class="no">Mic permission failed or denied: ' + e.message + '</span>';
+    log('Microphone permission DENIED/ERROR: ' + e.message);
+  }
+}
+
+// ---- 4. selectAudioOutput ----
+var selectedSinkId = null;
+async function trySelectOutput() {
+  var el = document.getElementById('selectResult');
+  if (!navigator.mediaDevices || !navigator.mediaDevices.selectAudioOutput) {
+    el.innerHTML = '<span class="no">selectAudioOutput() is NOT available on this browser.</span>\nThis is the experimental API — its absence here is itself an important, real result, not an error in this page.';
+    log('selectAudioOutput: API missing');
+    return;
+  }
+  try {
+    log('Calling selectAudioOutput() — a picker should appear now…');
+    var info = await navigator.mediaDevices.selectAudioOutput();
+    selectedSinkId = info.deviceId;
+    el.innerHTML = '<span class="ok">Selected:</span> label="' + (info.label || '(unlabeled)') + '"\ndeviceId=' + info.deviceId.slice(0, 16) + '…';
+    log('selectAudioOutput: user selected "' + (info.label || 'unlabeled') + '"');
+  } catch (e) {
+    el.innerHTML = '<span class="warn">selectAudioOutput() exists but failed/was cancelled: ' + e.message + '</span>';
+    log('selectAudioOutput ERROR/cancelled: ' + e.message);
+  }
+}
+
+// ---- 5. Test tone ----
+async function playTestTone() {
+  var el = document.getElementById('toneResult');
+  try {
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (selectedSinkId && ctx.setSinkId) {
+      try {
+        await ctx.setSinkId(selectedSinkId);
+        log('AudioContext.setSinkId succeeded for the selected device');
+      } catch (e) {
+        log('AudioContext.setSinkId FAILED: ' + e.message);
+      }
+    } else if (selectedSinkId) {
+      log('AudioContext.setSinkId not available on this browser — falling back to default output');
+    }
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.frequency.value = 880;
+    gain.gain.value = 0.2;
+    osc.connect(gain).connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 1);
+    el.innerHTML = 'Tone played (880Hz, 1s). <b>Where did you hear it?</b> Reply below in the log notes when you report back.';
+    log('Test tone played' + (selectedSinkId ? ' with sink routing attempted' : ' on default output — select a device in step 4 first to test routing'));
+  } catch (e) {
+    el.innerHTML = '<span class="no">Failed to play tone: ' + e.message + '</span>';
+    log('Test tone ERROR: ' + e.message);
+  }
+}
+
+// ---- 6. Device change watching ----
+var watching = false;
+function startWatching() {
+  var el = document.getElementById('watchResult');
+  var btn = document.getElementById('watchBtn');
+  if (watching) return;
+  if (!navigator.mediaDevices || !('ondevicechange' in navigator.mediaDevices)) {
+    el.innerHTML = '<span class="no">devicechange event not supported on this browser.</span>';
+    log('ondevicechange: not supported');
+    return;
+  }
+  navigator.mediaDevices.addEventListener('devicechange', function () {
+    log('*** devicechange EVENT FIRED *** — re-enumerating…');
+    enumerateOutputs('post');
+  });
+  watching = true;
+  btn.disabled = true;
+  btn.textContent = 'Watching… (disconnect/reconnect your earbuds now)';
+  el.innerHTML = '<span class="ok">Listening for devicechange events.</span>\nNow physically disconnect and reconnect your earbuds. Anything the browser notices will appear in the log below with a timestamp. If nothing appears after a real disconnect, that absence is itself the result.';
+  log('Started watching for devicechange events — go disconnect your earbuds now');
+}
+</script>
+
+</body>
+</html>
