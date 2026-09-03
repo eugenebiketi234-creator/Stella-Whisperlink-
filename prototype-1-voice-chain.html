@@ -382,6 +382,7 @@ function speak(text, langCode, onStart, onDone, onFail) {
    proven: SPEAK -> HEAR -> UNDERSTAND / HEARD -> TRANSLATED -> DELIVERED
 =================================================================== */
 function startListening() {
+  warmUpTTS();
   var micBtn = document.getElementById('micBtn');
   var srcName = document.getElementById('srcLang').selectedOptions[0].dataset.name;
   var tgtName = document.getElementById('tgtLang').selectedOptions[0].dataset.name;
@@ -625,6 +626,22 @@ function renderTestSuiteResult() {
   var passed = testResults.filter(function (r) { return r.correct; }).length;
   var lines = testResults.map(function (r) { return (r.correct ? '✓' : '✕') + ' ' + r.cat + ': "' + r.txt + '"'; });
   document.getElementById('testSuiteResult').textContent = passed + ' / ' + testResults.length + ' correct so far.\n' + lines.join('\n');
+}
+
+var _ttsWarmed = false;
+function warmUpTTS() {
+  if (_ttsWarmed || !window.speechSynthesis) return;
+  _ttsWarmed = true;
+  try {
+    var u = new SpeechSynthesisUtterance(' ');
+    u.volume = 0; // inaudible -- purpose is only to engage the engine early, not to be heard
+    u.onstart = function () { log('TTS engine warm-up started'); };
+    u.onend = function () { log('TTS engine warm-up complete'); };
+    u.onerror = function () { log('TTS engine warm-up failed (non-fatal -- first real utterance may be slow instead)'); };
+    window.speechSynthesis.speak(u);
+  } catch (e) {
+    log('TTS warm-up skipped: ' + e.message);
+  }
 }
 
 log('Prototype 1 loaded. Isolated from Track A. Ready.');
