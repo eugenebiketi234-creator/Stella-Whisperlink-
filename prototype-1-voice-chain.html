@@ -351,7 +351,7 @@ async function routeAudioContext(ctx) {
 /* ===================================================================
    TTS — browser speechSynthesis, with distinguishable failure states
 =================================================================== */
-function speak(text, langCode, onDone, onFail) {
+function speak(text, langCode, onStart, onDone, onFail) {
   if (_forceFailure === 'tts') { onFail('TTS FAILED (forced test)'); return; }
   if (!window.speechSynthesis) { onFail('TTS FAILED: speechSynthesis not available on this browser'); return; }
   try {
@@ -359,6 +359,7 @@ function speak(text, langCode, onDone, onFail) {
     routeAudioContext(ctx); // best-effort; does not block speech if it fails
     var u = new SpeechSynthesisUtterance(text);
     u.lang = langCode;
+    u.onstart = function () { onStart(); }; // true "first audible" moment
     u.onend = function () {
       if (_forceFailure === 'audio_output') { onFail('AUDIO-OUTPUT FAILED (forced test)'); return; }
       onDone();
@@ -467,27 +468,33 @@ function startListening() {
       setState('IDLE', 'ok');
     }
   };
+  var safetyTimer = null;
   rec.onend = function () {
+    clearTimeout(safetyTimer);
     if (!settled) { setState('IDLE', 'ok'); }
     micBtn.classList.remove('listening');
   };
 
   try {
     rec.start();
-    setTimeout(function () {
+    safetyTimer = setTimeout(function () {
       if (!settled) { rec.abort(); micBtn.classList.remove('listening');
         setState('MICROPHONE FAILED', 'fail');
         document.getElementById('pipelineResult').textContent = 'MICROPHONE FAILED: no result within 8s (stuck-state safety net).';
+        log('MICROPHONE FAILED: 8s stuck-state timeout (recognition never finalized, errored, or ended within 8s)');
       }
     }, 8000);
   } catch (e) {
     micBtn.classList.remove('listening');
     setState('MICROPHONE FAILED', 'fail');
     document.getElementById('pipelineResult').textContent = 'MICROPHONE FAILED: ' + e.message;
+    log('MICROPHONE FAILED (synchronous throw from rec.start()): ' + e.name + ': ' + e.message +
+        ' -- likely cause: starting a new recognition session too soon after the previous one ended');
   }
 }
 
 function handleFinalTranscript(text, srcName, tgtName, tgtCode) {
+  lastAttemptDelivered = false; // reset -- only the real DELIVERED path sets this true
   setChip('chipHeard', 'pass');
   setState('TRANSLATING', 'busy');
   log('HEARD: "' + text + '" (' + srcName + ')');
@@ -514,9 +521,16 @@ function handleFinalTranscript(text, srcName, tgtName, tgtCode) {
 
       speak(translated, tgtCode,
         function () {
-          if (!currentTiming.firstAudio) currentTiming.firstAudio = Date.now();
+          // onStart -- speech genuinely just became audible. This is the
+          // correct moment for the "first audible speech" measurement.
+          currentTiming.firstAudio = Date.now();
+          setState('DELIVERING', 'busy');
+          log('AUDIO STARTED (first audible speech)');
+        },
+        function () {
           setChip('chipDelivered', 'pass');
           setState('DELIVERED', 'ok');
+          lastAttemptDelivered = true;
           document.getElementById('pipelineResult').textContent =
             'HEARD: "' + text + '"\nTRANSLATED: "' + translated + '" [' + src + (conf != null ? ' ' + conf + '%' : '') + ']\nDELIVERED: ✓';
           log('DELIVERED ✓');
@@ -580,9 +594,11 @@ var testPhrases = [
   { cat: 'Incomplete speech (say only this much, then stop)', txt: 'Do not open the...' }
 ];
 var testIndex = -1, testSuiteActive = false, testResults = [];
+var lastAttemptDelivered = false;
 function startTestSuite() { testSuiteActive = true; testIndex = -1; testResults = []; nextTest(); }
 function nextTest() {
   testIndex++;
+  lastAttemptDelivered = false; // require a fresh, genuine attempt for the new phrase
   if (testIndex >= testPhrases.length) {
     testSuiteActive = false;
     document.getElementById('testCat').textContent = 'DONE';
@@ -595,6 +611,12 @@ function nextTest() {
 }
 function markTest(correct) {
   if (testIndex < 0 || testIndex >= testPhrases.length) return;
+  if (!lastAttemptDelivered) {
+    document.getElementById('testSuiteResult').textContent =
+      'Not marked: no successful delivery recorded for this phrase yet (last attempt may have hit a real or forced failure). Speak the phrase again until it reaches DELIVERED, then mark it.';
+    log('Blocked test mark for "' + testPhrases[testIndex].txt + '" -- no genuine DELIVERED outcome since this phrase was shown');
+    return;
+  }
   testResults.push({ cat: testPhrases[testIndex].cat, txt: testPhrases[testIndex].txt, correct: correct });
   log('TEST [' + testPhrases[testIndex].cat + ']: ' + (correct ? 'CORRECT' : 'WRONG'));
   nextTest();
