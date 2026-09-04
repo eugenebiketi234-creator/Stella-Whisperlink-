@@ -169,6 +169,7 @@
     <div class="cat" id="testCat">—</div>
     <div class="txt" id="testTxt">Tap "Start test suite" to begin</div>
   </div>
+  <input type="text" id="testReasonInput" placeholder="Optional: why wrong / any note (e.g. ASR mishearing, translation error)">
   <button class="small" onclick="startTestSuite()">Start test suite</button>
   <button class="small" onclick="markTest(true)">✓ Correct</button>
   <button class="small" onclick="markTest(false)">✕ Wrong</button>
@@ -496,6 +497,7 @@ function startListening() {
 
 function handleFinalTranscript(text, srcName, tgtName, tgtCode) {
   lastAttemptDelivered = false; // reset -- only the real DELIVERED path sets this true
+  lastHeardText = text; lastTranslatedText = null;
   setChip('chipHeard', 'pass');
   setState('TRANSLATING', 'busy');
   log('HEARD: "' + text + '" (' + srcName + ')');
@@ -514,6 +516,7 @@ function handleFinalTranscript(text, srcName, tgtName, tgtCode) {
   tx(text, srcName, tgtName,
     function (translated, conf, src) {
       currentTiming.translation = Date.now();
+      lastTranslatedText = translated;
       setChip('chipTranslated', 'pass');
       setState('SYNTHESIZING', 'busy');
       log('TRANSLATED: "' + translated + '" (src=' + src + (conf != null ? ' conf=' + conf + '%' : '') + ')');
@@ -596,10 +599,12 @@ var testPhrases = [
 ];
 var testIndex = -1, testSuiteActive = false, testResults = [];
 var lastAttemptDelivered = false;
+var lastHeardText = null, lastTranslatedText = null;
 function startTestSuite() { testSuiteActive = true; testIndex = -1; testResults = []; nextTest(); }
 function nextTest() {
   testIndex++;
   lastAttemptDelivered = false; // require a fresh, genuine attempt for the new phrase
+  document.getElementById('testReasonInput').value = '';
   if (testIndex >= testPhrases.length) {
     testSuiteActive = false;
     document.getElementById('testCat').textContent = 'DONE';
@@ -618,13 +623,27 @@ function markTest(correct) {
     log('Blocked test mark for "' + testPhrases[testIndex].txt + '" -- no genuine DELIVERED outcome since this phrase was shown');
     return;
   }
-  testResults.push({ cat: testPhrases[testIndex].cat, txt: testPhrases[testIndex].txt, correct: correct });
-  log('TEST [' + testPhrases[testIndex].cat + ']: ' + (correct ? 'CORRECT' : 'WRONG'));
+  var reason = document.getElementById('testReasonInput').value.trim();
+  if (!correct && !reason) {
+    document.getElementById('testSuiteResult').textContent =
+      'Not marked: a reason is required for WRONG (e.g. "ASR mishearing", "translation error", "TTS said something else"). Fill in the note above, then tap ✕ Wrong again.';
+    log('Blocked WRONG mark for "' + testPhrases[testIndex].txt + '" -- no reason given');
+    return;
+  }
+  testResults.push({ cat: testPhrases[testIndex].cat, txt: testPhrases[testIndex].txt, correct: correct, reason: reason || null,
+    lastHeard: lastHeardText, lastTranslated: lastTranslatedText });
+  log('TEST [' + testPhrases[testIndex].cat + ']: ' + (correct ? 'CORRECT' : 'WRONG') + (reason ? ' -- ' + reason : ''));
   nextTest();
 }
 function renderTestSuiteResult() {
   var passed = testResults.filter(function (r) { return r.correct; }).length;
-  var lines = testResults.map(function (r) { return (r.correct ? '✓' : '✕') + ' ' + r.cat + ': "' + r.txt + '"'; });
+  var lines = testResults.map(function (r) {
+    var line = (r.correct ? '✓' : '✕') + ' ' + r.cat + ': "' + r.txt + '"';
+    if (r.lastHeard) line += ' [heard: "' + r.lastHeard + '"]';
+    if (r.lastTranslated) line += ' [translated: "' + r.lastTranslated + '"]';
+    if (r.reason) line += ' -- reason: ' + r.reason;
+    return line;
+  });
   document.getElementById('testSuiteResult').textContent = passed + ' / ' + testResults.length + ' correct so far.\n' + lines.join('\n');
 }
 
