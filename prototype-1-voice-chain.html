@@ -353,7 +353,7 @@ async function routeAudioContext(ctx) {
    TTS — browser speechSynthesis, with distinguishable failure states
 =================================================================== */
 function speak(text, langCode, onStart, onDone, onFail) {
-  if (_forceFailure === 'tts') { onFail('TTS FAILED (forced test)'); return; }
+  if (_forceFailure === 'tts') { log('Forced failure "tts" consumed, clearing.'); _forceFailure = null; onFail('TTS FAILED (forced test)'); return; }
   if (!window.speechSynthesis) { onFail('TTS FAILED: speechSynthesis not available on this browser'); return; }
   try {
     var ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -362,7 +362,10 @@ function speak(text, langCode, onStart, onDone, onFail) {
     u.lang = langCode;
     u.onstart = function () { onStart(); }; // true "first audible" moment
     u.onend = function () {
-      if (_forceFailure === 'audio_output') { onFail('AUDIO-OUTPUT FAILED (forced test)'); return; }
+      if (_forceFailure === 'audio_output') {
+        log('Forced failure "audio_output" consumed, clearing.'); _forceFailure = null;
+        onFail('AUDIO-OUTPUT FAILED (forced test)'); return;
+      }
       onDone();
     };
     u.onerror = function (e) {
@@ -370,7 +373,11 @@ function speak(text, langCode, onStart, onDone, onFail) {
       if (e.error === 'canceled' || e.error === 'interrupted') { onDone(); return; }
       onFail('TTS FAILED: ' + e.error);
     };
-    window.speechSynthesis.cancel();
+    if (!_ttsWarmupUtterance) {
+      window.speechSynthesis.cancel();
+    } else {
+      log('Skipping cancel() -- TTS warm-up still in flight, letting it finish first');
+    }
     window.speechSynthesis.speak(u);
   } catch (e) {
     onFail('TTS FAILED: ' + e.message);
@@ -509,6 +516,8 @@ function handleFinalTranscript(text, srcName, tgtName, tgtCode) {
     setChip('chipTranslated', 'fail');
     setState('NETWORK FAILED', 'fail');
     document.getElementById('pipelineResult').textContent = 'HEARD ✓  |  NETWORK FAILED (forced test)';
+    log('Forced failure "network" consumed, clearing.');
+    _forceFailure = null;
     recordLatency();
     return;
   }
@@ -556,6 +565,7 @@ function handleFinalTranscript(text, srcName, tgtName, tgtCode) {
       setState('TRANSLATION FAILED', 'fail');
       document.getElementById('pipelineResult').textContent = 'HEARD: "' + text + '"\nTRANSLATION FAILED';
       log('TRANSLATION FAILED for "' + text + '"');
+      if (_forceFailure === 'translation') { log('Forced failure "translation" consumed, clearing.'); _forceFailure = null; }
       recordLatency();
     }
   );
@@ -572,13 +582,11 @@ function forceFailure(type) {
     'Forced failure armed: ' + type + '. Tap the mic button above to trigger it. Clears automatically after one attempt.';
   log('Forced failure armed: ' + type);
 }
-// Clear the forced flag after each pipeline attempt completes so it doesn't stick silently.
-var _origHandleFinal = handleFinalTranscript;
-handleFinalTranscript = function () {
-  var r = _origHandleFinal.apply(this, arguments);
-  setTimeout(function () { if (_forceFailure) { log('Forced failure "' + _forceFailure + '" consumed, clearing.'); _forceFailure = null; } }, 100);
-  return r;
-};
+// Each forced-failure type clears itself at its own actual consumption
+// point (see tx()/handleFinalTranscript()/speak()) rather than on a
+// generic timer -- a fixed delay can't work here since translation and
+// TTS genuinely take longer than any single delay chosen up front, which
+// was exactly why 'tts' and 'audio_output' could never actually fire.
 
 /* ===================================================================
    CRITICAL COMMUNICATION TEST SUITE (item 9)
@@ -648,16 +656,21 @@ function renderTestSuiteResult() {
 }
 
 var _ttsWarmed = false;
+var _ttsWarmupUtterance = null; // non-null while the warm-up utterance is in flight
 function warmUpTTS() {
   if (_ttsWarmed || !window.speechSynthesis) return;
   _ttsWarmed = true;
   try {
-    var u = new SpeechSynthesisUtterance(' ');
-    u.volume = 0; // inaudible -- purpose is only to engage the engine early, not to be heard
+    var u = new SpeechSynthesisUtterance('hi');
+    u.volume = 0.01; // effectively inaudible, but non-zero in case some engines treat exact 0 as invalid
+    _ttsWarmupUtterance = u;
     u.onstart = function () { log('TTS engine warm-up started'); };
-    u.onend = function () { log('TTS engine warm-up complete'); };
-    u.onerror = function () { log('TTS engine warm-up failed (non-fatal -- first real utterance may be slow instead)'); };
+    u.onend = function () { log('TTS engine warm-up complete'); _ttsWarmupUtterance = null; };
+    u.onerror = function (e) { log('TTS engine warm-up failed: ' + (e && e.error ? e.error : 'unknown') + ' (non-fatal -- first real utterance may be slow instead)'); _ttsWarmupUtterance = null; };
     window.speechSynthesis.speak(u);
+    // Safety net: if none of onstart/onend/onerror ever fire, don't let a stuck
+    // warm-up permanently block every future cancel() call below.
+    setTimeout(function () { _ttsWarmupUtterance = null; }, 3000);
   } catch (e) {
     log('TTS warm-up skipped: ' + e.message);
   }
