@@ -373,10 +373,10 @@ function speak(text, langCode, onStart, onDone, onFail) {
       if (e.error === 'canceled' || e.error === 'interrupted') { onDone(); return; }
       onFail('TTS FAILED: ' + e.error);
     };
-    if (!_ttsWarmupUtterance) {
-      window.speechSynthesis.cancel();
+    if (_warmupPending) {
+      log('Skipping cancel() -- TTS warm-up still in flight, letting it finish first instead of interrupting it');
     } else {
-      log('Skipping cancel() -- TTS warm-up still in flight, letting it finish first');
+      window.speechSynthesis.cancel();
     }
     window.speechSynthesis.speak(u);
   } catch (e) {
@@ -487,7 +487,9 @@ function startListening() {
   try {
     rec.start();
     safetyTimer = setTimeout(function () {
-      if (!settled) { rec.abort(); micBtn.classList.remove('listening');
+      if (!settled) {
+        settled = true; // must be set before abort() -- onend fires from it and must not also declare IDLE
+        rec.abort(); micBtn.classList.remove('listening');
         setState('MICROPHONE FAILED', 'fail');
         document.getElementById('pipelineResult').textContent = 'MICROPHONE FAILED: no result within 8s (stuck-state safety net).';
         log('MICROPHONE FAILED: 8s stuck-state timeout (recognition never finalized, errored, or ended within 8s)');
@@ -656,22 +658,23 @@ function renderTestSuiteResult() {
 }
 
 var _ttsWarmed = false;
-var _ttsWarmupUtterance = null; // non-null while the warm-up utterance is in flight
+var _warmupPending = false;
 function warmUpTTS() {
   if (_ttsWarmed || !window.speechSynthesis) return;
   _ttsWarmed = true;
   try {
     var u = new SpeechSynthesisUtterance('hi');
     u.volume = 0.01; // effectively inaudible, but non-zero in case some engines treat exact 0 as invalid
-    _ttsWarmupUtterance = u;
+    _warmupPending = true;
     u.onstart = function () { log('TTS engine warm-up started'); };
-    u.onend = function () { log('TTS engine warm-up complete'); _ttsWarmupUtterance = null; };
-    u.onerror = function (e) { log('TTS engine warm-up failed: ' + (e && e.error ? e.error : 'unknown') + ' (non-fatal -- first real utterance may be slow instead)'); _ttsWarmupUtterance = null; };
+    u.onend = function () { _warmupPending = false; log('TTS engine warm-up complete'); };
+    u.onerror = function (e) { _warmupPending = false; log('TTS engine warm-up failed: ' + (e && e.error ? e.error : 'unknown') + ' (non-fatal -- first real utterance may be slow instead)'); };
     window.speechSynthesis.speak(u);
     // Safety net: if none of onstart/onend/onerror ever fire, don't let a stuck
-    // warm-up permanently block every future cancel() call below.
-    setTimeout(function () { _ttsWarmupUtterance = null; }, 3000);
+    // warm-up permanently block every future cancel() call in speak().
+    setTimeout(function () { _warmupPending = false; }, 3000);
   } catch (e) {
+    _warmupPending = false;
     log('TTS warm-up skipped: ' + e.message);
   }
 }
