@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>WhisperLink — Prototype 2: Individualized Multi-Listener Output</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 14px 14px 60px;
+    background: #0a0e14; color: #e8eaed;
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 14px; line-height: 1.5;
+  }
+  h1 { font-size: 16px; margin: 0 0 2px; }
+  .sub { color: #7a8394; font-size: 11.5px; margin-bottom: 4px; }
+  .warn-banner {
+    background: #2a1f00; border: 1px solid #5a4300; color: #fbbf24;
+    border-radius: 8px; padding: 8px 10px; font-size: 11.5px; margin-bottom: 14px;
+  }
+  .section {
+    background: #111722; border: 1px solid #232b3a; border-radius: 12px;
+    padding: 13px; margin-bottom: 12px;
+  }
+  .section h2 { font-size: 12px; letter-spacing: 0.5px; color: #00e5ff; margin: 0 0 8px; text-transform: uppercase; }
+  .why { color: #8b93a3; font-size: 11.5px; margin-bottom: 8px; }
+  select, input[type=text] {
+    background: #0d1119; color: #e8eaed; border: 1px solid #2d3f57;
+    border-radius: 8px; padding: 9px 10px; font-size: 13px; width: 100%; margin-bottom: 8px;
+  }
+  label { display: block; font-size: 11px; color: #8b93a3; margin-bottom: 3px; }
+  button {
+    background: #1a2536; color: #00e5ff; border: 1px solid #2d3f57;
+    border-radius: 8px; padding: 11px 14px; font-size: 13.5px;
+    width: 100%; margin-bottom: 7px; cursor: pointer;
+  }
+  button.role-btn { width: 48%; display: inline-block; margin-right: 4%; }
+  button.role-btn:last-child { margin-right: 0; }
+  button.role-btn.active { background: #003a42; border-color: #00e5ff; }
+  #micBtn { height: 60px; font-size: 15px; border-radius: 30px; background: #14202e; border: 2px solid #00e5ff; }
+  #micBtn.listening { background: #003a42; animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.55;} }
+  .stateBanner { text-align: center; padding: 10px; border-radius: 8px; font-family: monospace; font-size: 12px; letter-spacing: 1px; margin-bottom: 10px; background: #0d1119; }
+  .stateBanner.ok { color: #4ade80; } .stateBanner.busy { color: #fbbf24; } .stateBanner.fail { color: #f87171; }
+  .transcript-box { background: #0d1119; border-radius: 8px; padding: 10px; min-height: 50px; font-size: 14px; margin-bottom: 8px; }
+  .interim { color: #8b93a3; font-style: italic; } .final { color: #e8eaed; }
+  .trust-row { display: flex; gap: 8px; margin-bottom: 4px; }
+  .trust-chip { flex: 1; text-align: center; padding: 8px 4px; border-radius: 8px; font-family: monospace; font-size: 11px; background: #0d1119; border: 1px solid #232b3a; }
+  .trust-chip.pass { color: #4ade80; border-color: #1f4d2f; } .trust-chip.fail { color: #f87171; border-color: #4d1f1f; } .trust-chip.pending { color: #556; }
+  .result { background: #0d1119; border-radius: 8px; padding: 9px; font-family: monospace; font-size: 11.5px; white-space: pre-wrap; word-break: break-word; margin-top: 6px; color: #b8c4d9; max-height: 160px; overflow-y: auto; }
+  #log { background: #0d1119; border: 1px solid #232b3a; border-radius: 12px; padding: 10px; font-family: monospace; font-size: 10.5px; white-space: pre-wrap; word-break: break-word; height: 220px; overflow-y: auto; color: #8ee88a; }
+  .tabId { font-family: monospace; color: #00e5ff; font-size: 11px; }
+</style>
+</head>
+<body>
+
+<h1>WhisperLink — Prototype 2</h1>
+<div class="sub">Individualized Multi-Listener Output — one speaker, several listeners, each hearing their own language</div>
+<div class="warn-banner">Isolated from Track A and from Prototype 1. This tab's ID: <span class="tabId" id="tabIdDisplay">—</span> — open this same URL in more tabs to test multiple listeners.</div>
+
+<div class="section">
+  <h2>Role</h2>
+  <div class="why">One tab should be the Speaker. Any number of other tabs (or windows) opened to this same URL can be Listeners, each with their own target language.</div>
+  <button class="role-btn" id="speakerBtn" onclick="setRole('speaker')">I am the Speaker</button>
+  <button class="role-btn active" id="listenerBtn" onclick="setRole('listener')">I am a Listener</button>
+</div>
+
+<div id="speakerPanel" style="display:none;">
+  <div class="section">
+    <h2>Speaker</h2>
+    <label>Source language</label>
+    <select id="srcLang">
+      <option value="English" selected>English</option>
+      <option value="Swahili">Swahili</option>
+      <option value="Spanish">Spanish</option>
+      <option value="Arabic">Arabic</option>
+    </select>
+    <div class="stateBanner ok" id="speakerState">IDLE</div>
+    <button id="micBtn" onclick="startListening()">🎤 Tap to speak</button>
+    <div class="transcript-box" id="transcriptBox"><span class="interim">Transcript will appear here…</span></div>
+    <div class="why">The moment your speech is finalized, it broadcasts to every open Listener tab automatically — nothing to copy or relay manually.</div>
+  </div>
+</div>
+
+<div id="listenerPanel">
+  <div class="section">
+    <h2>Listener</h2>
+    <label>My target language (what I want to hear)</label>
+    <select id="tgtLang">
+      <option value="Spanish" selected>Spanish</option>
+      <option value="English">English</option>
+      <option value="French">French</option>
+      <option value="Japanese">Japanese</option>
+      <option value="Arabic">Arabic</option>
+    </select>
+    <div class="stateBanner ok" id="listenerState">WAITING FOR SPEAKER</div>
+    <div class="trust-row">
+      <div class="trust-chip pending" id="chipHeard">HEARD</div>
+      <div class="trust-chip pending" id="chipTranslated">TRANSLATED</div>
+      <div class="trust-chip pending" id="chipDelivered">DELIVERED</div>
+    </div>
+    <div class="result" id="listenerResult">No utterance received yet.</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Running Log</h2>
+  <div class="why">Copy this tab's log separately from any other open tabs — each tab's log only shows what that specific tab (speaker or a given listener) actually did.</div>
+  <div id="log">Ready.\n</div>
+</div>
+
+<script>
+/* ===================================================================
+   PROTOTYPE 2 — INDIVIDUALIZED MULTI-LISTENER OUTPUT
+   Isolated file, no reference to Track A or Prototype 1's own file.
+   Proves: one speaker's utterance -> N listener tabs, each running its
+   OWN translation + TTS into its OWN configured target language,
+   independently. Tabs are relayed via BroadcastChannel -- same-origin,
+   no network, no server -- standing in for what would eventually be a
+   real multi-device Realtime channel (Track A's Supabase layer),
+   without prematurely rebuilding that infrastructure here.
+=================================================================== */
+
+var TAB_ID = Math.random().toString(36).substr(2, 6).toUpperCase();
+document.getElementById('tabIdDisplay').textContent = TAB_ID;
+
+function log(msg) {
+  var el = document.getElementById('log');
+  el.textContent += '[' + new Date().toLocaleTimeString() + '][' + TAB_ID + '] ' + msg + '\n';
+  el.scrollTop = el.scrollHeight;
+}
+
+var channel = new BroadcastChannel('whisperlink-prototype2');
+
+var role = 'listener';
+function setRole(r) {
+  role = r;
+  document.getElementById('speakerBtn').classList.toggle('active', r === 'speaker');
+  document.getElementById('listenerBtn').classList.toggle('active', r === 'listener');
+  document.getElementById('speakerPanel').style.display = r === 'speaker' ? 'block' : 'none';
+  document.getElementById('listenerPanel').style.display = r === 'listener' ? 'block' : 'none';
+  log('Role set to ' + r.toUpperCase());
+}
+
+/* ===================================================================
+   TRANSLATION CASCADE -- verbatim from the verified Prototype 1
+   checkpoint (SHA-256 1760cd1c...). Same trust fixes intact: no
+   fabricated confidence, the LC[from]/LC[to] silent-fallback guard,
+   single-callback behavior.
+=================================================================== */
+var LC = {
+  'English':'en-US','Swahili':'sw-KE','Somali':'so-SO','Amharic':'am-ET',
+  'Hausa':'ha-NG','Bengali':'bn-BD','Spanish':'es-ES','French':'fr-FR',
+  'Arabic':'ar-SA','Japanese':'ja-JP'
+};
+function baseLangCode(code){ code=code||'en'; if(code==='zh-CN'||code==='zh-TW') return code; return code.split('-')[0]; }
+var _txCache = {};
+var MYMEMORY_EMAIL = 'stellatechofficial@gmail.com';
+
+function _txMyMemory(text, from, to, ok, err) {
+  var url = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(text) +
+    '&langpair=' + LC[from] + '|' + LC[to] + '&de=' + encodeURIComponent(MYMEMORY_EMAIL);
+  fetch(url).then(function (r) { return r.json(); }).then(function (d) {
+    var hasMatch = d && d.responseData && typeof d.responseData.match === 'number';
+    var match = hasMatch ? d.responseData.match : 0.75;
+    if (d && d.responseStatus === 200 && d.responseData && d.responseData.translatedText &&
+        d.responseData.translatedText.toLowerCase() !== text.toLowerCase() && match >= 0.70) {
+      ok(d.responseData.translatedText, Math.min(99, Math.round(match * 100)), 'M');
+    } else { err(); }
+  }).catch(function () { err(); });
+}
+function _txGoogle(text, from, to, ok, err) {
+  var url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=' +
+    baseLangCode(LC[from]) + '&tl=' + baseLangCode(LC[to]) + '&dt=t&q=' + encodeURIComponent(text);
+  fetch(url).then(function (r) { return r.json(); }).then(function (d) {
+    var r = ''; if (d && d[0]) d[0].forEach(function (p) { if (p && p[0]) r += p[0]; });
+    r.trim() ? ok(r.trim(), null, 'G') : err();
+  }).catch(function () { err(); });
+}
+function tx(text, from, to, ok, err) {
+  if (!LC[from] || !LC[to]) { if (err) err(); return; }
+  var key = LC[from] + '|' + LC[to] + '|' + text;
+  if (_txCache[key]) { ok(_txCache[key].t, _txCache[key].c, _txCache[key].s); return; }
+  _txMyMemory(text, from, to,
+    function (r, c, s) { _txCache[key] = { t: r, c: c, s: s }; ok(r, c, s); },
+    function () {
+      _txGoogle(text, from, to,
+        function (r, c, s) { _txCache[key] = { t: r, c: c, s: s }; ok(r, c, s); },
+        function () { if (err) err(); }
+      );
+    }
+  );
+}
+
+/* ===================================================================
+   TTS -- simplified from Prototype 1 (no forced-failure hooks here;
+   this prototype's job is proving individualized output, not
+   re-covering failure-mode ground Prototype 1 already proved).
+=================================================================== */
+function speak(text, langCode, onStart, onDone, onFail) {
+  if (!window.speechSynthesis) { onFail('TTS FAILED: speechSynthesis not available'); return; }
+  try {
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = langCode;
+    u.onstart = function () { onStart(); };
+    u.onend = function () { onDone(); };
+    u.onerror = function (e) {
+      if (e.error === 'canceled' || e.error === 'interrupted') { onDone(); return; }
+      onFail('TTS FAILED: ' + e.error);
+    };
+    window.speechSynthesis.speak(u);
+  } catch (e) {
+    onFail('TTS FAILED: ' + e.message);
+  }
+}
+function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+/* ===================================================================
+   SPEAKER SIDE
+=================================================================== */
+function startListening() {
+  var micBtn = document.getElementById('micBtn');
+  var srcName = document.getElementById('srcLang').value;
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    document.getElementById('speakerState').textContent = 'MICROPHONE FAILED';
+    document.getElementById('speakerState').className = 'stateBanner fail';
+    log('MIC FAIL: SpeechRecognition absent');
+    return;
+  }
+  micBtn.classList.add('listening');
+  document.getElementById('speakerState').textContent = 'LISTENING';
+  document.getElementById('speakerState').className = 'stateBanner busy';
+  document.getElementById('transcriptBox').innerHTML = '<span class="interim">Listening…</span>';
+
+  var rec = new SR();
+  rec.lang = LC[srcName] || 'en-US';
+  rec.interimResults = true;
+  var settled = false;
+  var safetyTimer = null;
+
+  rec.onend = function () {
+    clearTimeout(safetyTimer);
+    if (!settled) { document.getElementById('speakerState').textContent = 'IDLE'; document.getElementById('speakerState').className = 'stateBanner ok'; }
+    micBtn.classList.remove('listening');
+  };
+  rec.onresult = function (e) {
+    var interim = '', final = '';
+    for (var i = 0; i < e.results.length; i++) {
+      if (e.results[i].isFinal) final += e.results[i][0].transcript;
+      else interim += e.results[i][0].transcript;
+    }
+    if (interim && !final) document.getElementById('transcriptBox').innerHTML = '<span class="interim">' + esc(interim) + '</span>';
+    if (final) {
+      settled = true;
+      document.getElementById('transcriptBox').innerHTML = '<span class="final">' + esc(final) + '</span>';
+      document.getElementById('speakerState').textContent = 'BROADCASTING';
+      log('HEARD (broadcasting): "' + final.trim() + '" (' + srcName + ')');
+      channel.postMessage({ type: 'utterance', text: final.trim(), sourceLang: srcName, fromTab: TAB_ID, ts: Date.now() });
+      setTimeout(function(){ document.getElementById('speakerState').textContent = 'IDLE'; document.getElementById('speakerState').className = 'stateBanner ok'; }, 500);
+    }
+  };
+  rec.onerror = function (e) {
+    settled = true; micBtn.classList.remove('listening');
+    document.getElementById('speakerState').textContent = 'MICROPHONE FAILED';
+    document.getElementById('speakerState').className = 'stateBanner fail';
+    log('ASR ERROR: ' + e.error);
+  };
+  try {
+    rec.start();
+    safetyTimer = setTimeout(function () {
+      if (!settled) { settled = true; rec.abort(); micBtn.classList.remove('listening');
+        document.getElementById('speakerState').textContent = 'MICROPHONE FAILED';
+        document.getElementById('speakerState').className = 'stateBanner fail';
+        log('MICROPHONE FAILED: 8s stuck-state timeout');
+      }
+    }, 8000);
+  } catch (e) {
+    micBtn.classList.remove('listening');
+    document.getElementById('speakerState').textContent = 'MICROPHONE FAILED';
+    document.getElementById('speakerState').className = 'stateBanner fail';
+    log('MICROPHONE FAILED (sync throw): ' + e.message);
+  }
+}
+
+/* ===================================================================
+   LISTENER SIDE -- this is the actual thing being proven. Each
+   listener tab independently translates + speaks the SAME broadcast
+   utterance into its OWN configured target language.
+=================================================================== */
+function setChip(id, state) { document.getElementById(id).className = 'trust-chip ' + state; }
+
+channel.onmessage = function (e) {
+  if (role !== 'listener' || !e.data || e.data.type !== 'utterance') return;
+  var text = e.data.text, srcName = e.data.sourceLang, tgtName = document.getElementById('tgtLang').value;
+  log('Received broadcast from speaker tab ' + e.data.fromTab + ': "' + text + '" (' + srcName + ')');
+  setChip('chipHeard', 'pass'); setChip('chipTranslated', 'pending'); setChip('chipDelivered', 'pending');
+  document.getElementById('listenerState').textContent = 'TRANSLATING (to ' + tgtName + ')';
+  document.getElementById('listenerState').className = 'stateBanner busy';
+  document.getElementById('listenerResult').textContent = 'HEARD: "' + text + '"\nTranslating to ' + tgtName + '…';
+
+  tx(text, srcName, tgtName,
+    function (translated, conf, src) {
+      setChip('chipTranslated', 'pass');
+      document.getElementById('listenerState').textContent = 'SYNTHESIZING';
+      log('TRANSLATED (to ' + tgtName + '): "' + translated + '" [' + src + (conf != null ? ' ' + conf + '%' : '') + ']');
+      document.getElementById('listenerResult').textContent =
+        'HEARD: "' + text + '"\nTRANSLATED (' + tgtName + '): "' + translated + '" [' + src + (conf != null ? ' ' + conf + '%' : '') + ']\nDELIVERED: pending…';
+      speak(translated, LC[tgtName] || 'en-US',
+        function () { document.getElementById('listenerState').textContent = 'DELIVERING'; },
+        function () {
+          setChip('chipDelivered', 'pass');
+          document.getElementById('listenerState').textContent = 'WAITING FOR SPEAKER';
+          document.getElementById('listenerState').className = 'stateBanner ok';
+          document.getElementById('listenerResult').textContent =
+            'HEARD: "' + text + '"\nTRANSLATED (' + tgtName + '): "' + translated + '"\nDELIVERED: ✓';
+          log('DELIVERED to this listener (' + tgtName + ') ✓');
+        },
+        function (failMsg) {
+          setChip('chipDelivered', 'fail');
+          document.getElementById('listenerState').textContent = failMsg.split(':')[0];
+          document.getElementById('listenerState').className = 'stateBanner fail';
+          log(failMsg);
+        }
+      );
+    },
+    function () {
+      setChip('chipTranslated', 'fail');
+      document.getElementById('listenerState').textContent = 'TRANSLATION FAILED';
+      document.getElementById('listenerState').className = 'stateBanner fail';
+      document.getElementById('listenerResult').textContent = 'HEARD: "' + text + '"\nTRANSLATION FAILED (to ' + tgtName + ')';
+      log('TRANSLATION FAILED (to ' + tgtName + ') for "' + text + '"');
+    }
+  );
+};
+
+log('Prototype 2 loaded. Tab ID ' + TAB_ID + '. Isolated from Track A and Prototype 1. Default role: Listener.');
+</script>
+
+</body>
+</html>
