@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>WhisperLink — ASR Provider Trial: Google Cloud Speech-to-Text</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; padding:14px 14px 60px; background:#0a0e14; color:#e8eaed; font-family:-apple-system,system-ui,sans-serif; font-size:14px; line-height:1.5; }
+  h1 { font-size:16px; margin:0 0 2px; }
+  .sub { color:#7a8394; font-size:11.5px; margin-bottom:4px; }
+  .warn-banner { background:#2a1f00; border:1px solid #5a4300; color:#fbbf24; border-radius:8px; padding:8px 10px; font-size:11.5px; margin-bottom:14px; }
+  .section { background:#111722; border:1px solid #232b3a; border-radius:12px; padding:13px; margin-bottom:12px; }
+  .section h2 { font-size:12px; letter-spacing:0.5px; color:#00e5ff; margin:0 0 8px; text-transform:uppercase; }
+  .why { color:#8b93a3; font-size:11.5px; margin-bottom:8px; }
+  select, input[type=password], input[type=text] { background:#0d1119; color:#e8eaed; border:1px solid #2d3f57; border-radius:8px; padding:9px 10px; font-size:13px; width:100%; margin-bottom:8px; }
+  label { display:block; font-size:11px; color:#8b93a3; margin-bottom:3px; }
+  button { background:#1a2536; color:#00e5ff; border:1px solid #2d3f57; border-radius:8px; padding:11px 14px; font-size:13.5px; width:100%; margin-bottom:7px; cursor:pointer; }
+  button:disabled { opacity:0.4; }
+  #recBtn { height:60px; font-size:15px; border-radius:30px; background:#14202e; border:2px solid #00e5ff; }
+  #recBtn.recording { background:#3a0000; border-color:#f87171; animation:pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.55;} }
+  .result { background:#0d1119; border-radius:8px; padding:10px; font-family:monospace; font-size:12px; white-space:pre-wrap; word-break:break-word; margin-top:6px; color:#b8c4d9; max-height:260px; overflow-y:auto; }
+  .ok { color:#4ade80; } .no { color:#f87171; } .warn { color:#fbbf24; }
+  #log { background:#0d1119; border:1px solid #232b3a; border-radius:12px; padding:10px; font-family:monospace; font-size:10.5px; white-space:pre-wrap; word-break:break-word; height:200px; overflow-y:auto; color:#8ee88a; }
+</style>
+</head>
+<body>
+
+<h1>ASR Provider Trial — Google Cloud Speech-to-Text</h1>
+<div class="sub">Real accuracy testing for Swahili / Somali / Amharic / Hausa / Bengali — closing the gap the research alone couldn't</div>
+<div class="warn-banner">
+  <b>Read before using:</b> this makes a real, billed request to Google Cloud on every recording — check your project's pricing/free-tier status first.
+  Your API key is used only in your browser to call Google's endpoint directly — this page has no backend and sends the key nowhere else. Still,
+  don't leave a real key sitting in a shared or public copy of this file.
+</div>
+
+<div class="section">
+  <h2>Setup</h2>
+  <div class="why">Needs: a Google Cloud project with billing enabled, the "Cloud Speech-to-Text API" enabled for that project, and an API key. If the request below fails with an auth/permission error, that's almost always one of these two steps, not this tool — see the diagnostic notes under Results.</div>
+  <label>Google Cloud API key</label>
+  <input type="password" id="apiKey" placeholder="AIza...">
+  <label>Language to test</label>
+  <select id="testLang">
+    <option value="sw-KE">Swahili (sw-KE)</option>
+    <option value="so-SO">Somali (so-SO)</option>
+    <option value="am-ET">Amharic (am-ET)</option>
+    <option value="ha-NG">Hausa (ha-NG)</option>
+    <option value="bn-BD">Bengali (bn-BD)</option>
+    <option value="en-US">English (en-US) — control</option>
+  </select>
+  <div class="why">Speak naturally in the selected language — whatever you'd actually want WhisperLink to understand, not a scripted phrase. Keep each recording under ~20 seconds (synchronous recognition caps at 60s).</div>
+</div>
+
+<div class="section">
+  <h2>Record &amp; Test</h2>
+  <button id="recBtn" onclick="toggleRecording()">🎤 Tap to record</button>
+  <div class="result" id="recStatus">Not recorded yet.</div>
+</div>
+
+<div class="section">
+  <h2>Result</h2>
+  <div class="why">What Google's own API actually returned — transcript, confidence (a real score from Google, not invented), and the exact request config used, so a failure here is diagnosable rather than mysterious.</div>
+  <div class="result" id="apiResult">No request sent yet.</div>
+</div>
+
+<div class="section">
+  <h2>Running Log</h2>
+  <div class="why">Copy this whole box and send it back per test — one log per language tried is most useful.</div>
+  <div id="log">Ready.\n</div>
+</div>
+
+<script>
+/* ===================================================================
+   ASR PROVIDER TRIAL -- GOOGLE CLOUD SPEECH-TO-TEXT
+   Standalone, isolated from Track A and every Prototype file. This is
+   the tool the Somali/Hausa provider research kept coming back empty
+   on -- documented language support was never going to settle that,
+   only real audio through the real API can.
+
+   HONEST LIMITS OF THIS TOOL (disclosed, not discovered the hard way):
+   - Uses simple API-key auth (?key=), since that's the only practical
+     option for a pure client-side page with no backend. Google's own
+     docs primarily describe OAuth/Application Default Credentials for
+     this endpoint -- API-key auth has long worked for speech:recognize
+     in practice, but this has NOT been verified live from here (no
+     network access in the environment this was built in). If the
+     request fails with a 401/403, that is the first thing to check,
+     not a sign the tool itself is broken.
+   - Records via MediaRecorder, which produces WEBM/Opus in Chrome --
+     an officially supported encoding for this API, sample rate
+     assumed at 48000Hz (Chrome's typical default). If Google's
+     response suggests a mismatch, that will show up as a clear error,
+     not a silent wrong transcript.
+=================================================================== */
+
+function log(msg) {
+  var el = document.getElementById('log');
+  el.textContent += '[' + new Date().toLocaleTimeString() + '] ' + msg + '\n';
+  el.scrollTop = el.scrollHeight;
+}
+
+var mediaRecorder = null;
+var audioChunks = [];
+var recording = false;
+
+async function toggleRecording() {
+  if (recording) { mediaRecorder.stop(); return; }
+  var apiKey = document.getElementById('apiKey').value.trim();
+  if (!apiKey) {
+    document.getElementById('recStatus').innerHTML = '<span class="no">Enter an API key first.</span>';
+    return;
+  }
+  try {
+    var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioChunks = [];
+    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+    mediaRecorder.ondataavailable = function (e) { if (e.data.size > 0) audioChunks.push(e.data); };
+    mediaRecorder.onstop = function () {
+      stream.getTracks().forEach(function (t) { t.stop(); });
+      recording = false;
+      document.getElementById('recBtn').classList.remove('recording');
+      document.getElementById('recBtn').textContent = '🎤 Tap to record';
+      var blob = new Blob(audioChunks, { type: 'audio/webm' });
+      document.getElementById('recStatus').innerHTML = 'Recorded ' + (blob.size / 1024).toFixed(1) + 'KB. Sending to Google…';
+      log('Recording stopped, ' + blob.size + ' bytes, sending to Google Cloud Speech-to-Text');
+      sendToGoogle(blob, apiKey);
+    };
+    mediaRecorder.start();
+    recording = true;
+    document.getElementById('recBtn').classList.add('recording');
+    document.getElementById('recBtn').textContent = '⏹ Tap to stop';
+    document.getElementById('recStatus').textContent = 'Recording…';
+    log('Recording started');
+  } catch (e) {
+    document.getElementById('recStatus').innerHTML = '<span class="no">Mic access failed: ' + e.message + '</span>';
+    log('Mic access failed: ' + e.name + ': ' + e.message);
+  }
+}
+
+function blobToBase64(blob) {
+  return new Promise(function (resolve, reject) {
+    var reader = new FileReader();
+    reader.onloadend = function () { resolve(reader.result.split(',')[1]); };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function sendToGoogle(blob, apiKey) {
+  var langCode = document.getElementById('testLang').value;
+  var resultEl = document.getElementById('apiResult');
+  try {
+    var base64Audio = await blobToBase64(blob);
+    var requestBody = {
+      config: {
+        encoding: 'WEBM_OPUS',
+        sampleRateHertz: 48000,
+        languageCode: langCode,
+        model: 'default',
+        enableAutomaticPunctuation: true
+      },
+      audio: { content: base64Audio }
+    };
+    log('Request config: ' + JSON.stringify(requestBody.config));
+
+    var response = await fetch('https://speech.googleapis.com/v1/speech:recognize?key=' + encodeURIComponent(apiKey), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody)
+    });
+    var data = await response.json();
+
+    if (!response.ok) {
+      var errMsg = (data && data.error && data.error.message) ? data.error.message : ('HTTP ' + response.status);
+      resultEl.innerHTML = '<span class="no">Request failed: ' + errMsg + '</span>\n\n' +
+        '<span class="warn">Diagnostic notes:</span>\n' +
+        '- 401/403 + "API key not valid" or "PERMISSION_DENIED" -> check the Speech-to-Text API is enabled for this project, and the key has no restriction blocking it.\n' +
+        '- 400 + mentions "sample rate" or "encoding" -> the WEBM_OPUS/48000Hz assumption in this tool may not match your browser; report the exact message and this can be adjusted precisely.\n' +
+        '- 403 + billing -> the project needs billing enabled even to use trial credits.';
+      log('Google API ERROR: ' + errMsg + ' (full response logged below)');
+      log('Full error response: ' + JSON.stringify(data));
+      document.getElementById('recStatus').innerHTML = '<span class="no">Failed — see Result section</span>';
+      return;
+    }
+
+    if (!data.results || data.results.length === 0) {
+      resultEl.innerHTML = '<span class="warn">Request succeeded, but no speech was recognized.</span>\nFull response: ' + JSON.stringify(data, null, 2);
+      log('No results returned (empty results array) -- try speaking louder/clearer, or check the language code matches what was actually spoken');
+      document.getElementById('recStatus').innerHTML = '<span class="warn">No speech recognized</span>';
+      return;
+    }
+
+    var transcript = data.results.map(function (r) { return r.alternatives[0].transcript; }).join(' ');
+    var confidence = data.results[0].alternatives[0].confidence;
+    resultEl.innerHTML = '<span class="ok">Transcript:</span> "' + transcript + '"\n' +
+      '<span class="ok">Confidence:</span> ' + (confidence != null ? (confidence * 100).toFixed(1) + '%' : '(not returned for this request)') + ' -- this is Google\'s own real score, not invented\n' +
+      'Language requested: ' + langCode + '\n\nFull response:\n' + JSON.stringify(data, null, 2);
+    log('SUCCESS -- transcript: "' + transcript + '" | confidence: ' + confidence);
+    document.getElementById('recStatus').innerHTML = '<span class="ok">Done — see Result section</span>';
+  } catch (e) {
+    resultEl.innerHTML = '<span class="no">Unexpected error: ' + e.message + '</span>';
+    log('Unexpected error: ' + e.message);
+    document.getElementById('recStatus').innerHTML = '<span class="no">Failed — see Result section</span>';
+  }
+}
+
+log('ASR provider trial tool loaded. Enter your API key, pick a language, and record a short real utterance.');
+</script>
+
+</body>
+</html>
