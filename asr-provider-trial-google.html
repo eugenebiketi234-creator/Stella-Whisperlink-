@@ -79,7 +79,9 @@
    only real audio through the real API can.
 
    HONEST LIMITS OF THIS TOOL (disclosed, not discovered the hard way):
-   - Uses simple API-key auth (?key=), since that's the only practical
+   - Uses simple API-key auth (x-goog-api-key header, not the URL query
+     parameter -- Google's own docs flag ?key= as exposing the key to
+     theft via URL scans), since that's the only practical
      option for a pure client-side page with no backend. Google's own
      docs primarily describe OAuth/Application Default Credentials for
      this endpoint -- API-key auth has long worked for speech:recognize
@@ -164,9 +166,9 @@ async function sendToGoogle(blob, apiKey) {
     };
     log('Request config: ' + JSON.stringify(requestBody.config));
 
-    var response = await fetch('https://speech.googleapis.com/v1/speech:recognize?key=' + encodeURIComponent(apiKey), {
+    var response = await fetch('https://speech.googleapis.com/v1/speech:recognize', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
       body: JSON.stringify(requestBody)
     });
     var data = await response.json();
