@@ -4359,6 +4359,27 @@ WL.Utils.joinErrorMessage = function(err){
   return 'COULD NOT JOIN · CHECK CONNECTION';
 };
 
+/* ── LEAVE SERVICE — mirrors WL.joinSessionByCode's shape. Calls the
+   server-authoritative leave_session RPC, which derives identity from
+   auth.uid() itself and never accepts a client-supplied user id — the
+   client only ever tells it *which session*, never *who*.
+   Read WL.Session.dbId synchronously before any caller clears local
+   state, so this stays correct regardless of what the caller does
+   with WL.Session afterward.
+   Known limitation, stated plainly rather than assumed away: this is
+   fire-and-forget from the UI's perspective (see Chat.confirmLeave) —
+   if the network call itself fails, the local UI still leaves, but
+   the participant row's left_at is not set, so the slot is not freed
+   server-side until a future join/cleanup pass addresses it. No retry
+   or offline queue exists for this yet. ── */
+WL.leaveSession = function(cb){
+  if(!WL.Session.dbId){ cb(null); return; }
+  WL.Supabase.rpc('leave_session', { p_session_id: WL.Session.dbId }).then(function(res){
+    if(res.error){ cb(res.error); return; }
+    cb(null, res.data);
+  }).catch(function(err){ cb(err); });
+};
+
 /* ── RECENT PEOPLE — Step 9 / Decision "Option C". Derived entirely
    from existing session history (participants + sessions + profiles)
    — no Contacts table. Three queries, aggregated client-side, rather
@@ -5825,6 +5846,11 @@ var Chat={
     hap([150,60,150,60,100]);
     clearInterval(_durT);clearInterval(this._invT);
     window.speechSynthesis&&window.speechSynthesis.cancel();
+    if(window.WL && WL.Session.dbId){
+      WL.leaveSession(function(err){
+        if(err){ console.error('[WL] leave_session failed (local leave still proceeds):', err); }
+      });
+    }
     if(window.WL){ WL.Session.id=null; WL.Session.dbId=null; WL.Session.status='inactive'; WL._participants=[]; }
     showToast('LEFT SESSION · RETURNING HOME...');
     WL.Router.go('home');
