@@ -4213,6 +4213,7 @@ WL.boot = function(){
     }
     WL.State.uid = session.user.id;
     WL.State.onboarded = true;
+    WL._flushPendingLeaves();
     try {
       var cached = localStorage.getItem('wl_profile_cache_'+session.user.id);
       if(cached){
@@ -4366,18 +4367,68 @@ WL.Utils.joinErrorMessage = function(err){
    Read WL.Session.dbId synchronously before any caller clears local
    state, so this stays correct regardless of what the caller does
    with WL.Session afterward.
-   Known limitation, stated plainly rather than assumed away: this is
-   fire-and-forget from the UI's perspective (see Chat.confirmLeave) —
-   if the network call itself fails, the local UI still leaves, but
-   the participant row's left_at is not set, so the slot is not freed
-   server-side until a future join/cleanup pass addresses it. No retry
-   or offline queue exists for this yet. ── */
+
+   Previously fire-and-forget with no recovery path if the network
+   call failed — flagged, now fixed: 2 quick retries (1s, then 2s)
+   before giving up; if still failing, the session id is queued in
+   localStorage and retried automatically on next app boot (see the
+   flush call in WL.boot, right after WL.State.uid is set). The local
+   UI still leaves immediately either way — this never blocks
+   navigation, matching how every other network call in this app
+   degrades (never trap the user in a screen over a bad connection).
+   Not solved: a flush attempt itself failing silently just leaves the
+   entry queued for the boot after that — there's no exponential cap
+   or eventual give-up, so a permanently-unreachable session id would
+   retry forever on every boot. Accepted for now; revisit if that
+   becomes a real problem. ── */
 WL.leaveSession = function(cb){
   if(!WL.Session.dbId){ cb(null); return; }
-  WL.Supabase.rpc('leave_session', { p_session_id: WL.Session.dbId }).then(function(res){
-    if(res.error){ cb(res.error); return; }
+  WL._attemptLeave(WL.Session.dbId, 2, cb);
+};
+
+WL._attemptLeave = function(sessionId, retriesLeft, cb){
+  WL.Supabase.rpc('leave_session', { p_session_id: sessionId }).then(function(res){
+    if(res.error){ WL._leaveFailed(sessionId, retriesLeft, res.error, cb); return; }
     cb(null, res.data);
-  }).catch(function(err){ cb(err); });
+  }).catch(function(err){ WL._leaveFailed(sessionId, retriesLeft, err, cb); });
+};
+
+WL._leaveFailed = function(sessionId, retriesLeft, err, cb){
+  if(retriesLeft > 0){
+    setTimeout(function(){ WL._attemptLeave(sessionId, retriesLeft - 1, cb); }, (3 - retriesLeft) * 1000);
+    return;
+  }
+  WL._queueLeave(sessionId);
+  cb(err);
+};
+
+WL._queueLeave = function(sessionId){
+  try{
+    var q = JSON.parse(localStorage.getItem('wl_pending_leaves') || '[]');
+    if(q.indexOf(sessionId) === -1){ q.push(sessionId); }
+    localStorage.setItem('wl_pending_leaves', JSON.stringify(q));
+  }catch(e){ console.error('[WL] failed to queue pending leave:', e); }
+};
+
+/* Best-effort flush of any leave_session calls that failed on a prior
+   run. Called once per boot, after a real session is confirmed. Each
+   entry is removed from the queue only on confirmed success — a
+   still-unreachable entry is silently left for the next boot to try
+   again, never thrown away. */
+WL._flushPendingLeaves = function(){
+  var q;
+  try{ q = JSON.parse(localStorage.getItem('wl_pending_leaves') || '[]'); }catch(e){ q = []; }
+  if(!q.length) return;
+  q.forEach(function(sessionId){
+    WL.Supabase.rpc('leave_session', { p_session_id: sessionId }).then(function(res){
+      if(!res.error){
+        try{
+          var cur = JSON.parse(localStorage.getItem('wl_pending_leaves') || '[]');
+          localStorage.setItem('wl_pending_leaves', JSON.stringify(cur.filter(function(id){ return id !== sessionId; })));
+        }catch(e){}
+      }
+    }).catch(function(){ /* still unreachable, left queued for next boot */ });
+  });
 };
 
 /* ── RECENT PEOPLE — Step 9 / Decision "Option C". Derived entirely
@@ -5848,7 +5899,7 @@ var Chat={
     window.speechSynthesis&&window.speechSynthesis.cancel();
     if(window.WL && WL.Session.dbId){
       WL.leaveSession(function(err){
-        if(err){ console.error('[WL] leave_session failed (local leave still proceeds):', err); }
+        if(err){ console.error('[WL] leave_session failed after retries, queued for next boot:', err); }
       });
     }
     if(window.WL){ WL.Session.id=null; WL.Session.dbId=null; WL.Session.status='inactive'; WL._participants=[]; }
