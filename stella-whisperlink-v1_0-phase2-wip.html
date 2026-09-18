@@ -1724,6 +1724,9 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
 .solo-lang-section:active{background:rgba(255,255,255,0.06);}
 .solo-lang-section-left{border-right:1px solid rgba(255,255,255,0.06);}
 .solo-lang-section-right{border-left:1px solid rgba(255,255,255,0.06);}
+.solo-gender-hint{display:none;padding:4px 16px 0;font-size:10px;line-height:1.4;color:rgba(255,255,255,0.4);}
+.solo-gender-hint.hidden{display:none;}
+.solo-gender-hint:not(.hidden){display:block;}
 .solo-lang-label{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:0.5px;pointer-events:none;text-align:center;}
 #solo-from-label{color:rgba(255,255,255,0.8);}
 #solo-to-label{color:#00e5ff;}
@@ -1753,7 +1756,7 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
    larger of the two prior values — for readability, per the product
    philosophy doc's own "trust and readability first" framing. */
 .bubble-right-wrap{display:flex;flex-direction:column;align-items:flex-end;padding:0 14px 0 46px;}
-.bubble-right{background:rgba(99,102,241,0.18);border:1px solid rgba(99,102,241,0.28);border-radius:15px 4px 15px 15px;padding:10px 14px;max-width:78%;cursor:pointer;animation:bubbleRight 0.2s ease forwards;transform-origin:right bottom;position:relative;}
+.bubble-right{background:rgba(99,102,241,0.18);border:1px solid rgba(99,102,241,0.28);border-radius:15px 4px 15px 15px;padding:10px 14px;max-width:78%;cursor:pointer;animation:bubbleRight 0.2s ease forwards;transform-origin:right bottom;position:relative;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
 @keyframes bubbleRight{from{opacity:0;transform:scale(0.9)}to{opacity:1;transform:scale(1)}}
 .bubble-right-text{font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;color:rgba(255,255,255,0.92);line-height:1.48;word-break:break-word;}
 .bubble-right-meta{display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-top:5px;}
@@ -1761,7 +1764,7 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
 .bubble-left-wrap{display:flex;flex-direction:column;align-items:flex-start;padding:4px 48px 0 16px;opacity:0;}
 .bubble-left-wrap.visible{animation:bubbleLeft 0.4s ease forwards;}
 @keyframes bubbleLeft{from{opacity:0;transform:translateY(8px) scale(0.9)}to{opacity:1;transform:translateY(0) scale(1)}}
-.bubble-left{background:rgba(0,229,255,0.07);border:1px solid rgba(0,229,255,0.16);border-radius:4px 15px 15px 15px;padding:10px 14px;max-width:78%;cursor:pointer;}
+.bubble-left{background:rgba(0,229,255,0.07);border:1px solid rgba(0,229,255,0.16);border-radius:4px 15px 15px 15px;padding:10px 14px;max-width:78%;cursor:pointer;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
 .bubble-left.offline{background:rgba(245,158,11,0.07);border-color:rgba(245,158,11,0.2);}
 .bubble-left.emergency-bubble{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.3);}
 .bubble-left-text{font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;color:#00e5ff;line-height:1.48;word-break:break-word;}
@@ -1962,6 +1965,11 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
 /* VOICE MODE TOGGLE */
 .voice-mode-row{width:100%;display:none;padding:0 10px 6px;align-items:center;gap:6px;}
 .voice-mode-row.active{display:flex;}
+.composer-ctx{width:100%;display:none;align-items:center;gap:8px;padding:6px 10px;margin-bottom:4px;background:rgba(99,102,241,0.08);border-left:2px solid #818cf8;border-radius:8px;}
+.composer-ctx.active{display:flex;}
+.composer-ctx-icon{font-size:12px;color:#818cf8;flex-shrink:0;}
+.composer-ctx-text{flex:1;font-size:11px;color:rgba(255,255,255,0.55);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.composer-ctx-cancel{width:22px;height:22px;flex-shrink:0;border-radius:6px;background:rgba(255,255,255,0.05);border:none;color:rgba(255,255,255,0.5);font-size:14px;line-height:1;cursor:pointer;}
 .voice-mode-label{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:1px;color:rgba(255,255,255,0.3);flex-shrink:0;}
 .voice-mode-select{flex:1;height:26px;background:rgba(255,255,255,0.04);border:1px solid rgba(99,102,241,0.2);border-radius:13px;color:rgba(255,255,255,0.6);font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:0.5px;padding:0 10px;outline:none;-webkit-appearance:none;appearance:none;cursor:pointer;}
 .voice-mode-select option{background:#0a0d1e;color:#ffffff;}
@@ -1988,6 +1996,19 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
 /* Info sheet */
 .info-sheet{position:fixed;bottom:0;left:0;right:0;background:#0a0d1e;border-top:1px solid rgba(99,102,241,0.2);border-radius:20px 20px 0 0;padding:14px 20px calc(env(safe-area-inset-bottom,0px)+18px);z-index:82;transform:translateY(100%);transition:transform 0.3s cubic-bezier(.34,1.56,.64,1);}
 .info-sheet.visible{transform:translateY(0);}
+/* About / Privacy / Terms document sheet */
+.legal-sheet{position:fixed;bottom:0;left:0;right:0;top:8%;background:#0a0d1e;border-top:1px solid rgba(99,102,241,0.2);border-radius:20px 20px 0 0;padding:14px 20px calc(env(safe-area-inset-bottom,0px)+18px);z-index:82;transform:translateY(100%);transition:transform 0.3s cubic-bezier(.34,1.56,.64,1);display:flex;flex-direction:column;}
+.legal-sheet.visible{transform:translateY(0);}
+.legal-sheet-head{display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;border-bottom:1px solid rgba(99,102,241,0.12);flex-shrink:0;}
+.legal-sheet-title{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.75);}
+.legal-sheet-close{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(99,102,241,0.2);color:rgba(255,255,255,0.5);font-size:16px;line-height:1;cursor:pointer;}
+.legal-sheet-body{overflow-y:auto;padding-top:12px;color:rgba(255,255,255,0.65);font-size:13px;line-height:1.6;-webkit-overflow-scrolling:touch;}
+.legal-sheet-body h4{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1.5px;color:#818cf8;margin:16px 0 6px;text-transform:uppercase;}
+.legal-sheet-body h4:first-child{margin-top:0;}
+.legal-sheet-body p{margin:0 0 10px;}
+.legal-sheet-body ol,.legal-sheet-body ul{margin:0 0 10px;padding-left:20px;}
+.legal-sheet-body li{margin-bottom:4px;}
+.legal-sheet-body .doc-pending{margin-top:14px;padding:10px 12px;border:1px dashed rgba(245,158,11,0.4);border-radius:10px;background:rgba(245,158,11,0.06);color:rgba(245,158,11,0.85);font-size:11px;line-height:1.5;}
 .info-title{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.4);text-align:center;margin-bottom:12px;}
 .info-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(99,102,241,0.08);}
 .info-lbl{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:1px;color:rgba(255,255,255,0.28);}
@@ -2924,85 +2945,18 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
         <button class="demo-clear-btn" id="demo-clear" onclick="Demo.clearInput()">✕</button>
       </div>
       <!-- Language selectors -->
+      <!-- Options generated at load by WL.Languages.populateSelectors()
+           from the canonical WL.Languages registry (see near
+           WL.Utils.baseLangCode) -- not hand-maintained here anymore. -->
       <div class="demo-lang-row">
-        <select class="demo-lang-select" id="demo-src-lang">
-          <option value="auto">Auto</option>
-          <optgroup label="★ TIER 1">
-            <option value="en">English</option>
-            <option value="zh">Mandarin</option>
-            <option value="hi">Hindi</option>
-            <option value="ja">Japanese</option>
-            <option value="ko">Korean</option>
-            <option value="id">Indonesian</option>
-            <option value="ar">Arabic</option>
-            <option value="es">Spanish</option>
-            <option value="pt">Portuguese</option>
-            <option value="fr">French</option>
-            <option value="sw">Swahili</option>
-            <option value="ha">Hausa</option>
-            <option value="am">Amharic</option>
-            <option value="so">Somali</option>
-            <option value="bn">Bengali</option>
-          </optgroup>
-          <optgroup label="TIER 2">
-            <option value="de">German</option>
-            <option value="ru">Russian</option>
-            <option value="it">Italian</option>
-            <option value="tr">Turkish</option>
-            <option value="nl">Dutch</option>
-            <option value="pl">Polish</option>
-            <option value="uk">Ukrainian</option>
-            <option value="ur">Urdu</option>
-            <option value="fa">Persian</option>
-            <option value="he">Hebrew</option>
-            <option value="ta">Tamil</option>
-            <option value="te">Telugu</option>
-            <option value="vi">Vietnamese</option>
-            <option value="th">Thai</option>
-            <option value="ms">Malay</option>
-            <option value="tl">Filipino</option>
-          </optgroup>
-        </select>
+        <select class="demo-lang-select" id="demo-src-lang"></select>
         <button class="demo-swap-btn" onclick="Demo.swapLangs()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
             <path d="M7 16V4m0 0L3 8m4-4l4 4"/>
             <path d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
           </svg>
         </button>
-        <select class="demo-lang-select" id="demo-tgt-lang">
-          <optgroup label="★ TIER 1">
-            <option value="es">Spanish</option>
-            <option value="en">English</option>
-            <option value="fr">French</option>
-            <option value="zh">Mandarin</option>
-            <option value="hi">Hindi</option>
-            <option value="ar">Arabic</option>
-            <option value="sw">Swahili</option>
-            <option value="pt">Portuguese</option>
-            <option value="id">Indonesian</option>
-            <option value="ja">Japanese</option>
-            <option value="ko">Korean</option>
-            <option value="ha">Hausa</option>
-            <option value="am">Amharic</option>
-            <option value="so">Somali</option>
-            <option value="bn">Bengali</option>
-          </optgroup>
-          <optgroup label="TIER 2">
-            <option value="de">German</option>
-            <option value="ru">Russian</option>
-            <option value="it">Italian</option>
-            <option value="tr">Turkish</option>
-            <option value="nl">Dutch</option>
-            <option value="uk">Ukrainian</option>
-            <option value="ur">Urdu</option>
-            <option value="fa">Persian</option>
-            <option value="he">Hebrew</option>
-            <option value="ta">Tamil</option>
-            <option value="vi">Vietnamese</option>
-            <option value="th">Thai</option>
-            <option value="tl">Filipino</option>
-          </optgroup>
-        </select>
+        <select class="demo-lang-select" id="demo-tgt-lang"></select>
       </div>
     </div>
 
@@ -3178,22 +3132,17 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
 <div class="solo-lang-bar">
   <div class="solo-lang-section solo-lang-section-left">
     <div class="solo-lang-label" id="solo-from-label">English</div>
-    <select class="solo-lang-select" id="solo-from-select" onchange="SoloApp.onFromChange()">
-      <optgroup label="★ TIER 1"><option value="English" selected>English</option><option value="Mandarin">Mandarin</option><option value="Hindi">Hindi</option><option value="Japanese">Japanese</option><option value="Korean">Korean</option><option value="Indonesian">Indonesian</option><option value="Arabic">Arabic</option><option value="Spanish">Spanish</option><option value="Portuguese">Portuguese</option><option value="French">French</option><option value="Swahili">Swahili</option><option value="Hausa">Hausa</option><option value="Amharic">Amharic</option><option value="Somali">Somali</option><option value="Bengali">Bengali</option></optgroup>
-      <optgroup label="TIER 2"><option value="German">German</option><option value="Russian">Russian</option><option value="Italian">Italian</option><option value="Turkish">Turkish</option><option value="Dutch">Dutch</option><option value="Polish">Polish</option><option value="Ukrainian">Ukrainian</option><option value="Urdu">Urdu</option><option value="Persian">Persian</option><option value="Hebrew">Hebrew</option><option value="Tamil">Tamil</option><option value="Vietnamese">Vietnamese</option><option value="Thai">Thai</option><option value="Filipino">Filipino</option></optgroup>
-    </select>
+    <select class="solo-lang-select" id="solo-from-select" onchange="SoloApp.onFromChange()"></select>
   </div>
   <button class="solo-swap-btn" onclick="SoloApp.swapLangs()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
   </button>
   <div class="solo-lang-section solo-lang-section-right">
     <div class="solo-lang-label" id="solo-to-label">Arabic</div>
-    <select class="solo-lang-select" id="solo-to-select" onchange="SoloApp.onToChange()">
-      <optgroup label="★ TIER 1"><option value="Arabic" selected>Arabic</option><option value="English">English</option><option value="Spanish">Spanish</option><option value="French">French</option><option value="Mandarin">Mandarin</option><option value="Hindi">Hindi</option><option value="Swahili">Swahili</option><option value="Portuguese">Portuguese</option><option value="Indonesian">Indonesian</option><option value="Japanese">Japanese</option><option value="Korean">Korean</option><option value="Hausa">Hausa</option><option value="Amharic">Amharic</option><option value="Somali">Somali</option><option value="Bengali">Bengali</option></optgroup>
-      <optgroup label="TIER 2"><option value="German">German</option><option value="Russian">Russian</option><option value="Italian">Italian</option><option value="Turkish">Turkish</option><option value="Dutch">Dutch</option><option value="Ukrainian">Ukrainian</option><option value="Urdu">Urdu</option><option value="Persian">Persian</option><option value="Hebrew">Hebrew</option><option value="Tamil">Tamil</option><option value="Vietnamese">Vietnamese</option><option value="Thai">Thai</option><option value="Filipino">Filipino</option></optgroup>
-    </select>
+    <select class="solo-lang-select" id="solo-to-select" onchange="SoloApp.onToChange()"></select>
   </div>
 </div>
+<div class="solo-gender-hint hidden" id="solo-gender-hint"></div>
 <div class="solo-phrases" id="solo-phrases"></div>
 <div id="solo-messages">
   <div class="chat-empty" id="solo-empty-state">
@@ -3278,6 +3227,11 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
 </div>
 <!-- DOCK — hidden until session active -->
 <div class="chat-dock" id="chat-dock">
+  <div class="composer-ctx" id="composer-ctx">
+    <span class="composer-ctx-icon" id="composer-ctx-icon">↩</span>
+    <span class="composer-ctx-text" id="composer-ctx-text"></span>
+    <button class="composer-ctx-cancel" onclick="Chat.cancelComposerContext()" aria-label="Cancel">&times;</button>
+  </div>
   <div class="voice-mode-row" id="voice-mode-row">
     <span class="voice-mode-label">VOICE MODE</span>
     <select class="voice-mode-select" id="voice-mode-sel">
@@ -3501,34 +3455,21 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
           <div class="stg-row-label">Your Language</div>
           <div class="stg-row-sub">Used as translation source</div>
         </div>
-        <select class="stg-select" id="sel-your-lang" onchange="Stg.savePref('yourLang',this.value)">
-          <optgroup label="★ TIER 1">
-            <option value="English" selected>English</option>
-            <option value="Arabic">Arabic</option>
-            <option value="Spanish">Spanish</option>
-            <option value="French">French</option>
-            <option value="Mandarin">Mandarin</option>
-            <option value="Hindi">Hindi</option>
-            <option value="Swahili">Swahili</option>
-            <option value="Portuguese">Portuguese</option>
-            <option value="Indonesian">Indonesian</option>
-            <option value="Japanese">Japanese</option>
-            <option value="Korean">Korean</option>
-            <option value="Hausa">Hausa</option>
-            <option value="Amharic">Amharic</option>
-            <option value="Somali">Somali</option>
-            <option value="Bengali">Bengali</option>
-          </optgroup>
-          <optgroup label="TIER 2">
-            <option value="German">German</option>
-            <option value="Russian">Russian</option>
-            <option value="Italian">Italian</option>
-            <option value="Turkish">Turkish</option>
-            <option value="Dutch">Dutch</option>
-            <option value="Urdu">Urdu</option>
-            <option value="Persian">Persian</option>
-            <option value="Hebrew">Hebrew</option>
-          </optgroup>
+        <select class="stg-select" id="sel-your-lang" onchange="Stg.savePref('yourLang',this.value);Stg.updateGenderRowHint();"></select>
+      </div>
+      <!-- Gender (optional, self-reported) -->
+      <div class="stg-row">
+        <div class="stg-row-icon cyan">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+        </div>
+        <div class="stg-row-body">
+          <div class="stg-row-label">Gender</div>
+          <div class="stg-row-sub" id="gender-row-sub">Optional — used only where a language's grammar needs it</div>
+        </div>
+        <select class="stg-select" id="sel-gender" onchange="Stg.savePref('gender',this.value);Stg.updateGenderRowHint();">
+          <option value="unspecified">Unspecified</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
         </select>
       </div>
     </div>
@@ -3549,21 +3490,7 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
           <div class="stg-row-label">Default Target Language</div>
           <div class="stg-row-sub">Translate everything to this language</div>
         </div>
-        <select class="stg-select" id="sel-target-lang" onchange="Stg.savePref('targetLang',this.value)">
-          <optgroup label="★ TIER 1">
-            <option value="Spanish" selected>Spanish</option>
-            <option value="English">English</option>
-            <option value="Arabic">Arabic</option>
-            <option value="French">French</option>
-            <option value="Mandarin">Mandarin</option>
-            <option value="Swahili">Swahili</option>
-          </optgroup>
-          <optgroup label="TIER 2">
-            <option value="German">German</option>
-            <option value="Russian">Russian</option>
-            <option value="Italian">Italian</option>
-          </optgroup>
-        </select>
+        <select class="stg-select" id="sel-target-lang" onchange="Stg.savePref('targetLang',this.value)"></select>
       </div>
       <div class="stg-row">
         <div class="stg-row-icon">
@@ -3782,7 +3709,7 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
       <span class="stg-section-title">ABOUT</span>
     </div>
     <div class="stg-section-body">
-      <div class="stg-row">
+      <div class="stg-row tappable" onclick="Stg.openDoc('about')">
         <div class="stg-row-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2L13.5 10.5L22 12L13.5 13.5L12 22L10.5 13.5L2 12L10.5 10.5Z" fill="currentColor" stroke="none"/></svg>
         </div>
@@ -3790,15 +3717,16 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
           <div class="stg-row-label">WhisperLink v1.0</div>
           <div class="stg-row-sub">Stella Tech · Protection First. Precision Always.</div>
         </div>
+        <div class="stg-row-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></div>
       </div>
-      <div class="stg-row tappable" onclick="Stg.openLink('#privacy')">
+      <div class="stg-row tappable" onclick="Stg.openDoc('privacy')">
         <div class="stg-row-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         </div>
         <div class="stg-row-body"><div class="stg-row-label">Privacy Policy</div></div>
         <div class="stg-row-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></div>
       </div>
-      <div class="stg-row tappable" onclick="Stg.openLink('#terms')">
+      <div class="stg-row tappable" onclick="Stg.openDoc('terms')">
         <div class="stg-row-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
         </div>
@@ -3833,6 +3761,17 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
     <button class="confirm-cancel" onclick="Stg.closeSheet()">CANCEL</button>
     <button class="confirm-go" id="confirm-go-btn" onclick="Stg.executeConfirm()">CONFIRM</button>
   </div>
+</div>
+
+<!-- ABOUT / PRIVACY / TERMS DOCUMENT SHEET -->
+<div class="sheet-bd" id="stg-doc-bd" onclick="Stg.closeDoc()"></div>
+<div class="legal-sheet" id="stg-doc-sheet">
+  <div class="confirm-handle"></div>
+  <div class="legal-sheet-head">
+    <div class="legal-sheet-title" id="stg-doc-title">ABOUT</div>
+    <button class="legal-sheet-close" onclick="Stg.closeDoc()" aria-label="Close">&times;</button>
+  </div>
+  <div class="legal-sheet-body" id="stg-doc-body"></div>
 </div>
 
 <div id="stg-toast"></div>
@@ -4038,8 +3977,39 @@ WL.Supabase = supabase.createClient(
    worth it given WhisperLink's target settings (hospitals, airports,
    job sites) often put many users behind one shared IP. */
 WL.Config = {
-  myMemoryEmail: 'stellatechofficial@gmail.com' // temporary Version 1.0 operational address — swap here only, once a domain address exists
+  myMemoryEmail: 'stellatechofficial@gmail.com', // temporary Version 1.0 operational address — swap here only, once a domain address exists
+  /* Translation-fidelity fix (v1.0 release blocker): MyMemory is a
+     Translation Memory service — `match` scores how closely your query
+     resembles the SOURCE sentence of a stored human-submitted pair, not
+     how faithful that pair's translation is to your exact wording. At
+     the old 0.70 floor, an approximately-similar-but-not-identical TM
+     entry could be accepted wholesale, including whatever cultural
+     padding its original human translator added (observed case:
+     "Hope you are doing well." -> an Arabic TM entry that added a
+     health/wellness blessing the English never stated). Raised to 0.90
+     so only near-exact TM matches are trusted; approximate matches now
+     fall through to Google instead. Reasoned default, not
+     telemetry-tuned — no production traffic to measure against yet.
+     Trade-off worth tracking: this sends more traffic to the Google
+     fallback, which has no official rate-limit guarantee. */
+  myMemoryMatchThreshold: 0.90
 };
+
+/* Defense-in-depth fidelity guard, used alongside the threshold above —
+   not a replacement for it. Word-count expansion is a rough,
+   language-agnostic proxy for "more content came back than was sent
+   in," not a semantic check: it will not catch every case of invented
+   meaning (the observed Arabic regression itself was ~1.6x, inside this
+   guard's tolerance — the threshold fix above is what actually targets
+   that case) and it is not evidence of correctness. Deliberately
+   generous multiplier to avoid rejecting legitimately longer natural
+   phrasing in verbose target languages. */
+function txExpansionOk(srcText, outText){
+  var srcWords = String(srcText||'').trim().split(/\s+/).filter(Boolean).length;
+  var outWords = String(outText||'').trim().split(/\s+/).filter(Boolean).length;
+  if(srcWords <= 1) return true;
+  return outWords <= Math.max(srcWords * 3, srcWords + 4);
+}
 
 /* ── CANONICAL LANGUAGE REGISTRY — 75 languages ───────────────
    Verified against MyMemory's own documented language-code list and
@@ -4072,7 +4042,39 @@ WL.Config = {
    (see RTL_REG etc.), not a per-language list — Arabic, Persian, and
    Urdu share the Arabic Unicode block, and Hebrew's block is already
    included too. Nothing here needed to change for RTL to keep
-   covering all four correctly. */
+   covering all four correctly.
+
+   GENDER CLASSIFICATION — from WHISPERLINK_LANGUAGE_GENDER_AUDIT.md.
+   One of NONE / SPEAKER / RECIPIENT / SPEAKER_AND_RECIPIENT /
+   CONTEXTUAL / UNVERIFIED per language, attached to each registry
+   entry as `genderClass` below (not a second, disconnected list).
+   UNVERIFIED means exactly that — not independently confirmed against
+   a reference grammar this session — and must never be treated as
+   NONE by any caller. This metadata drives whether/what gender-context
+   UI is shown (see Stg's Gender row and SoloApp's gender hint); it is
+   never sent to a translation provider — see Phase E in the audit and
+   WL.Config.myMemoryMatchThreshold's neighborhood for why. */
+  var GENDER_CLASS = {
+    'English':'NONE','Mandarin':'NONE','Hindi':'SPEAKER_AND_RECIPIENT','Japanese':'CONTEXTUAL',
+    'Korean':'NONE','Indonesian':'NONE','Arabic':'SPEAKER_AND_RECIPIENT','Spanish':'SPEAKER_AND_RECIPIENT',
+    'Portuguese':'SPEAKER_AND_RECIPIENT','French':'SPEAKER_AND_RECIPIENT','Swahili':'NONE','Hausa':'RECIPIENT',
+    'Amharic':'UNVERIFIED','Somali':'UNVERIFIED','Bengali':'NONE',
+    'German':'NONE','Russian':'SPEAKER_AND_RECIPIENT','Italian':'SPEAKER_AND_RECIPIENT','Turkish':'NONE',
+    'Dutch':'NONE','Polish':'SPEAKER_AND_RECIPIENT','Ukrainian':'SPEAKER_AND_RECIPIENT','Urdu':'SPEAKER_AND_RECIPIENT',
+    'Persian':'NONE','Hebrew':'SPEAKER_AND_RECIPIENT','Tamil':'NONE','Telugu':'NONE',
+    'Malayalam':'NONE','Kannada':'NONE','Marathi':'SPEAKER_AND_RECIPIENT','Gujarati':'SPEAKER_AND_RECIPIENT',
+    'Punjabi':'SPEAKER_AND_RECIPIENT','Nepali':'SPEAKER_AND_RECIPIENT','Sinhala':'UNVERIFIED','Vietnamese':'CONTEXTUAL',
+    'Thai':'SPEAKER','Malay':'NONE','Filipino':'NONE','Khmer':'UNVERIFIED',
+    'Burmese':'UNVERIFIED','Lao':'UNVERIFIED','Yoruba':'NONE','Igbo':'NONE',
+    'Zulu':'NONE','Xhosa':'NONE','Afrikaans':'NONE','Swedish':'NONE',
+    'Danish':'NONE','Norwegian':'NONE','Finnish':'NONE','Greek':'SPEAKER_AND_RECIPIENT',
+    'Czech':'SPEAKER_AND_RECIPIENT','Slovak':'SPEAKER_AND_RECIPIENT','Romanian':'SPEAKER_AND_RECIPIENT','Hungarian':'NONE',
+    'Bulgarian':'SPEAKER_AND_RECIPIENT','Croatian':'SPEAKER_AND_RECIPIENT','Serbian':'SPEAKER_AND_RECIPIENT','Lithuanian':'SPEAKER_AND_RECIPIENT',
+    'Latvian':'SPEAKER_AND_RECIPIENT','Estonian':'NONE','Slovenian':'SPEAKER_AND_RECIPIENT','Albanian':'SPEAKER_AND_RECIPIENT',
+    'Georgian':'NONE','Armenian':'NONE','Azerbaijani':'NONE','Kazakh':'NONE',
+    'Uzbek':'NONE','Mongolian':'NONE','Welsh':'NONE','Irish':'NONE',
+    'Catalan':'SPEAKER_AND_RECIPIENT','Icelandic':'SPEAKER_AND_RECIPIENT','Maltese':'SPEAKER_AND_RECIPIENT','Chinese Traditional':'NONE'
+  };
 (function(){
   var TIER1 = [
     ['English','en-US'],['Mandarin','zh-CN'],['Hindi','hi-IN'],['Japanese','ja-JP'],
@@ -4098,7 +4100,7 @@ WL.Config = {
     ['Catalan','ca-ES'],['Icelandic','is-IS'],['Maltese','mt-MT'],['Chinese Traditional','zh-TW']
   ];
   function addEntry(name, code, tier){
-    var entry = { name:name, code:code, tier:tier };
+    var entry = { name:name, code:code, tier:tier, genderClass: GENDER_CLASS[name] || 'UNVERIFIED' };
     WL.Languages.list.push(entry);
     WL.Languages.byName[name] = entry;
     WL.Languages.byCode[code] = entry;
@@ -4170,6 +4172,66 @@ WL.Utils.baseLangCode = function(code){
   if(code==='zh-CN'||code==='zh-TW') return code;
   return code.split('-')[0];
 };
+
+/* ── SELECTOR GENERATION — one registry, one mapping, every selector ──
+   Fixes the six hand-written <select> lists (Demo source/target, Solo
+   from/to, Settings your-lang/target-lang) that had each accumulated
+   their own partial, mutually-inconsistent subset of the 75-language
+   registry (see the language+gender audit for the full before-state).
+   Auth already builds its dropdown from WL.Languages at runtime and is
+   untouched here.
+
+   Value format is picked per selector to match what that selector's
+   *existing, unmodified* consuming code already expects -- this only
+   changes where the option list comes from, never what the translation
+   call sites downstream receive:
+     - Demo's own _fetchTranslation/_fetchGoogle build MyMemory langpair
+       and Google sl=/tl= directly from the select's raw .value with no
+       lookup step, so Demo needs the bare code baseLangCode() already
+       produces (zh-CN/zh-TW deliberately kept intact by baseLangCode --
+       Demo can now actually offer Chinese Traditional, which its old
+       hardcoded list never included).
+     - Solo/Settings resolve the select's .value as a language *name*
+       through LANG_CODES (= WL.Languages.byName_code) before any
+       provider call, so those selects keep using the name as the
+       option value, unchanged. */
+WL.Languages.buildOptionsHTML = function(valueFormat, includeAuto){
+  var valueOf = valueFormat==='code'
+    ? function(e){ return WL.Utils.baseLangCode(e.code); }
+    : function(e){ return e.name; };
+  var html = includeAuto ? '<option value="auto">Auto</option>' : '';
+  html += '<optgroup label="★ TIER 1">';
+  WL.Languages.tier1.forEach(function(e){
+    html += '<option value="'+valueOf(e)+'">'+e.name+'</option>';
+  });
+  html += '</optgroup><optgroup label="TIER 2">';
+  WL.Languages.list.forEach(function(e){
+    if(e.tier===2) html += '<option value="'+valueOf(e)+'">'+e.name+'</option>';
+  });
+  html += '</optgroup>';
+  return html;
+};
+WL.Languages.populateSelectors = function(){
+  // Each selector's pre-existing default is preserved explicitly (via
+  // .value= after repopulating) so the visible default behavior for a
+  // first-time load doesn't shift just because the option list under
+  // it is now complete -- only the *coverage* changes, not the default.
+  var sels = [
+    ['demo-src-lang','code',true,'auto'],
+    ['demo-tgt-lang','code',false,'es'],
+    ['solo-from-select','name',false,'English'],
+    ['solo-to-select','name',false,'Arabic'],
+    ['sel-your-lang','name',false,'English'],
+    ['sel-target-lang','name',false,'Spanish']
+  ];
+  sels.forEach(function(s){
+    var el = document.getElementById(s[0]);
+    if(!el) return;
+    el.innerHTML = WL.Languages.buildOptionsHTML(s[1], s[2]);
+    el.value = s[3];
+  });
+};
+WL.Languages.populateSelectors();
 
 /* ── BOOT — Phase 2: the real Supabase session/profile is now the
    source of truth for identity, not localStorage. Sync defaults are
@@ -4968,8 +5030,9 @@ var Demo={
       fetch(myUrl).then(function(r){return r.json();}).then(function(d){
         var hasMatch=d&&d.responseData&&typeof d.responseData.match==='number';
         var match=hasMatch?d.responseData.match:0.75;
-        if(d&&d.responseStatus===200&&d.responseData&&d.responseData.translatedText&&d.responseData.translatedText.toLowerCase()!==text.toLowerCase()&&match>=0.70){
-          onOk(d.responseData.translatedText);
+        var out=d&&d.responseData&&d.responseData.translatedText;
+        if(d&&d.responseStatus===200&&out&&out.toLowerCase()!==text.toLowerCase()&&match>=WL.Config.myMemoryMatchThreshold&&txExpansionOk(text,out)){
+          onOk(out);
         } else { Demo._fetchGoogle(text,src,tgt,onOk,onErr); }
       }).catch(function(){ Demo._fetchGoogle(text,src,tgt,onOk,onErr); });
     } else {
@@ -5301,7 +5364,18 @@ function scrollToBottom(){var m=document.getElementById('solo-messages');setTime
 function soloSmartScroll(){if(soloIsAtBottom()){scrollToBottom();}else if(soloIsAtThreshold()){_soloNewMsgCount++;var b=document.getElementById('solo-scroll-down-btn');if(b){b.textContent='↓ '+_soloNewMsgCount+' NEW';b.classList.add('visible');}}}
 var _soloTxCache={};
 function _soloTxGoogle(text,from,to,ok,err){var url='https://translate.googleapis.com/translate_a/single?client=gtx&sl='+WL.Utils.baseLangCode(LANG_CODES[from])+'&tl='+WL.Utils.baseLangCode(LANG_CODES[to])+'&dt=t&q='+encodeURIComponent(text);fetch(url).then(function(r){return r.json();}).then(function(d){var r='';if(d&&d[0])d[0].forEach(function(p){if(p&&p[0])r+=p[0];});r.trim()?ok(r.trim(),null,'G'):err();}).catch(function(){err();});}
-function _soloTxMyMemory(text,from,to,ok,err){var url='https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair='+LANG_CODES[from]+'|'+LANG_CODES[to]+'&de='+encodeURIComponent(WL.Config.myMemoryEmail);fetch(url).then(function(r){return r.json();}).then(function(d){var hasMatch=d&&d.responseData&&typeof d.responseData.match==='number';var match=hasMatch?d.responseData.match:0.75;if(d&&d.responseStatus===200&&d.responseData&&d.responseData.translatedText&&d.responseData.translatedText.toLowerCase()!==text.toLowerCase()&&match>=0.70){var conf=Math.min(99,Math.round(match*100));ok(d.responseData.translatedText,conf,'M');}else{err();}}).catch(function(){err();});}
+function _soloTxMyMemory(text,from,to,ok,err){
+  var url='https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair='+LANG_CODES[from]+'|'+LANG_CODES[to]+'&de='+encodeURIComponent(WL.Config.myMemoryEmail);
+  fetch(url).then(function(r){return r.json();}).then(function(d){
+    var hasMatch=d&&d.responseData&&typeof d.responseData.match==='number';
+    var match=hasMatch?d.responseData.match:0.75;
+    var out=d&&d.responseData&&d.responseData.translatedText;
+    if(d&&d.responseStatus===200&&out&&out.toLowerCase()!==text.toLowerCase()&&match>=WL.Config.myMemoryMatchThreshold&&txExpansionOk(text,out)){
+      var conf=Math.min(99,Math.round(match*100));
+      ok(out,conf,'M');
+    }else{err();}
+  }).catch(function(){err();});
+}
 function fetchTx(text,from,to,ok,err){
   /* Track A trust fix — mirrors tx()'s guard. See tx() for full reasoning. */
   if(!LANG_CODES[from] || !LANG_CODES[to]){ if(err) err(); return; }
@@ -5324,6 +5398,18 @@ function loadHistory(){try{var s=JSON.parse(localStorage.getItem(STORAGE_KEY)||'
 var SoloApp={
   _fromLang:'English',_toLang:'Arabic',_listening:false,_rec:null,_earpod:false,_invTimer:null,_invSecs:0,
   init:function(){
+    // Pre-existing gap found while wiring the gender hint below: these
+    // were only ever set inside onFromChange/onToChange (fired by the
+    // select's onchange event), never at load -- populateSelectors()
+    // sets the select's .value programmatically, which does not fire
+    // onchange, so _fromLang/_toLang stayed undefined until a user
+    // manually touched a dropdown. _sendText's fetchTx() call happened
+    // to still translate FROM English correctly by accident
+    // (WL.Utils.baseLangCode defaults falsy input to 'en'), but TO
+    // would silently fall back to 'en' too, ignoring the "Arabic" the
+    // UI was actually showing as selected.
+    this._fromLang=document.getElementById('solo-from-select').value;
+    this._toLang=document.getElementById('solo-to-select').value;
     var p=PHRASES[MockProfile.industry]||PHRASES.General;
     var wrap=document.getElementById('solo-phrases');
     var html='';p.forEach(function(ph){html+='<button class="phrase-chip" onclick="SoloApp.sendPhrase(\''+ph.replace(/'/g,"\\'")+'\'">'+ph+'</button>';});
@@ -5351,6 +5437,40 @@ var SoloApp={
         });
       }
     }
+    this.updateGenderHint();
+  },
+  /* Phase D conditional gender UI, Solo mode. Solo is the one place in
+     this frontend with an actual from/to pair, so it's the only place
+     that can honestly demonstrate the RECIPIENT case -- and honestly
+     is the operative word: Solo has no real "other participant" (it's
+     a single-device tool), so a RECIPIENT/SPEAKER_AND_RECIPIENT target
+     language gets a "not available yet" note, never a fake field
+     pretending to collect someone else's gender. Priority when more
+     than one condition applies: recipient-not-available note first
+     (the most important honesty boundary), then the speaker prompt,
+     then the lighter contextual note. Never forces a choice, never
+     wired to a translation call (Phase E boundary). */
+  updateGenderHint:function(){
+    var el=document.getElementById('solo-gender-hint');
+    if(!el) return;
+    var fromLang=this._fromLang||'English', toLang=this._toLang||'Arabic';
+    var fromEntry=WL.Languages.byName[fromLang], toEntry=WL.Languages.byName[toLang];
+    var fromClass=fromEntry?fromEntry.genderClass:'NONE';
+    var toClass=toEntry?toEntry.genderClass:'NONE';
+    var gender=(typeof _prefs!=='undefined'&&_prefs.gender)?_prefs.gender:'unspecified';
+    var needsRecipientNote=(toClass==='RECIPIENT'||toClass==='SPEAKER_AND_RECIPIENT');
+    var needsSpeaker=(fromClass==='SPEAKER'||fromClass==='SPEAKER_AND_RECIPIENT')&&gender==='unspecified';
+    var isContextual=(fromClass==='CONTEXTUAL'||toClass==='CONTEXTUAL');
+    var msg='';
+    if(needsRecipientNote){
+      msg="WhisperLink doesn't yet know the other person's gender for "+toLang+" — translation uses a default form.";
+    } else if(needsSpeaker){
+      msg='Setting your gender in Settings may improve '+fromLang+' phrasing.';
+    } else if(isContextual){
+      msg=(fromClass==='CONTEXTUAL'?fromLang:toLang)+" uses speech context a single field can't fully capture.";
+    }
+    if(msg){ el.textContent=msg; el.classList.remove('hidden'); }
+    else { el.textContent=''; el.classList.add('hidden'); }
   },
   _checkConn:function(){var b=document.getElementById('solo-offline-banner');navigator.onLine?b.classList.remove('visible'):b.classList.add('visible');},
   _setupInput:function(){
@@ -5373,9 +5493,9 @@ var SoloApp={
   send:function(){var inp=document.getElementById('solo-chat-input');var text=inp.value.trim();if(!text)return;inp.value='';document.getElementById('dock-send-btn').classList.remove('enabled');inp.style.direction='ltr';this._sendText(text);},
   sendPhrase:function(p){try{navigator.vibrate([20]);}catch(e){}this._sendText(p);},
   _sendText:function(text){var ts=Date.now();var pair=soloRenderRight(text,ts);try{navigator.vibrate([20]);}catch(e){}var self=this;setTimeout(function(){if(!navigator.onLine){soloRenderLeft(pair,text,ts,true,0,'✕');saveMsg(text,text,ts,true);showToast('OFFLINE · SHOWING ORIGINAL');return;}fetchTx(text,self._fromLang,self._toLang,function(result,conf,src){soloRenderLeft(pair,result,ts,false,conf,src);saveMsg(text,result,ts,false,conf,src);if(self._earpod)speakText(result,self._toLang);},function(){soloRenderLeft(pair,text,ts,true,0,'✕');saveMsg(text,text,ts,true);showToast('TRANSLATION FAILED');});},600);},
-  onFromChange:function(){this._fromLang=document.getElementById('solo-from-select').value;document.getElementById('solo-from-label').textContent=this._fromLang;},
-  onToChange:function(){this._toLang=document.getElementById('solo-to-select').value;document.getElementById('solo-to-label').textContent=this._toLang;},
-  swapLangs:function(){var fs=document.getElementById('solo-from-select');var ts=document.getElementById('solo-to-select');var fv=fs.value,tv=ts.value;var fo=Array.from(fs.options).map(function(o){return o.value;});var to2=Array.from(ts.options).map(function(o){return o.value;});if(to2.indexOf(fv)>-1)ts.value=fv;if(fo.indexOf(tv)>-1)fs.value=tv;this._fromLang=fs.value;this._toLang=ts.value;document.getElementById('solo-from-label').textContent=this._fromLang;document.getElementById('solo-to-label').textContent=this._toLang;try{navigator.vibrate([20]);}catch(e){}},
+  onFromChange:function(){this._fromLang=document.getElementById('solo-from-select').value;document.getElementById('solo-from-label').textContent=this._fromLang;this.updateGenderHint();},
+  onToChange:function(){this._toLang=document.getElementById('solo-to-select').value;document.getElementById('solo-to-label').textContent=this._toLang;this.updateGenderHint();},
+  swapLangs:function(){var fs=document.getElementById('solo-from-select');var ts=document.getElementById('solo-to-select');var fv=fs.value,tv=ts.value;var fo=Array.from(fs.options).map(function(o){return o.value;});var to2=Array.from(ts.options).map(function(o){return o.value;});if(to2.indexOf(fv)>-1)ts.value=fv;if(fo.indexOf(tv)>-1)fs.value=tv;this._fromLang=fs.value;this._toLang=ts.value;document.getElementById('solo-from-label').textContent=this._fromLang;document.getElementById('solo-to-label').textContent=this._toLang;this.updateGenderHint();try{navigator.vibrate([20]);}catch(e){}},
   toggleMic:function(){this._listening?this._stopMic():this._startMic();},
   _startMic:function(){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){showToast('SPEECH NOT AVAILABLE');return;}this._listening=true;document.getElementById('dock-mic-btn').classList.add('listening');var rec=new SR();rec.lang=LANG_CODES[this._fromLang]||'en-US';rec.interimResults=false;var self=this;var settled=false;var micErrMsg={'not-allowed':'MIC PERMISSION DENIED','service-not-allowed':'MIC PERMISSION DENIED','audio-capture':'NO MICROPHONE FOUND','network':'MIC NEEDS NETWORK CONNECTION','no-speech':'DIDN\'T CATCH THAT — TRY AGAIN','aborted':null};rec.onstart=function(){settled=true;};rec.onresult=function(e){settled=true;var t=e.results[0][0].transcript;SoloApp._stopMic();SoloApp._sendText(t);};rec.onerror=function(e){settled=true;SoloApp._stopMic();var msg=(e.error in micErrMsg)?micErrMsg[e.error]:('MIC ERROR: '+e.error).toUpperCase();if(msg)showToast(msg);};rec.onend=function(){settled=true;SoloApp._stopMic();};try{rec.start();this._rec=rec;setTimeout(function(){if(!settled&&self._listening){self._stopMic();showToast('MIC UNAVAILABLE');}},8000);}catch(e){this._stopMic();showToast('MIC UNAVAILABLE');}},
   _stopMic:function(){this._listening=false;document.getElementById('dock-mic-btn').classList.remove('listening');if(this._rec){try{this._rec.stop();}catch(e){}this._rec=null;}},
@@ -5446,9 +5566,10 @@ function _txMyMemory(text,from,to,ok,err){
   fetch(url).then(function(r){return r.json();}).then(function(d){
     var hasMatch=d&&d.responseData&&typeof d.responseData.match==='number';
     var match=hasMatch?d.responseData.match:0.75;
-    if(d&&d.responseStatus===200&&d.responseData&&d.responseData.translatedText&&d.responseData.translatedText.toLowerCase()!==text.toLowerCase()&&match>=0.70){
+    var out=d&&d.responseData&&d.responseData.translatedText;
+    if(d&&d.responseStatus===200&&out&&out.toLowerCase()!==text.toLowerCase()&&match>=WL.Config.myMemoryMatchThreshold&&txExpansionOk(text,out)){
       var conf=Math.min(99,Math.round(match*100));
-      ok(d.responseData.translatedText,conf,'M');
+      ok(out,conf,'M');
     }else{err();}
   }).catch(function(){err();});
 }
@@ -5527,6 +5648,73 @@ function renderWatermark(){
   m.innerHTML='<div class="chat-watermark"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L13.5 10.5L22 12L13.5 13.5L12 22L10.5 13.5L2 12L10.5 10.5Z"/></svg><div class="chat-watermark-text">START THE CONVERSATION</div></div>';
 }
 
+/* ── SWIPE-TO-REPLY / LONG-PRESS ───────────────────────────────
+   Frontend-only interaction layer (Phase 3 backend dependency: see
+   Chat.send). Swipe right on any bubble past THRESH -> reply. A
+   held press with no meaningful horizontal movement -> onLongPress
+   (existing speak-aloud on received bubbles, edit-entry on own
+   bubbles). One shared implementation for both bubble kinds and
+   both input types (touch and mouse), via Pointer Events:
+   - touch-action:pan-y tells the browser vertical scroll is still
+     native/instant; only a clearly horizontal drag is claimed by
+     this handler, so #chat-messages scrolling is never contested.
+   - setPointerCapture once a drag is confirmed keeps move/up events
+     routed to this element even if the finger wanders outside its
+     bounds, so a drag started here can't be silently dropped.
+   - Exactly one active pointer per bubble at a time; every exit path
+     (up, cancel, leave-without-drag) clears the long-press timer and
+     resets state, so a cancelled gesture never leaves a stale timer
+     or a bubble stuck mid-transform.
+   - -webkit-touch-callout/user-select:none (bubble CSS) stop the
+     browser's own long-press text-selection/callout from competing
+     with this handler. */
+function attachBubbleGestures(el,replyText,onLongPress){
+  el.style.touchAction='pan-y';
+  var startX=0,startY=0,dx=0,dragging=false,lpTimer=null,activeId=null;
+  var THRESH=52,MAXD=78;
+  function clearLp(){if(lpTimer){clearTimeout(lpTimer);lpTimer=null;}}
+  function resetState(){clearLp();dragging=false;activeId=null;}
+  function snapBack(){el.style.transition='transform 0.2s ease';el.style.transform='translateX(0)';}
+  el.addEventListener('pointerdown',function(e){
+    if(e.pointerType==='mouse'&&e.button!==0)return;
+    if(activeId!==null)return;
+    activeId=e.pointerId;startX=e.clientX;startY=e.clientY;dx=0;dragging=false;
+    el.style.transition='';
+    if(onLongPress){lpTimer=setTimeout(function(){lpTimer=null;onLongPress();resetState();},600);}
+  });
+  el.addEventListener('pointermove',function(e){
+    if(e.pointerId!==activeId)return;
+    var ddx=e.clientX-startX,ddy=e.clientY-startY;
+    if(!dragging){
+      if(Math.abs(ddx)<8||Math.abs(ddx)<Math.abs(ddy)*1.8)return;
+      dragging=true;clearLp();
+      try{el.setPointerCapture(activeId);}catch(err){}
+    }
+    if(ddx<0)ddx=0;
+    dx=Math.min(ddx,MAXD);
+    el.style.transform='translateX('+dx+'px)';
+  });
+  function release(e){
+    if(e&&e.pointerId!==activeId)return;
+    var wasDragging=dragging,finalDx=dx;
+    clearLp();
+    try{if(wasDragging)el.releasePointerCapture(activeId);}catch(err){}
+    resetState();
+    snapBack();
+    if(wasDragging&&finalDx>=THRESH){
+      try{navigator.vibrate([15]);}catch(err){}
+      Chat.startReply(replyText);
+    }
+  }
+  el.addEventListener('pointerup',release);
+  el.addEventListener('pointercancel',release);
+  el.addEventListener('pointerleave',function(e){
+    if(e.pointerId!==activeId||dragging)return;
+    resetState();
+  });
+}
+function ctxTruncate(t){t=String(t||'');return t.length>60?t.slice(0,60)+'…':t;}
+
 function renderRight(text,ts){
   var m=document.getElementById('chat-messages');
   var wm=m.querySelector('.chat-watermark');if(wm)wm.remove();
@@ -5534,7 +5722,9 @@ function renderRight(text,ts){
   var langTag=U.lang.substring(0,2).toUpperCase();
   pair.innerHTML='<div class="bubble-right-wrap"><div class="bubble-right" id="br-'+ts+'"><div class="bubble-right-text">'+esc(text)+'</div><div class="bubble-right-meta"><span class="b-lang">'+langTag+'</span><span class="b-time">'+fmtT(ts)+'</span><span class="b-check" id="bc-'+ts+'">✓</span></div></div></div><div id="blw-'+ts+'"></div>';
   m.appendChild(pair);
-  pair.querySelector('.bubble-right').addEventListener('click',function(){cp(text);});
+  var rb=pair.querySelector('.bubble-right');
+  rb.addEventListener('click',function(){cp(text);});
+  attachBubbleGestures(rb,text,function(){Chat.startEdit(text,ts);});
   _msgs++;document.getElementById('inf-msgs').textContent=_msgs;
   var atB=isAtBottom();
   if(atB){scrollB();}else if(isAtThreshold()){_newMsgCount++;var sdb=document.getElementById('scroll-down-btn');sdb.textContent='↓ '+_newMsgCount+' NEW';sdb.classList.add('visible');}
@@ -5557,14 +5747,14 @@ function renderLeft(pair,translation,partner,ts,offline,emergency,confScore,conf
   wrap.querySelector('.bubble-left-wrap').classList.add('visible');
   var bl=wrap.querySelector('.bubble-left');
   bl.addEventListener('click',function(){cp(translation);});
-  var lp;bl.addEventListener('touchstart',function(){lp=setTimeout(function(){spk(translation,U.lang);showToast('SPEAKING...');},600);});
-  bl.addEventListener('touchend',function(){clearTimeout(lp);});
+  attachBubbleGestures(bl,translation,function(){spk(translation,U.lang);showToast('SPEAKING...');});
   var atB=isAtBottom();
   if(atB){scrollB();}else if(isAtThreshold()){_newMsgCount++;var sdb=document.getElementById('scroll-down-btn');sdb.textContent='↓ '+_newMsgCount+' NEW';sdb.classList.add('visible');}
 }
 
 var Chat={
   _earpod:false,_ng:false,_listening:false,_rec:null,_invSecs:0,_invT:null,_handRaised:false,
+  _ctxMode:null,_replySource:null,_editTs:null,
 
   init:function(){
     if(window.WL && WL.Session && WL.Session.id){ SID=WL.Session.id; }
@@ -5672,11 +5862,80 @@ var Chat={
     document.getElementById('scroll-down-btn').classList.remove('visible');
   },
 
+  /* ── REPLY / EDIT COMPOSER STATE ───────────────────────────────
+     Frontend-only. No message relationship or edit is persisted
+     anywhere (not to Supabase, not to localStorage as a stand-in) --
+     see the PHASE 3 BACKEND DEPENDENCY markers in send() below. */
+  startReply:function(sourceText){
+    this.cancelComposerContext();
+    this._ctxMode='reply';
+    this._replySource=sourceText;
+    document.getElementById('composer-ctx-icon').textContent='↩';
+    document.getElementById('composer-ctx-text').textContent='Replying to: '+ctxTruncate(sourceText);
+    document.getElementById('composer-ctx').classList.add('active');
+    document.getElementById('chat-input').focus();
+  },
+  startEdit:function(sourceText,ts){
+    this.cancelComposerContext();
+    this._ctxMode='edit';
+    this._editTs=ts;
+    var inp=document.getElementById('chat-input');
+    inp.value=sourceText;
+    inp.style.direction=RTL.test(sourceText)?'rtl':'ltr';
+    document.getElementById('send-btn').classList.toggle('on',sourceText.trim().length>0);
+    document.getElementById('composer-ctx-icon').textContent='✎';
+    document.getElementById('composer-ctx-text').textContent='Editing message';
+    document.getElementById('composer-ctx').classList.add('active');
+    inp.focus();
+  },
+  cancelComposerContext:function(){
+    var wasEditing=this._ctxMode==='edit';
+    this._ctxMode=null;this._replySource=null;this._editTs=null;
+    document.getElementById('composer-ctx').classList.remove('active');
+    if(wasEditing){
+      // Edit always overwrote the composer with the message's source
+      // text, so cancelling edit clears it back to a normal empty
+      // composer. Reply never touches the composer's own text, so
+      // cancelling reply intentionally leaves an in-progress draft
+      // untouched -- it must not alter the original message either
+      // way, and here there is nothing of the original to alter.
+      var inp=document.getElementById('chat-input');
+      inp.value='';inp.style.direction='ltr';
+      document.getElementById('send-btn').classList.remove('on');
+    }
+  },
+
   send:function(){
     var inp=document.getElementById('chat-input');
     var text=inp.value.trim();if(!text)return;
+    if(this._ctxMode==='edit'){
+      /* PHASE 3 BACKEND DEPENDENCY -- persistent message editing needs:
+         an update path scoped to the sender's own message (ownership
+         check), an edited-state marker, and a retranslation trigger so
+         the new source never keeps showing the old translation. None
+         of that exists yet. The frontend cannot honestly apply this
+         edit to the original bubble or to any local state that would
+         look saved -- that would be fake persistence. Say so plainly
+         instead. */
+      showToast('EDITING NEEDS BACKEND SUPPORT — COMING SOON');
+      inp.value='';document.getElementById('send-btn').classList.remove('on');inp.style.direction='ltr';
+      this.cancelComposerContext();
+      return;
+    }
+    var wasReply=this._ctxMode==='reply';
     inp.value='';document.getElementById('send-btn').classList.remove('on');inp.style.direction='ltr';
     this._doSend(text,false);
+    if(wasReply){
+      /* PHASE 3 BACKEND DEPENDENCY -- a reply-to-message relationship
+         (e.g. a reply_to_message_id-style reference -- exact schema is
+         the backend session's call, not prescribed here) would be
+         attached to the _doSend insert at this point once the schema
+         supports it, and rendered for both sides via realtime. The
+         message above already sent for real, through the normal
+         pipeline -- it is not fake -- it simply carries no reply
+         relationship yet, for either participant. */
+      this.cancelComposerContext();
+    }
   },
 
   _doSend:function(text,emergency){
@@ -6105,6 +6364,71 @@ function savePrefs(){
   try{localStorage.setItem('wl_settings',JSON.stringify(_prefs));}catch(e){}
 }
 
+/* ── ABOUT / PRIVACY / TERMS CONTENT ───────────────────────────
+   About: product copy is Eugene's own spec, used as supplied.
+   Privacy/Terms: legal clauses (governing law, dispute resolution,
+   age minimum) reflect prior founder direction but are NOT the
+   executed policy documents -- marked DRAFT until the approved
+   Privacy Policy / Terms of Service text is supplied and pasted in
+   here. The technical description under Privacy is verified against
+   this file's actual code (Supabase writes, translation providers,
+   local storage keys), not asserted from design intent. */
+var STG_DOCS={
+  about:{
+    title:'ABOUT WHISPERLINK',
+    html:`
+      <h4>What is WhisperLink?</h4>
+      <p>WhisperLink is a real-time multilingual communication platform that helps people who speak different languages communicate and understand each other.</p>
+      <h4>How does it work?</h4>
+      <ol>
+        <li>Choose your language.</li>
+        <li>Start or join a session.</li>
+        <li>Share the session link/code.</li>
+        <li>Speak or type.</li>
+        <li>WhisperLink translates.</li>
+        <li>Continue communicating in each participant's language.</li>
+      </ol>
+      <h4>Joining a session</h4>
+      <p>Open the session link/code → confirm your language → join → communicate.</p>
+      <h4>Starting a session</h4>
+      <p>Choose your language → start a session → invite the other person → choose the appropriate languages → speak or type → continue the conversation.</p>
+      <p style="color:rgba(255,255,255,0.4);font-size:11px;">WhisperLink v1.0 · Stella Tech · Protection First. Precision Always.</p>
+    `
+  },
+  privacy:{
+    title:'PRIVACY POLICY',
+    html:`
+      <div class="doc-pending">DRAFT — reflects prior founder direction, not the final executed Privacy Policy. Replace this content with the approved document before release.</div>
+      <h4>What actually happens in v1.0</h4>
+      <p>Verified against this build's code, not design intention:</p>
+      <ul>
+        <li>Sign-in is anonymous only — no email or password is collected.</li>
+        <li>Typed or spoken text you send is sent to a translation provider (MyMemory or Google Translate) to produce a translation.</li>
+        <li>Solo mode: your conversation history is saved only on your device (local storage). Nothing is sent to Stella Tech's own servers beyond the translation request itself.</li>
+        <li>Session mode (multiple participants): your original message text and chosen language <em>are</em> stored on Stella Tech's backend (Supabase) so other participants in the session can receive it. The translated text is not stored server-side — each participant's device generates its own translation on arrival.</li>
+        <li>Voice input uses your browser's built-in speech recognition, which — depending on your browser — may send audio to that browser vendor's own speech-recognition service, not to Stella Tech.</li>
+        <li>"Clear All History" (Settings) deletes your local device history. It does not delete messages already stored server-side for a session — server-side retention/deletion is a backend policy question, not yet finalized here.</li>
+      </ul>
+      <h4>Minimum age</h4>
+      <p>16+. Under 16 requires parental consent. <em>(Carried from prior direction — confirm before release.)</em></p>
+      <h4>Governing law &amp; disputes</h4>
+      <p>Kenya-based governing-law language until a Singapore entity exists. Disputes: email first, then binding SIAC arbitration; class-action waiver. <em>(Carried from prior direction — confirm exact clause wording before release.)</em></p>
+      <h4>Contact</h4>
+      <p>stellatechofficial@gmail.com</p>
+    `
+  },
+  terms:{
+    title:'TERMS OF SERVICE',
+    html:`
+      <div class="doc-pending">DRAFT — the full Terms of Service text has not been supplied to this session. This is a placeholder so the screen is real and functional rather than a "coming soon" stub. Replace with the approved document before release.</div>
+      <p>By using WhisperLink you agree to use it lawfully and not to rely on it for safety-critical or emergency communication beyond what its built-in emergency phrases are designed for.</p>
+      <p>WhisperLink translations are generated by third-party providers and may not be perfectly accurate. Do not rely on WhisperLink as the sole means of communication in a medical, legal, or safety-critical situation.</p>
+      <h4>Contact</h4>
+      <p>stellatechofficial@gmail.com</p>
+    `
+  }
+};
+
 var Stg={
   goBack:function(){showToast('RETURNING TO HOME...');WL.Router.go('home');},
 
@@ -6125,6 +6449,32 @@ var Stg={
   savePref:function(key,val){
     _prefs[key]=val;savePrefs();
     showToast('SAVED');
+  },
+  /* Phase D conditional gender UI: reflects Your Language's audited
+     classification (see GENDER_CLASS near the registry). Read-only
+     display logic -- never feeds a translation call (Phase E boundary:
+     no provider currently accepts this, see the audit). UNVERIFIED is
+     shown as genuinely unresolved, never silently treated as NONE. */
+  updateGenderRowHint:function(){
+    var sub=document.getElementById('gender-row-sub');
+    if(!sub) return;
+    var ylEl=document.getElementById('sel-your-lang');
+    var yourLang=ylEl&&ylEl.value?ylEl.value:'English';
+    var entry=WL.Languages.byName[yourLang];
+    var cls=entry?entry.genderClass:'NONE';
+    var gEl=document.getElementById('sel-gender');
+    var gender=gEl?gEl.value:'unspecified';
+    if(cls==='SPEAKER'||cls==='SPEAKER_AND_RECIPIENT'){
+      sub.textContent = (gender==='unspecified')
+        ? yourLang+' phrasing can depend on this — currently unspecified.'
+        : yourLang+' will use this for phrasing that depends on it.';
+    } else if(cls==='CONTEXTUAL'){
+      sub.textContent = yourLang+' uses speech context this field can\'t fully capture.';
+    } else if(cls==='UNVERIFIED'){
+      sub.textContent = 'Optional — whether '+yourLang+' needs this isn\'t confirmed yet.';
+    } else {
+      sub.textContent = 'Optional — '+yourLang+' doesn\'t need this for ordinary translation.';
+    }
   },
 
   quickToggle:function(key,btn){
@@ -6148,10 +6498,17 @@ var Stg={
     Stg.savePref('industry',ind);
   },
 
-  openLink:function(url){
-    if(url.startsWith('http')){window.open(url,'_blank');return;}
-    var label=url==='#privacy'?'PRIVACY POLICY':url==='#terms'?'TERMS OF SERVICE':'THIS PAGE';
-    showToast(label+' COMING SOON · QUESTIONS: STELLATECHOFFICIAL@GMAIL.COM');
+  openDoc:function(type){
+    var d=STG_DOCS[type];
+    if(!d)return;
+    document.getElementById('stg-doc-title').textContent=d.title;
+    document.getElementById('stg-doc-body').innerHTML=d.html;
+    document.getElementById('stg-doc-sheet').classList.add('visible');
+    document.getElementById('stg-doc-bd').classList.add('visible');
+  },
+  closeDoc:function(){
+    document.getElementById('stg-doc-sheet').classList.remove('visible');
+    document.getElementById('stg-doc-bd').classList.remove('visible');
   },
 
   confirmClearHistory:function(){
@@ -6223,7 +6580,19 @@ document.getElementById('stg-search-input').addEventListener('input',function(){
   });
 });
 
-WL.Components.settings = { onEnter:function(){ loadPrefs(); }, onExit:function(){ savePrefs(); } };
+WL.Components.settings = { onEnter:function(){
+  loadPrefs();
+  // Pre-existing gap found while adding the Gender field: these three
+  // selects were never synced from the saved preference on screen
+  // entry -- savePref() wrote to _prefs correctly, but nothing read it
+  // back on the next visit, so the visible selection silently reset to
+  // populateSelectors()'s default every time. Fixed for all three
+  // together rather than leaving Gender the only one that works.
+  var yl=document.getElementById('sel-your-lang'); if(yl && _prefs.yourLang) yl.value=_prefs.yourLang;
+  var tl=document.getElementById('sel-target-lang'); if(tl && _prefs.targetLang) tl.value=_prefs.targetLang;
+  var g=document.getElementById('sel-gender'); if(g) g.value=_prefs.gender||'unspecified';
+  Stg.updateGenderRowHint();
+}, onExit:function(){ savePrefs(); } };
 } catch(e) { console.error('[WL] settings script failed:', e); if(window.WL && WL.Utils && WL.Utils.toast) WL.Utils.toast('SCREEN LOAD ERROR — see console'); }
 </script>
 
