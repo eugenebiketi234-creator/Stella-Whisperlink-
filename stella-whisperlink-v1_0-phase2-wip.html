@@ -1276,9 +1276,10 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
 /* Language row */
 .demo-lang-row{
   display:flex;align-items:center;gap:8px;
+  width:100%;min-width:0;
 }
 .demo-lang-select{
-  flex:1;height:32px;
+  flex:1 1 0;min-width:0;width:0;height:32px;
   background:rgba(255,255,255,0.05);
   border:1px solid rgba(0,229,255,0.15);
   border-radius:8px;
@@ -1288,9 +1289,23 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
   -webkit-appearance:none;appearance:none;
   cursor:pointer;text-align:center;
   outline:none;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
 .demo-lang-select option{background:#0a0d1e;color:#ffffff;font-size:13px;}
 .demo-lang-select optgroup{background:#0a0d1e;color:rgba(0,229,255,0.7);}
+.lang-select-hidden{display:none;}
+.demo-lang-trigger{
+  flex:1 1 0;min-width:0;height:32px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(0,229,255,0.15);
+  border-radius:8px;
+  color:rgba(0,229,255,0.85);
+  font-family:'Share Tech Mono',monospace;font-size:11px;
+  letter-spacing:0.5px;padding:0 8px;
+  cursor:pointer;text-align:center;
+  outline:none;
+}
+.lang-trigger-text{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .demo-swap-btn{
   width:34px;height:32px;flex-shrink:0;
   background:rgba(0,229,255,0.07);
@@ -1736,10 +1751,6 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
 .solo-swap-btn{width:44px;height:100%;flex-shrink:0;background:transparent;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.45);transition:all 0.2s ease;}
 .solo-swap-btn:active{background:rgba(0,229,255,0.08);transform:rotate(180deg);}
 .solo-swap-btn svg{width:16px;height:16px;}
-.solo-phrases{display:flex;align-items:center;gap:8px;padding:10px 16px 0;flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
-.solo-phrases::-webkit-scrollbar{display:none;}
-.phrase-chip{height:32px;padding:0 12px;border-radius:20px;flex-shrink:0;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:rgba(255,255,255,0.65);background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);cursor:pointer;white-space:nowrap;transition:all 0.15s ease;}
-.phrase-chip:active{background:rgba(99,102,241,0.18);transform:scale(0.97);}
 #solo-messages{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;padding:12px 0 96px;position:relative;z-index:10;display:flex;flex-direction:column;}
 #solo-messages::-webkit-scrollbar{display:none;}
 .chat-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px;opacity:0;animation:fadeIn 0.5s ease 0.3s forwards;}
@@ -1799,7 +1810,7 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
 #solo-scroll-down-btn.visible{display:block;}
 #solo-toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:8px 18px;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1.5px;color:rgba(255,255,255,0.6);white-space:nowrap;z-index:50;opacity:0;transition:opacity 0.3s ease;pointer-events:none;}
 #solo-toast.visible{opacity:1;}
-@media(max-height:650px){.solo-header{height:46px;}.solo-lang-bar{height:36px;margin-top:8px;}.solo-phrases{padding-top:8px;}.solo-dock{height:50px;}}
+@media(max-height:650px){.solo-header{height:46px;}.solo-lang-bar{height:36px;margin-top:8px;}.solo-dock{height:50px;}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.bubble-right,.bubble-left-wrap,.chat-empty{animation:none;opacity:1;}.dock-mic-btn.listening svg,.inv-dot{animation:none;}}
 /* ══════ CHAT ══════ */
@@ -1835,10 +1846,6 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
 .chat-hdr-btn svg{width:14px;height:14px;color:rgba(255,255,255,0.6);}
 .chat-ep-btn.active{background:rgba(0,229,255,0.1);border-color:rgba(0,229,255,0.4);}
 .chat-ep-btn.active svg{color:#00e5ff;}
-.chat-emg-btn{border-color:rgba(239,68,68,0.35);}
-.chat-emg-btn svg{color:rgba(239,68,68,0.65);}
-.chat-emg-btn.open{background:rgba(239,68,68,0.12);border-color:rgba(239,68,68,0.7);}
-.chat-emg-btn.open svg{color:#ef4444;}
 
 /* MERGED BAR */
 .chat-merged-bar{flex-shrink:0;height:92px;background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(99,102,241,0.08);display:flex;align-items:center;padding:0 14px;gap:12px;}
@@ -1976,13 +1983,6 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
 .panel-bd{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:80;opacity:0;pointer-events:none;transition:opacity 0.25s;}
 .panel-bd.visible{opacity:1;pointer-events:auto;}
 /* Emergency */
-.emg-panel{position:fixed;bottom:0;left:0;right:0;background:#0a0d1e;border-top:2px solid rgba(239,68,68,0.3);border-radius:20px 20px 0 0;padding:14px 18px calc(env(safe-area-inset-bottom,0px)+14px);z-index:81;transform:translateY(100%);transition:transform 0.3s cubic-bezier(.34,1.56,.64,1);}
-.emg-panel.visible{transform:translateY(0);}
-.emg-handle{width:36px;height:4px;border-radius:2px;background:rgba(239,68,68,0.3);margin:0 auto 10px;}
-.emg-title{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:rgba(239,68,68,0.8);margin-bottom:10px;text-align:center;}
-.emg-phrases{display:flex;flex-direction:column;gap:7px;}
-.emg-btn{min-height:50px;width:100%;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.22);border-radius:10px;color:rgba(255,255,255,0.88);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;cursor:pointer;padding:9px 14px;text-align:left;transition:background 0.15s;}
-.emg-btn:active{background:rgba(239,68,68,0.2);}
 /* Leave sheet */
 .leave-sheet{position:fixed;bottom:0;left:0;right:0;background:#0a0d1e;border-top:1px solid rgba(99,102,241,0.2);border-radius:20px 20px 0 0;padding:18px 20px calc(env(safe-area-inset-bottom,0px)+18px);z-index:82;transform:translateY(100%);transition:transform 0.3s cubic-bezier(.34,1.56,.64,1);}
 .leave-sheet.visible{transform:translateY(0);}
@@ -2010,6 +2010,16 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
 .legal-sheet-body li{margin-bottom:4px;}
 .legal-sheet-body .doc-pending{margin-top:14px;padding:10px 12px;border:1px dashed rgba(245,158,11,0.4);border-radius:10px;background:rgba(245,158,11,0.06);color:rgba(245,158,11,0.85);font-size:11px;line-height:1.5;}
 .info-title{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.4);text-align:center;margin-bottom:12px;}
+
+.langpick-sheet{position:fixed;bottom:0;left:0;right:0;top:6%;background:#0a0d1e;border-top:1px solid rgba(99,102,241,0.2);border-radius:22px 22px 0 0;padding:14px 16px calc(env(safe-area-inset-bottom,0px)+14px);z-index:85;transform:translateY(100%);transition:transform 0.3s cubic-bezier(.34,1.56,.64,1);display:flex;flex-direction:column;}
+.langpick-sheet.visible{transform:translateY(0);}
+.langpick-head{display:flex;align-items:center;justify-content:space-between;padding:0 6px 12px;border-bottom:1px solid rgba(99,102,241,0.12);flex-shrink:0;}
+.langpick-title{font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:2px;color:rgba(255,255,255,0.8);}
+.langpick-body{overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:4px;}
+.langpick-group-label{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:#818cf8;padding:14px 10px 6px;position:sticky;top:0;background:#0a0d1e;z-index:1;}
+.langpick-row{display:block;width:100%;text-align:left;min-height:50px;padding:0 12px;background:transparent;border:none;border-radius:10px;color:rgba(255,255,255,0.85);font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;cursor:pointer;transition:background 0.12s;}
+.langpick-row:active{background:rgba(99,102,241,0.14);}
+.langpick-row.selected{background:rgba(0,229,255,0.1);color:#00e5ff;font-weight:600;}
 .info-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(99,102,241,0.08);}
 .info-lbl{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:1px;color:rgba(255,255,255,0.28);}
 .info-val{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.65);}
@@ -2097,7 +2107,7 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
 .ppl-invite-sub{font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:rgba(255,255,255,0.35);}
 
 /* ── PEOPLE CARD ── */
-.ppl-card{margin:0 16px 10px;padding:14px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(99,102,241,0.12);border-radius:14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background 0.15s;position:relative;overflow:hidden;}
+.ppl-card{margin:0 clamp(14px,4vw,22px) 12px;padding:16px 18px;background:rgba(255,255,255,0.03);border:1px solid rgba(99,102,241,0.12);border-radius:16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:background 0.15s;position:relative;overflow:hidden;}
 .ppl-card:active{background:rgba(255,255,255,0.06);}
 
 /* Swipe reveal */
@@ -2106,15 +2116,15 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
 .ppl-card-swipe-lbl{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:1px;color:#10b981;}
 
 .ppl-card-info{flex:1;min-width:0;}
-.ppl-card-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:500;font-size:15px;color:#ffffff;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.ppl-card-lang{display:flex;align-items:center;gap:6px;margin-bottom:2px;}
-.ppl-lang-pill{font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:0.5px;color:rgba(0,229,255,0.8);background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.15);border-radius:4px;padding:1px 5px;}
-.ppl-lang-name{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(0,229,255,0.6);letter-spacing:0.5px;}
-.ppl-card-pair{font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(255,255,255,0.28);letter-spacing:0.3px;margin-bottom:2px;}
-.ppl-card-meta{font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(255,255,255,0.25);letter-spacing:0.3px;}
+.ppl-card-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;font-size:16px;color:#ffffff;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ppl-card-lang{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
+.ppl-lang-pill{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:0.5px;color:rgba(0,229,255,0.8);background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.15);border-radius:4px;padding:2px 6px;}
+.ppl-lang-name{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(0,229,255,0.65);letter-spacing:0.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ppl-card-pair{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:0.3px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ppl-card-meta{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.26);letter-spacing:0.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
 .ppl-card-action{flex-shrink:0;}
-.ppl-start-btn{height:32px;padding:0 10px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);border-radius:8px;font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:1px;color:rgba(99,102,241,0.85);cursor:pointer;white-space:nowrap;transition:all 0.15s;}
+.ppl-start-btn{height:40px;min-width:44px;padding:0 14px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);border-radius:10px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;color:rgba(99,102,241,0.85);cursor:pointer;white-space:nowrap;transition:all 0.15s;}
 .ppl-start-btn:active{background:rgba(99,102,241,0.2);}
 
 /* ── EMPTY STATES ── */
@@ -2128,16 +2138,16 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
 /* ── PROFILE SHEET ── */
 .sheet-bd{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:80;opacity:0;pointer-events:none;transition:opacity 0.25s;}
 .sheet-bd.visible{opacity:1;pointer-events:auto;}
-.ppl-profile-sheet{position:fixed;bottom:0;left:0;right:0;background:#0a0d1e;border-top:1px solid rgba(99,102,241,0.2);border-radius:20px 20px 0 0;padding:16px 20px calc(env(safe-area-inset-bottom,0px)+20px);z-index:81;transform:translateY(100%);transition:transform 0.3s cubic-bezier(.34,1.56,.64,1);}
+.ppl-profile-sheet{position:fixed;bottom:0;left:0;right:0;background:#0a0d1e;border-top:1px solid rgba(99,102,241,0.2);border-radius:22px 22px 0 0;padding:20px 24px calc(env(safe-area-inset-bottom,0px)+26px);z-index:81;transform:translateY(100%);transition:transform 0.3s cubic-bezier(.34,1.56,.64,1);}
 .ppl-profile-sheet.visible{transform:translateY(0);}
-.sheet-handle{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,0.12);margin:0 auto 16px;}
-.sheet-top{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
-.sheet-info{flex:1;}
-.sheet-name{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:#ffffff;margin-bottom:4px;}
-.sheet-lang{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(0,229,255,0.7);letter-spacing:1px;margin-bottom:2px;}
-.sheet-stats{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:0.5px;}
-.sheet-actions{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
-.sheet-action{height:44px;background:rgba(255,255,255,0.04);border:1px solid rgba(99,102,241,0.18);border-radius:10px;color:rgba(255,255,255,0.7);font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1.5px;cursor:pointer;transition:background 0.15s;}
+.sheet-handle{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,0.12);margin:0 auto 20px;}
+.sheet-top{display:flex;align-items:center;gap:18px;margin-bottom:22px;}
+.sheet-info{flex:1;min-width:0;}
+.sheet-name{font-family:'Syne',sans-serif;font-weight:800;font-size:21px;color:#ffffff;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sheet-lang{font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(0,229,255,0.7);letter-spacing:1px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sheet-stats{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,255,255,0.32);letter-spacing:0.5px;}
+.sheet-actions{display:flex;flex-direction:column;gap:10px;margin-bottom:18px;}
+.sheet-action{height:50px;background:rgba(255,255,255,0.04);border:1px solid rgba(99,102,241,0.18);border-radius:12px;color:rgba(255,255,255,0.7);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1.5px;cursor:pointer;transition:background 0.15s;}
 .sheet-action:active{background:rgba(99,102,241,0.12);}
 .sheet-action-invite{border-color:rgba(0,229,255,0.25);color:rgba(0,229,255,0.8);}
 .sheet-action-remove{border-color:rgba(239,68,68,0.2);color:rgba(239,68,68,0.6);}
@@ -2245,13 +2255,14 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
 
 /* ── SELECT INPUT ── */
 .stg-select{height:36px;background:rgba(255,255,255,0.04);border:1px solid rgba(99,102,241,0.2);border-radius:8px;color:rgba(0,229,255,0.8);font-family:'Share Tech Mono',monospace;font-size:12px;padding:0 10px;outline:none;-webkit-appearance:none;appearance:none;cursor:pointer;max-width:150px;}
+.stg-lang-trigger{height:36px;background:rgba(255,255,255,0.04);border:1px solid rgba(99,102,241,0.2);border-radius:8px;color:rgba(0,229,255,0.8);font-family:'Share Tech Mono',monospace;font-size:12px;padding:0 10px;outline:none;cursor:pointer;max-width:150px;flex-shrink:0;}
 .stg-select option{background:#0a0d1e;color:#ffffff;}
 .stg-select optgroup{background:#0a0d1e;color:rgba(0,229,255,0.6);}
 
 /* ── SPEED SLIDER ── */
-.stg-slider-wrap{display:flex;align-items:center;gap:8px;flex:1;}
+.stg-slider-wrap{display:flex;align-items:center;gap:8px;flex:1;min-width:0;flex-shrink:1;}
 .stg-slider-label{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.5px;}
-.stg-slider{-webkit-appearance:none;appearance:none;flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,0.1);outline:none;cursor:pointer;}
+.stg-slider{-webkit-appearance:none;appearance:none;flex:1;min-width:0;height:3px;border-radius:2px;background:rgba(255,255,255,0.1);outline:none;cursor:pointer;}
 .stg-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#00e5ff;box-shadow:0 0 6px rgba(0,229,255,0.5);cursor:pointer;}
 
 /* ── PROFILE AVATAR ── */
@@ -2343,6 +2354,8 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
 .ov-input::placeholder{color:rgba(255,255,255,0.22);}
 .ov-input:focus{border-color:rgba(0,229,255,0.45);box-shadow:0 0 0 3px rgba(0,229,255,0.08);}
 .ov-input.error{border-color:rgba(239,68,68,0.6);}
+#ov1-role-other-wrap{margin-bottom:20px;}
+.ov-input-role{height:58px;font-size:16px;}
 
 /* Primary button */
 .ov-btn-primary{
@@ -2947,16 +2960,28 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
       <!-- Language selectors -->
       <!-- Options generated at load by WL.Languages.populateSelectors()
            from the canonical WL.Languages registry (see near
-           WL.Utils.baseLangCode) -- not hand-maintained here anymore. -->
+           WL.Utils.baseLangCode) -- not hand-maintained here anymore.
+           The <select> elements are the real state/event holders
+           (kept exactly as before); the buttons below are the visible,
+           tappable surface that opens the shared WL.LangPicker panel
+           instead of relying on the native Android popup. -->
       <div class="demo-lang-row">
-        <select class="demo-lang-select" id="demo-src-lang"></select>
+        <select class="demo-lang-select lang-select-hidden" id="demo-src-lang"></select>
+        <button class="demo-lang-trigger" id="demo-src-lang-trigger" data-format="code"
+          onclick="WL.LangPicker.open('demo-src-lang','code',true,'TRANSLATE FROM')">
+          <span class="lang-trigger-text" id="demo-src-lang-trigger-text">Auto</span>
+        </button>
         <button class="demo-swap-btn" onclick="Demo.swapLangs()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
             <path d="M7 16V4m0 0L3 8m4-4l4 4"/>
             <path d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
           </svg>
         </button>
-        <select class="demo-lang-select" id="demo-tgt-lang"></select>
+        <select class="demo-lang-select lang-select-hidden" id="demo-tgt-lang"></select>
+        <button class="demo-lang-trigger" id="demo-tgt-lang-trigger" data-format="code"
+          onclick="WL.LangPicker.open('demo-tgt-lang','code',false,'TRANSLATE TO')">
+          <span class="lang-trigger-text" id="demo-tgt-lang-trigger-text">Spanish</span>
+        </button>
       </div>
     </div>
 
@@ -3130,20 +3155,19 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
 </div>
 <div id="solo-offline-banner">⚡ OFFLINE · PHRASE MODE ACTIVE</div>
 <div class="solo-lang-bar">
-  <div class="solo-lang-section solo-lang-section-left">
+  <div class="solo-lang-section solo-lang-section-left" onclick="WL.LangPicker.open('solo-from-select','name',false,'YOUR LANGUAGE')">
     <div class="solo-lang-label" id="solo-from-label">English</div>
-    <select class="solo-lang-select" id="solo-from-select" onchange="SoloApp.onFromChange()"></select>
+    <select class="solo-lang-select lang-select-hidden" id="solo-from-select" onchange="SoloApp.onFromChange()"></select>
   </div>
   <button class="solo-swap-btn" onclick="SoloApp.swapLangs()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
   </button>
-  <div class="solo-lang-section solo-lang-section-right">
+  <div class="solo-lang-section solo-lang-section-right" onclick="WL.LangPicker.open('solo-to-select','name',false,'TRANSLATE TO')">
     <div class="solo-lang-label" id="solo-to-label">Arabic</div>
-    <select class="solo-lang-select" id="solo-to-select" onchange="SoloApp.onToChange()"></select>
+    <select class="solo-lang-select lang-select-hidden" id="solo-to-select" onchange="SoloApp.onToChange()"></select>
   </div>
 </div>
 <div class="solo-gender-hint hidden" id="solo-gender-hint"></div>
-<div class="solo-phrases" id="solo-phrases"></div>
 <div id="solo-messages">
   <div class="chat-empty" id="solo-empty-state">
     <div class="chat-empty-star"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L13.5 10.5L22 12L13.5 13.5L12 22L10.5 13.5L2 12L10.5 10.5Z"/></svg></div>
@@ -3189,9 +3213,6 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
   <div class="chat-hdr-actions">
     <button class="chat-hdr-btn chat-ep-btn" id="ep-btn" onclick="Chat.toggleEarpod()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 10a6 6 0 0 1 12 0v4a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-1"/><path d="M6 14a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-1"/></svg>
-    </button>
-    <button class="chat-hdr-btn chat-emg-btn" id="emg-btn" onclick="Chat.toggleEmg()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
     </button>
     <button class="chat-hdr-btn" onclick="Chat.openInfo()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg>
@@ -3250,20 +3271,6 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
   <button class="dock-send-btn" id="send-btn" onclick="Chat.send()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
   </button>
-  </div>
-</div>
-<!-- EMERGENCY PANEL -->
-<div class="panel-bd" id="emg-bd" onclick="Chat.closeEmg()"></div>
-<div class="emg-panel" id="emg-panel">
-  <div class="emg-handle"></div>
-  <div class="emg-title">EMERGENCY PHRASES</div>
-  <div class="emg-phrases">
-    <button class="emg-btn" onclick="Chat.sendEmg(this.textContent)">Call an ambulance now</button>
-    <button class="emg-btn" onclick="Chat.sendEmg(this.textContent)">Stop — danger ahead</button>
-    <button class="emg-btn" onclick="Chat.sendEmg(this.textContent)">I need a doctor immediately</button>
-    <button class="emg-btn" onclick="Chat.sendEmg(this.textContent)">Emergency evacuation now</button>
-    <button class="emg-btn" onclick="Chat.sendEmg(this.textContent)">Do not move</button>
-    <button class="emg-btn" onclick="Chat.sendEmg(this.textContent)">Fire — evacuate now</button>
   </div>
 </div>
 <!-- LEAVE SHEET -->
@@ -3353,8 +3360,8 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
 <div class="ppl-profile-sheet" id="profile-sheet">
   <div class="sheet-handle"></div>
   <div class="sheet-top">
-    <div class="av-ring" id="sheet-av-ring" style="width:56px;height:56px;">
-      <div class="av-inner" id="sheet-av-inner" style="font-size:20px;"></div>
+    <div class="av-ring" id="sheet-av-ring" style="width:68px;height:68px;">
+      <div class="av-inner" id="sheet-av-inner" style="font-size:24px;"></div>
     </div>
     <div class="sheet-info">
       <div class="sheet-name" id="sheet-name"></div>
@@ -3397,22 +3404,6 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
   </div>
 </div>
 
-<!-- QUICK TOGGLES -->
-<div class="stg-quick">
-  <button class="stg-quick-pill on" id="quick-ng" onclick="Stg.quickToggle('ng',this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
-    NOISEGUARD
-  </button>
-  <button class="stg-quick-pill" id="quick-as" onclick="Stg.quickToggle('as',this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-    AUTO-SPEAK
-  </button>
-  <button class="stg-quick-pill on" id="quick-sh" onclick="Stg.quickToggle('sh',this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-    SAVE HISTORY
-  </button>
-</div>
-
 <!-- SCROLLABLE BODY -->
 <div class="stg-body">
 
@@ -3425,13 +3416,12 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
     <div class="stg-section-body">
       <!-- Avatar + name row -->
       <div class="stg-row" style="gap:14px;">
-        <div class="stg-profile-av" onclick="Stg.tapAvatar()">
-          <div class="stg-av-ring"><div class="stg-av-inner" id="stg-av-initials">E</div></div>
-          <div class="stg-av-edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+        <div class="stg-profile-av">
+          <div class="stg-av-ring"><div class="stg-av-inner" id="stg-av-initials">?</div></div>
         </div>
         <div class="stg-row-body">
-          <div class="stg-row-label" id="stg-profile-name">Eugene Biketi</div>
-          <div class="stg-row-sub cyan">TAP AVATAR TO EDIT PHOTO</div>
+          <div class="stg-row-label" id="stg-profile-name">—</div>
+          <div class="stg-row-sub">Session participants see this name</div>
         </div>
       </div>
       <!-- Display name -->
@@ -3443,8 +3433,7 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
           <div class="stg-row-label">Display Name</div>
           <div class="stg-row-sub">Shown to session participants</div>
         </div>
-        <span class="stg-row-value" id="val-name">Eugene Biketi</span>
-        <div class="stg-row-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></div>
+        <span class="stg-row-value" id="val-name">—</span>
       </div>
       <!-- Your language -->
       <div class="stg-row">
@@ -3455,10 +3444,14 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
           <div class="stg-row-label">Your Language</div>
           <div class="stg-row-sub">Used as translation source</div>
         </div>
-        <select class="stg-select" id="sel-your-lang" onchange="Stg.savePref('yourLang',this.value);Stg.updateGenderRowHint();"></select>
+        <select class="stg-select lang-select-hidden" id="sel-your-lang" onchange="Stg.savePref('yourLang',this.value);Stg.updateGenderRowHint();"></select>
+        <button class="stg-lang-trigger" id="sel-your-lang-trigger" data-format="name"
+          onclick="WL.LangPicker.open('sel-your-lang','name',false,'YOUR LANGUAGE')">
+          <span class="lang-trigger-text" id="sel-your-lang-trigger-text">English</span>
+        </button>
       </div>
-      <!-- Gender (optional, self-reported) -->
-      <div class="stg-row">
+      <!-- Gender (optional, self-reported; row itself hidden when Your Language doesn't need it) -->
+      <div class="stg-row" id="gender-row">
         <div class="stg-row-icon cyan">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
         </div>
@@ -3490,31 +3483,11 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
           <div class="stg-row-label">Default Target Language</div>
           <div class="stg-row-sub">Translate everything to this language</div>
         </div>
-        <select class="stg-select" id="sel-target-lang" onchange="Stg.savePref('targetLang',this.value)"></select>
-      </div>
-      <div class="stg-row">
-        <div class="stg-row-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v2m0 16v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M2 12h2m16 0h2"/></svg>
-        </div>
-        <div class="stg-row-body">
-          <div class="stg-row-label">Translation Engine</div>
-          <div class="stg-row-sub cyan">MyMemory · Google · Local Dictionary</div>
-        </div>
-        <span class="stg-row-value">AUTO</span>
-      </div>
-      <div class="stg-row">
-        <div class="stg-row-icon green">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <div class="stg-row-body">
-          <div class="stg-row-label">Show Confidence Badges</div>
-          <div class="stg-row-sub">Translation reliability on each message</div>
-        </div>
-        <label class="stg-toggle">
-          <input type="checkbox" id="tog-confidence" checked onchange="Stg.savePref('showConfidence',this.checked)"/>
-          <div class="stg-toggle-track"></div>
-          <div class="stg-toggle-thumb"></div>
-        </label>
+        <select class="stg-select lang-select-hidden" id="sel-target-lang" onchange="Stg.savePref('targetLang',this.value)"></select>
+        <button class="stg-lang-trigger" id="sel-target-lang-trigger" data-format="name"
+          onclick="WL.LangPicker.open('sel-target-lang','name',false,'DEFAULT TARGET LANGUAGE')">
+          <span class="lang-trigger-text" id="sel-target-lang-trigger-text">Spanish</span>
+        </button>
       </div>
       <div class="stg-row">
         <div class="stg-row-icon amber">
@@ -3522,7 +3495,7 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
         </div>
         <div class="stg-row-body">
           <div class="stg-row-label">Voice Auto-send</div>
-          <div class="stg-row-sub">Confirm before send is safer for field ops</div>
+          <div class="stg-row-sub">Sends as soon as you stop speaking, no review step. Off is safer for field ops.</div>
         </div>
         <label class="stg-toggle">
           <input type="checkbox" id="tog-autosend" onchange="Stg.savePref('autoSend',this.checked)"/>
@@ -3533,27 +3506,13 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
     </div>
   </div>
 
-  <!-- 3. VOICE & AUDIO -->
+  <!-- 3. VOICE -->
   <div class="stg-section">
     <div class="stg-section-header">
       <span class="stg-section-icon">🎙</span>
-      <span class="stg-section-title">VOICE & AUDIO</span>
+      <span class="stg-section-title">VOICE</span>
     </div>
     <div class="stg-section-body">
-      <div class="stg-row">
-        <div class="stg-row-icon amber">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
-        </div>
-        <div class="stg-row-body">
-          <div class="stg-row-label">NoiseGuard</div>
-          <div class="stg-row-sub">Filters background noise during translation</div>
-        </div>
-        <label class="stg-toggle">
-          <input type="checkbox" id="tog-ng" checked onchange="Stg.savePref('noiseGuard',this.checked);Stg.syncQuick('ng',this.checked)"/>
-          <div class="stg-toggle-track"></div>
-          <div class="stg-toggle-thumb"></div>
-        </label>
-      </div>
       <div class="stg-row">
         <div class="stg-row-icon cyan">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
@@ -3567,30 +3526,6 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
           <input class="stg-slider" type="range" min="0" max="2" value="1" step="1" id="slider-speed" onchange="Stg.savePref('ttsSpeed',this.value)"/>
           <span class="stg-slider-label">FAST</span>
         </div>
-      </div>
-      <div class="stg-row">
-        <div class="stg-row-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="7.5" cy="7" rx="3" ry="3.4"/><path d="M7.5 10.3v6.2a2.1 2.1 0 0 1-4.2 0"/><ellipse cx="16.5" cy="7" rx="3" ry="3.4"/><path d="M16.5 10.3v6.2a2.1 2.1 0 0 0 4.2 0"/></svg>
-        </div>
-        <div class="stg-row-body">
-          <div class="stg-row-label">Earpod Auto-mode</div>
-          <div class="stg-row-sub">Auto-activate when earpods connected</div>
-        </div>
-        <label class="stg-toggle">
-          <input type="checkbox" id="tog-ep" checked onchange="Stg.savePref('earpodAuto',this.checked)"/>
-          <div class="stg-toggle-track"></div>
-          <div class="stg-toggle-thumb"></div>
-        </label>
-      </div>
-      <div class="stg-row">
-        <div class="stg-row-icon cyan">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-        </div>
-        <div class="stg-row-body">
-          <div class="stg-row-label">TTS Voice</div>
-          <div class="stg-row-sub">Custom voices coming in v1.1</div>
-        </div>
-        <span class="stg-row-value">SYSTEM</span>
       </div>
     </div>
   </div>
@@ -3608,10 +3543,10 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
         </div>
         <div class="stg-row-body">
           <div class="stg-row-label">Save Session History</div>
-          <div class="stg-row-sub">Stored locally on your device only</div>
+          <div class="stg-row-sub">Keep Solo conversation history on this device</div>
         </div>
         <label class="stg-toggle">
-          <input type="checkbox" id="tog-history" checked onchange="Stg.savePref('saveHistory',this.checked);Stg.syncQuick('sh',this.checked)"/>
+          <input type="checkbox" id="tog-history" checked onchange="Stg.savePref('saveHistory',this.checked)"/>
           <div class="stg-toggle-track"></div>
           <div class="stg-toggle-thumb"></div>
         </label>
@@ -3621,8 +3556,8 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
         </div>
         <div class="stg-row-body">
-          <div class="stg-row-label">Invisible Mode Default</div>
-          <div class="stg-row-sub">Start sessions in earpod invisible mode</div>
+          <div class="stg-row-label">Auto-speak Mode Default</div>
+          <div class="stg-row-sub">Start sessions with auto-speak (earpod mode) already on</div>
         </div>
         <label class="stg-toggle">
           <input type="checkbox" id="tog-invisible" onchange="Stg.savePref('invisibleDefault',this.checked)"/>
@@ -3635,8 +3570,8 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         </div>
         <div class="stg-row-body">
-          <div class="stg-row-label">Data stays on device</div>
-          <div class="stg-row-sub">WhisperLink does not transmit your conversations to any server. Translation only.</div>
+          <div class="stg-row-label">How your data moves</div>
+          <div class="stg-row-sub">Local Solo history stays on this device. Session messages go through the session backend so other participants can receive them. Translation may use third-party translation providers.</div>
         </div>
       </div>
     </div>
@@ -3659,7 +3594,7 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
           </div>
           <div class="stg-row-body">
             <div class="stg-row-label">Default Industry</div>
-            <div class="stg-row-sub">Sets phrase chips and emergency phrases</div>
+            <div class="stg-row-sub">Sets the mode shown in Solo, Chat, and your session name</div>
           </div>
         </div>
         <div class="stg-ind-pills">
@@ -3670,34 +3605,6 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
           <button class="stg-ind-pill" onclick="Stg.selectIndustry(this,'Education')">Education</button>
           <button class="stg-ind-pill" onclick="Stg.selectIndustry(this,'Legal')">Legal</button>
         </div>
-      </div>
-      <div class="stg-row">
-        <div class="stg-row-icon red">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        </div>
-        <div class="stg-row-body">
-          <div class="stg-row-label">Emergency Phrases Panel</div>
-          <div class="stg-row-sub">Show in Aviation · Healthcare · Industrial</div>
-        </div>
-        <label class="stg-toggle">
-          <input type="checkbox" id="tog-emg" checked onchange="Stg.savePref('showEmergency',this.checked)"/>
-          <div class="stg-toggle-track"></div>
-          <div class="stg-toggle-thumb"></div>
-        </label>
-      </div>
-      <div class="stg-row">
-        <div class="stg-row-icon amber">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        </div>
-        <div class="stg-row-body">
-          <div class="stg-row-label">Industry Lock</div>
-          <div class="stg-row-sub">Prevents accidental switching mid-session</div>
-        </div>
-        <label class="stg-toggle">
-          <input type="checkbox" id="tog-lock" onchange="Stg.savePref('industryLock',this.checked)"/>
-          <div class="stg-toggle-track"></div>
-          <div class="stg-toggle-thumb"></div>
-        </label>
       </div>
     </div>
   </div>
@@ -3788,6 +3695,24 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
   <span>CONNECTION LOST · RECONNECTING...</span>
 </div>
 
+<!-- LANGUAGE PICKER — one shared custom panel for every language
+     selector in the app (Demo/Solo/Settings). Native <select> popup
+     dimensions on Android can't be reliably controlled from CSS, so
+     the actual picking surface is this panel instead; the underlying
+     <select> stays in the DOM as the real state/event holder (same
+     value contract, same change-event wiring every existing screen
+     already has), just visually replaced by a trigger button. See
+     WL.LangPicker below. -->
+<div class="sheet-bd" id="langpick-bd" onclick="WL.LangPicker.close()"></div>
+<div class="langpick-sheet" id="langpick-sheet">
+  <div class="confirm-handle"></div>
+  <div class="langpick-head">
+    <div class="langpick-title" id="langpick-title">SELECT LANGUAGE</div>
+    <button class="legal-sheet-close" onclick="WL.LangPicker.close()" aria-label="Close">&times;</button>
+  </div>
+  <div class="langpick-body" id="langpick-body"></div>
+</div>
+
 <!-- ══════════════════════════════════
      OVERLAY 1 — SESSION CREATION
 ══════════════════════════════════ -->
@@ -3806,23 +3731,15 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
     <button class="ov-ind-pill" onclick="Ov1.selectInd(this,'Legal')">Legal</button>
   </div>
 
-  <!-- Role selector — populated per industry -->
-  <div class="ov-step-label" id="ov1-role-label" style="display:none;">STEP 2 — YOUR ROLE</div>
-  <div class="ov-step-wrap" id="ov1-roles"></div>
-  <div id="ov1-role-other-wrap" style="display:none;margin-bottom:16px;">
-    <input class="ov-input" id="ov1-role-other-input" type="text"
+  <!-- Role — a single, always-visible text field. This is the role
+       mechanism, not a picker trigger; no pill list, no taxonomy
+       browsing. -->
+  <div class="ov-step-label">YOUR ROLE</div>
+  <div id="ov1-role-other-wrap">
+    <input class="ov-input ov-input-role" id="ov1-role-other-input" type="text"
       placeholder="Enter your role" autocomplete="off" autocorrect="off"
       oninput="Ov1.onRoleOtherInput()"/>
   </div>
-
-  <!-- Purpose selector — populated per role -->
-  <div class="ov-step-label" id="ov1-purpose-label" style="display:none;">STEP 3 — SESSION PURPOSE</div>
-  <div class="ov-step-wrap" id="ov1-purposes"></div>
-
-  <!-- Session name -->
-  <input class="ov-input" id="ov1-name" type="text"
-    placeholder="Session name (optional)"
-    autocomplete="off" autocorrect="off" style="margin-bottom:12px;"/>
 
   <!-- Session code display (after creation) -->
   <div class="ov1-code-display" id="ov1-code-display" style="display:none;">
@@ -4011,6 +3928,228 @@ function txExpansionOk(srcText, outText){
   return outWords <= Math.max(srcWords * 3, srcWords + 4);
 }
 
+/* ══════════════════════════════════════════════════════════════
+   GLOBAL TRANSLATION FIDELITY FIREWALL
+   ══════════════════════════════════════════════════════════════
+   One shared ACCEPT/REJECT gate for every translation candidate,
+   from every provider, in all three cascades (Demo/Solo/Chat).
+   Replaces the old per-cascade "match>=threshold && txExpansionOk"
+   checks that were duplicated three times.
+
+   WHAT THIS IS: a set of language-agnostic structural checks (Layer
+   B) plus a small combined heuristic risk score (Layer C) for
+   unsupported semantic additions, gated behind the existing
+   provider-quality check (Layer A). WHAT THIS IS NOT: a semantic
+   model. It cannot prove a translation is correct, only flag
+   specific, checkable patterns associated with known failure modes
+   (structural data loss, appended clauses, flipped negation/
+   question-marking, invented numbers). It has not been validated
+   against live provider output in this sandbox -- no network access
+   here -- see WL.Fidelity._TEST_LIMITATIONS below and the delivered
+   report for exactly what was and wasn't tested.
+
+   Layer E (cross-provider conflict) is satisfied structurally, not
+   with new code: every candidate from every provider, in every
+   cascade, already passes through this same evaluate() call in the
+   existing sequential fallback chains (MyMemory candidate evaluated
+   -> if rejected, Google candidate evaluated independently -> if
+   rejected, existing honest-failure UI). No provider gets to win on
+   length, fluency, or raw score alone -- WL.Fidelity is the only
+   thing that decides accept/reject, for either provider, uniformly. */
+WL.Fidelity = {};
+
+/* Reject reason codes -- stable strings, used by the observability
+   log and by callers that want to distinguish failure causes. */
+WL.Fidelity.REASON = {
+  EMPTY: 'empty_candidate',
+  UNCHANGED: 'unchanged_from_source',
+  LOW_PROVIDER_SCORE: 'low_provider_score',
+  STRUCTURAL_LOSS: 'structural_token_lost',
+  EXPANSION_RISK: 'semantic_expansion_risk',
+  ACCEPTED: 'accepted'
+};
+
+/* ── Digit normalization (Arabic-Indic / Extended Arabic-Indic ->
+   ASCII) so "3" in an English source matches "٣" in an Arabic
+   candidate. This is a numeral-system mapping, not per-language
+   vocabulary -- these digit blocks are shared across many languages,
+   not Arabic-specific. */
+(function(){
+  var AI='٠١٢٣٤٥٦٧٨٩', EAI='۰۱۲۳۴۵۶۷۸۹';
+  WL.Fidelity._normalizeDigits = function(s){
+    return String(s||'')
+      .replace(/[٠-٩]/g, function(c){ return String(AI.indexOf(c)); })
+      .replace(/[۰-۹]/g, function(c){ return String(EAI.indexOf(c)); });
+  };
+})();
+
+/* ── Layer B: structural token extraction. Fully language-agnostic
+   -- pattern-based, not vocabulary-based. */
+WL.Fidelity.extractStructural = function(t){
+  t = String(t||'');
+  var norm = WL.Fidelity._normalizeDigits(t);
+  return {
+    numbers: (norm.match(/\d+(?:[.,]\d+)?%?/g) || []).map(function(n){return n.replace(',', '.');}),
+    urls: (t.match(/https?:\/\/[^\s]+/gi) || []),
+    emails: (t.match(/[\w.+-]+@[\w-]+\.[\w.-]+/g) || []),
+    phones: (norm.match(/\+?\d[\d\s\-().]{6,}\d/g) || []).map(function(s){return s.replace(/[\s\-().]/g,'');}),
+    codes: (t.match(/\b[A-Z]{2,4}[\-\s]?\d{2,6}\b|\b[A-Za-z]{1,4}-\d{2,6}\b/g) || []),
+    hasQuestion: /[?？]/.test(t),
+    exclaimCount: (t.match(/[!！]/g)||[]).length,
+    sentenceBreaks: (t.match(/[.!?。！？؟۔]+/g)||[]).length
+  };
+};
+
+/* ── Small, isolated, explicitly-scoped per-language marker tables.
+   Deliberately NOT comprehensive -- covers only the 14 languages in
+   the required regression list (see the delivered report), 1-3
+   markers each. For any language not listed here, the corresponding
+   signal is simply skipped (never assumed pass OR fail). This is the
+   "extensible language rule layer, isolated rather than embedded in
+   one cascade" the brief asked for -- add a language by adding one
+   line here, not by touching Demo/Solo/Chat. */
+WL.Fidelity.NEGATION_MARKERS = {
+  'en':['not','never'], 'ar':['لا','لم','ليس'],
+  'zh-CN':[/不/,/没/], 'zh-TW':[/不/,/沒/], 'fr':['ne','pas'],
+  'es':['no'], 'pt':['não'], 'hi':['नहीं'], 'sw':['si'],
+  'ja':[/ない/,/ません/], 'ko':[/안\s/,/지\s*않/], 'vi':['không'],
+  'th':[/ไม่/], 'ru':['не','нет'], 'de':['nicht','kein']
+};
+WL.Fidelity.CONJUNCTION_MARKERS = {
+  'en':['and'], 'ar':[/(^|\s)و[\u0600-\u06FF]/], 'zh-CN':[/和/,/并且/], 'zh-TW':[/和/,/並且/],
+  'fr':['et'], 'es':['y'], 'pt':['e'], 'hi':['और'], 'sw':['na'],
+  'ja':[/そして/], 'ko':[/그리고/], 'vi':['và'], 'th':[/และ/], 'ru':['и'], 'de':['und']
+};
+/* String markers are matched as exact whitespace-delimited tokens
+   (works correctly for any script that uses spaces between words --
+   Latin, Cyrillic, Devanagari, Arabic proper words -- without relying
+   on regex \b, which is ASCII-only in JS and silently fails to detect
+   boundaries around non-Latin letters: \bи\b can never match Cyrillic
+   "и" surrounded by spaces, since JS's \w -- what \b is defined
+   against -- doesn't include Cyrillic, so no word/non-word transition
+   is ever detected there. RegExp markers are for scripts that don't
+   use spaces (zh/ja/th) or attach as a prefix (Arabic's wa-), tested
+   as a direct substring/pattern match instead. */
+WL.Fidelity._tokenize=function(text){
+  return String(text||'').split(/[\s.,!?;:،؛؟。、！？"'()\[\]{}]+/).filter(Boolean);
+};
+WL.Fidelity._countMarkers=function(text,markers){
+  if(!markers) return null; // language not in the seeded table -- signal skipped, not assumed
+  var text2=String(text||''), tokens=null, n=0;
+  markers.forEach(function(m){
+    if(m instanceof RegExp){
+      var re=new RegExp(m.source, m.flags.indexOf('g')>-1?m.flags:m.flags+'g');
+      var mm=text2.match(re); if(mm) n+=mm.length;
+    } else {
+      if(!tokens) tokens=WL.Fidelity._tokenize(text2).map(function(t){return t.toLowerCase();});
+      var ml=m.toLowerCase();
+      tokens.forEach(function(t){ if(t===ml) n++; });
+    }
+  });
+  return n;
+};
+
+/* ── Layer A: existing provider-quality checks, now the firewall's
+   entry gate rather than living separately in each cascade. */
+WL.Fidelity._layerA=function(source,candidate,opts){
+  opts=opts||{};
+  if(!candidate || !candidate.trim()) return {ok:false,reason:WL.Fidelity.REASON.EMPTY};
+  if(opts.requireChanged!==false && candidate.trim().toLowerCase()===String(source||'').trim().toLowerCase())
+    return {ok:false,reason:WL.Fidelity.REASON.UNCHANGED};
+  if(opts.providerName==='M' && typeof opts.providerScore==='number' && opts.providerScore < WL.Config.myMemoryMatchThreshold)
+    return {ok:false,reason:WL.Fidelity.REASON.LOW_PROVIDER_SCORE};
+  return {ok:true};
+};
+
+/* ── Layer B: structural preservation. Hard-reject only on the
+   highest-confidence losses (URL/email/phone/code vanished entirely)
+   -- these essentially never legitimately disappear in translation,
+   so the false-positive risk of hard-rejecting on them is low. */
+WL.Fidelity._layerB=function(source,candidate){
+  var s=WL.Fidelity.extractStructural(source), c=WL.Fidelity.extractStructural(candidate);
+  var lost=[];
+  s.urls.forEach(function(u){ if(candidate.indexOf(u)===-1) lost.push('url'); });
+  s.emails.forEach(function(e){ if(candidate.indexOf(e)===-1) lost.push('email'); });
+  if(s.phones.length && !c.phones.length) lost.push('phone');
+  if(s.codes.length){
+    var candidateNorm=candidate.replace(/[\s\-]/g,'');
+    var anyCodeSurvives=s.codes.some(function(code){ return candidateNorm.indexOf(code.replace(/[\s\-]/g,''))>-1; });
+    if(!anyCodeSurvives) lost.push('code');
+  }
+  s.numbers.forEach(function(n){ if(c.numbers.indexOf(n)===-1) lost.push('number:'+n); });
+  return { ok: lost.length===0, lost: lost, structSource:s, structCandidate:c };
+};
+
+/* ── Layer C: combined semantic-expansion risk score. No single soft
+   signal rejects alone (word-expansion is deliberately the weakest
+   signal here -- "token expansion is not semantic expansion"); they
+   combine. See WL.Config.fidelityRiskRejectThreshold for the cutoff. */
+WL.Fidelity._layerC=function(source,candidate,structSource,structCandidate,opts){
+  opts=opts||{};
+  var risk=0, signals=[];
+  if(!txExpansionOk(source,candidate)){ risk+=1; signals.push('word-expansion'); }
+  if(structCandidate.sentenceBreaks - structSource.sentenceBreaks >= 2){ risk+=2; signals.push('extra-clause-boundaries'); }
+  if(structSource.hasQuestion && !structCandidate.hasQuestion){ risk+=3; signals.push('question-marking-lost'); }
+  var newNumbers=structCandidate.numbers.filter(function(n){return structSource.numbers.indexOf(n)===-1;});
+  if(newNumbers.length){ risk+=2; signals.push('new-number-introduced'); }
+  if(opts.fromLangCode && opts.toLangCode){
+    var negS=WL.Fidelity._countMarkers(source, WL.Fidelity.NEGATION_MARKERS[opts.fromLangCode]);
+    var negC=WL.Fidelity._countMarkers(candidate, WL.Fidelity.NEGATION_MARKERS[opts.toLangCode]);
+    if(negS!==null && negC!==null && (negS>0)!==(negC>0)){ risk+=3; signals.push(negS>0?'negation-lost':'negation-added'); }
+    var conjS=WL.Fidelity._countMarkers(source, WL.Fidelity.CONJUNCTION_MARKERS[opts.fromLangCode]);
+    var conjC=WL.Fidelity._countMarkers(candidate, WL.Fidelity.CONJUNCTION_MARKERS[opts.toLangCode]);
+    if(conjS!==null && conjC!==null && conjC>conjS){ risk+=3; signals.push('new-conjunction-joins-unmatched-content'); }
+  }
+  return { risk:risk, signals:signals, reject: risk >= (WL.Config.fidelityRiskRejectThreshold||3) };
+};
+
+/* ── Layer D: back-translation cross-check. Built and independently
+   callable, but NOT invoked automatically by evaluate() below --
+   doing so would double every provider call's latency/cost for
+   every message sent, in a real-time chat product, and that specific
+   tradeoff has not been exercised against a live provider from this
+   sandbox (no network access). Disabled by default; a caller that
+   has already obtained a back-translation (by calling the normal
+   provider functions again, source-language-as-target) can pass it
+   through this for a second opinion. */
+WL.Config.fidelityBackTranslationEnabled = false;
+WL.Fidelity.evaluateBackTranslation=function(originalSource,backTranslatedText){
+  var a=WL.Fidelity._layerB(originalSource,backTranslatedText);
+  var c=WL.Fidelity._layerC(originalSource,backTranslatedText,a.structSource,a.structCandidate,{});
+  return { consistent: a.ok && !c.reject, structuralLoss:a.lost, riskSignals:c.signals };
+};
+
+/* ── Observability (dev-only). Capped in-memory ring buffer, never
+   shown to end users -- console.debug + WL.Fidelity.log for manual
+   inspection. No fabricated confidence numbers: providerScore is
+   only present when a provider actually returned one (MyMemory);
+   Google and the risk score are reported as what they are (a raw
+   score or a heuristic count), never dressed up as a probability. */
+WL.Fidelity.log=[];
+WL.Fidelity._record=function(entry){
+  WL.Fidelity.log.push(entry);
+  if(WL.Fidelity.log.length>200) WL.Fidelity.log.shift();
+  if(typeof console!=='undefined' && console.debug) console.debug('[Fidelity]',entry.decision,entry.reason,entry);
+};
+
+/* ── Main entry point. opts: {providerName:'M'|'G', providerScore,
+   fromLangCode, toLangCode, requireChanged}. fromLangCode/toLangCode
+   are the bare (baseLangCode'd) codes -- used only to look up the
+   small marker tables above; absent/unknown codes just skip those
+   two Layer C signals rather than guessing. */
+WL.Fidelity.evaluate=function(source,candidate,opts){
+  opts=opts||{};
+  var a=WL.Fidelity._layerA(source,candidate,opts);
+  if(!a.ok){ var rA={accept:false,reasonCode:a.reason,layer:'A',signals:[]}; WL.Fidelity._record({decision:'reject',reason:a.reason,layer:'A',provider:opts.providerName,source:source,candidate:candidate}); return rA; }
+  var b=WL.Fidelity._layerB(source,candidate);
+  if(!b.ok){ var rB={accept:false,reasonCode:WL.Fidelity.REASON.STRUCTURAL_LOSS,layer:'B',signals:b.lost}; WL.Fidelity._record({decision:'reject',reason:'structural:'+b.lost.join(','),layer:'B',provider:opts.providerName,source:source,candidate:candidate}); return rB; }
+  var c=WL.Fidelity._layerC(source,candidate,b.structSource,b.structCandidate,opts);
+  if(c.reject){ var rC={accept:false,reasonCode:WL.Fidelity.REASON.EXPANSION_RISK,layer:'C',signals:c.signals,risk:c.risk}; WL.Fidelity._record({decision:'reject',reason:'risk:'+c.signals.join(','),layer:'C',provider:opts.providerName,source:source,candidate:candidate,risk:c.risk}); return rC; }
+  var accepted={accept:true,reasonCode:WL.Fidelity.REASON.ACCEPTED,layer:null,signals:c.signals,risk:c.risk};
+  WL.Fidelity._record({decision:'accept',reason:'ok',provider:opts.providerName,source:source,candidate:candidate,risk:c.risk});
+  return accepted;
+};
+
 /* ── CANONICAL LANGUAGE REGISTRY — 75 languages ───────────────
    Verified against MyMemory's own documented language-code list and
    Google Translate's supported-language list (both fetched directly,
@@ -4172,6 +4311,15 @@ WL.Utils.baseLangCode = function(code){
   if(code==='zh-CN'||code==='zh-TW') return code;
   return code.split('-')[0];
 };
+/* Reverse lookup for bare codes (what Demo's selects actually store,
+   via baseLangCode above) -- WL.Languages.byCode is keyed by the full
+   code ('fr-FR'), so a bare 'fr' would miss there. Built once, right
+   after baseLangCode exists (the registry IIFE runs before this and
+   can't call it yet). */
+WL.Languages.byBaseCode = {};
+WL.Languages.list.forEach(function(e){
+  WL.Languages.byBaseCode[WL.Utils.baseLangCode(e.code)] = e;
+});
 
 /* ── SELECTOR GENERATION — one registry, one mapping, every selector ──
    Fixes the six hand-written <select> lists (Demo source/target, Solo
@@ -4229,9 +4377,88 @@ WL.Languages.populateSelectors = function(){
     if(!el) return;
     el.innerHTML = WL.Languages.buildOptionsHTML(s[1], s[2]);
     el.value = s[3];
+    if(window.WL && WL.LangPicker && WL.LangPicker.refreshTrigger) WL.LangPicker.refreshTrigger(s[0]);
   });
 };
 WL.Languages.populateSelectors();
+
+/* ── LANGUAGE PICKER ────────────────────────────────────────────
+   One shared custom picker for every language selector. Renders
+   directly from WL.Languages.tier1/.list (same source, same order
+   populateSelectors used) -- never a second registry. The target
+   <select> stays the real state holder: choosing a row sets its
+   .value and dispatches a genuine 'change' event, so every existing
+   onchange handler (Demo's retranslate, Solo's onFromChange/
+   onToChange, Settings' savePref/updateGenderRowHint) fires exactly
+   as it would from native interaction. Nothing downstream needed to
+   change. */
+WL.LangPicker = {
+  _targetId:null, _valueFormat:'name', _includeAuto:false,
+  _valueOf:function(entry){
+    return this._valueFormat==='code' ? WL.Utils.baseLangCode(entry.code) : entry.name;
+  },
+  open:function(selectId, valueFormat, includeAuto, title){
+    this._targetId=selectId;
+    this._valueFormat=valueFormat||'name';
+    this._includeAuto=!!includeAuto;
+    var sel=document.getElementById(selectId);
+    var currentValue=sel?sel.value:null;
+    document.getElementById('langpick-title').textContent=title||'SELECT LANGUAGE';
+    this._render(currentValue);
+    document.getElementById('langpick-bd').classList.add('visible');
+    document.getElementById('langpick-sheet').classList.add('visible');
+  },
+  close:function(){
+    document.getElementById('langpick-bd').classList.remove('visible');
+    document.getElementById('langpick-sheet').classList.remove('visible');
+  },
+  _render:function(currentValue){
+    var self=this, html='';
+    function esc(s){return String(s).replace(/'/g,"\\'");}
+    if(this._includeAuto){
+      html+='<button class="langpick-row'+(currentValue==='auto'?' selected':'')+'" onclick="WL.LangPicker.choose(\'auto\')">Auto</button>';
+    }
+    html+='<div class="langpick-group-label">★ TIER 1</div>';
+    WL.Languages.tier1.forEach(function(e){
+      var v=self._valueOf(e);
+      html+='<button class="langpick-row'+(v===currentValue?' selected':'')+'" onclick="WL.LangPicker.choose(\''+esc(v)+'\')">'+e.name+'</button>';
+    });
+    html+='<div class="langpick-group-label">TIER 2</div>';
+    WL.Languages.list.forEach(function(e){
+      if(e.tier!==2)return;
+      var v=self._valueOf(e);
+      html+='<button class="langpick-row'+(v===currentValue?' selected':'')+'" onclick="WL.LangPicker.choose(\''+esc(v)+'\')">'+e.name+'</button>';
+    });
+    document.getElementById('langpick-body').innerHTML=html;
+  },
+  choose:function(value){
+    var sel=document.getElementById(this._targetId);
+    if(sel){
+      sel.value=value;
+      sel.dispatchEvent(new Event('change'));
+    }
+    WL.LangPicker.refreshTrigger(this._targetId);
+    this.close();
+  },
+  /* Demo/Settings triggers show their own text (no separate label
+     element like Solo has), so it must be explicitly refreshed
+     wherever the underlying select's value changes programmatically:
+     initial population, swap, Settings' onEnter restoration, and
+     here after a picker choice. Solo doesn't need this call -- its
+     onFromChange/onToChange already update .solo-lang-label from the
+     same 'change' event. */
+  refreshTrigger:function(selectId){
+    var sel=document.getElementById(selectId);
+    var textEl=document.getElementById(selectId+'-trigger-text');
+    if(!sel||!textEl)return;
+    var triggerEl=document.getElementById(selectId+'-trigger');
+    var format=triggerEl?triggerEl.dataset.format:'name';
+    var v=sel.value;
+    if(v==='auto'){ textEl.textContent='Auto'; return; }
+    var entry = format==='code' ? WL.Languages.byBaseCode[v] : WL.Languages.byName[v];
+    textEl.textContent = entry ? entry.name : v;
+  }
+};
 
 /* ── BOOT — Phase 2: the real Supabase session/profile is now the
    source of truth for identity, not localStorage. Sync defaults are
@@ -4351,6 +4578,7 @@ WL.Router = {
   current: null,
 
   go: function(screenName){
+    var t0 = (window.performance && performance.mark) ? performance.mark('wl-nav-start-'+screenName) : null;
     var prev = this.current;
     if(prev && WL.Components[prev] && WL.Components[prev].onExit){
       try { WL.Components[prev].onExit(); } catch(e){}
@@ -4362,8 +4590,26 @@ WL.Router = {
     var target = document.getElementById('screen-' + screenName);
     if(target){
       target.style.display = 'block';
-      target.offsetHeight; // force reflow so the opacity transition actually runs
-      target.classList.add('wl-screen-in');
+      // Previously forced a synchronous reflow here (reading
+      // target.offsetHeight) purely so the browser would register
+      // display:block as a rendered frame before wl-screen-in's
+      // opacity transition class was added -- otherwise the two style
+      // changes can get batched into one frame and the transition
+      // never visibly runs. requestAnimationFrame achieves the same
+      // "let display:block paint first" ordering without forcing
+      // layout synchronously on the main thread.
+      requestAnimationFrame(function(){
+        target.classList.add('wl-screen-in');
+        if(window.performance && performance.mark){
+          performance.mark('wl-nav-visible-'+screenName);
+          try{
+            performance.measure('wl-screen-navigation:'+screenName, 'wl-nav-start-'+screenName, 'wl-nav-visible-'+screenName);
+            var entries = performance.getEntriesByName('wl-screen-navigation:'+screenName);
+            var last = entries[entries.length-1];
+            if(last) console.debug('[WL nav]', screenName, Math.round(last.duration)+'ms');
+          }catch(e){}
+        }
+      });
     }
     this.current = screenName;
     if(WL.Components[screenName] && WL.Components[screenName].onEnter){
@@ -4835,7 +5081,7 @@ function handleLogin() {
   });
 
   btn.textContent = 'WELCOME, ' + name.toUpperCase();
-  setTimeout(function() { WL.Router.go('home'); }, 900);
+  WL.Router.go('home');
 }
 
 // Clear error on input
@@ -4982,6 +5228,8 @@ var Demo={
     // Don't swap if source is auto
     if(srcVal==='auto')return;
     src.value=tgtVal;tgt.value=srcVal;
+    WL.LangPicker.refreshTrigger('demo-src-lang');
+    WL.LangPicker.refreshTrigger('demo-tgt-lang');
     // Re-translate if there's text
     var text=document.getElementById('demo-input').value.trim();
     if(text) this._translate(text);
@@ -5031,7 +5279,9 @@ var Demo={
         var hasMatch=d&&d.responseData&&typeof d.responseData.match==='number';
         var match=hasMatch?d.responseData.match:0.75;
         var out=d&&d.responseData&&d.responseData.translatedText;
-        if(d&&d.responseStatus===200&&out&&out.toLowerCase()!==text.toLowerCase()&&match>=WL.Config.myMemoryMatchThreshold&&txExpansionOk(text,out)){
+        var apiOk=d&&d.responseStatus===200&&out;
+        var verdict=apiOk?WL.Fidelity.evaluate(text,out,{providerName:'M',providerScore:match,fromLangCode:src,toLangCode:tgt}):{accept:false};
+        if(verdict.accept){
           onOk(out);
         } else { Demo._fetchGoogle(text,src,tgt,onOk,onErr); }
       }).catch(function(){ Demo._fetchGoogle(text,src,tgt,onOk,onErr); });
@@ -5046,7 +5296,10 @@ var Demo={
     fetch(url).then(function(r){return r.json();})
     .then(function(d){
       var r='';if(d&&d[0])d[0].forEach(function(p){if(p&&p[0])r+=p[0];});
-      r.trim()?onOk(r.trim()):onErr('empty');
+      r=r.trim();
+      if(!r){ onErr('empty'); return; }
+      var verdict=WL.Fidelity.evaluate(text,r,{providerName:'G',fromLangCode:src,toLangCode:tgt});
+      verdict.accept ? onOk(r) : onErr('fidelity:'+verdict.reasonCode);
     }).catch(function(){onErr('net');});
   },
 
@@ -5097,19 +5350,17 @@ var Demo={
     var btn=document.getElementById('demo-go-btn');
     btn.textContent='ENTERING...';
     btn.style.pointerEvents='none';btn.style.opacity='0.75';
+    if(window.WL){WL.Router.go('auth');}
     setTimeout(function(){
-      showToast('NAVIGATING TO HOME...');if(window.WL){WL.Router.go('auth');}
-      setTimeout(function(){
-        // Reset for re-testing
-        btn.textContent='LET\'S GO →';
-        btn.style.pointerEvents='';btn.style.opacity='';
-        Demo._firstDone=false;Demo._busy=false;
-        Demo.clearInput();
-        document.getElementById('demo-magic').classList.remove('visible');
-        document.getElementById('demo-go-btn').classList.remove('visible');
-        document.getElementById('demo-status-text').textContent='READY';
-      },1200);
-    },300);
+      // Reset for re-testing
+      btn.textContent='LET\'S GO →';
+      btn.style.pointerEvents='';btn.style.opacity='';
+      Demo._firstDone=false;Demo._busy=false;
+      Demo.clearInput();
+      document.getElementById('demo-magic').classList.remove('visible');
+      document.getElementById('demo-go-btn').classList.remove('visible');
+      document.getElementById('demo-status-text').textContent='READY';
+    },1200);
   }
 };
 
@@ -5337,7 +5588,6 @@ setTimeout(function(){
 try {
 /* ══════ SOLO SCRIPT ══════ */
 var MockProfile = {name:'', lang:'English', industry:'General'};
-var PHRASES={General:['Hello, how are you?','Where is the exit?','I need help','Thank you','Please repeat that',"I don't understand"],Healthcare:['Where does it hurt?','Are you allergic to anything?','I need a doctor','Take this medication','How long have you felt this way?','Emergency — call ambulance'],Aviation:['Clear for takeoff','Confirm your position','Weather conditions ahead','Emergency protocol active','Maintenance required','Stand by for instructions'],Industrial:['Stop the machine','Safety equipment required','Report to supervisor','Evacuation in progress','Equipment malfunction','Secure the area'],Education:['Please open your book','Do you understand?','Repeat after me','Good work','Please be quiet','Come to the front'],Legal:['You have the right to remain silent','Sign here please','This is a legal document','Do you understand the charges?','Your attorney will be present','This is confidential']};
 var LANG_CODES = WL.Languages.byName_code; // canonical registry
 var SOLO_RTL_REG=/[\u0600-\u06FF\u0750-\u077F\u0590-\u05FF]/;
 var STORAGE_KEY='wl_solo_messages_v1';
@@ -5363,14 +5613,17 @@ var _soloNewMsgCount=0;
 function scrollToBottom(){var m=document.getElementById('solo-messages');setTimeout(function(){m.scrollTop=m.scrollHeight;},50);_soloNewMsgCount=0;var b=document.getElementById('solo-scroll-down-btn');if(b)b.classList.remove('visible');}
 function soloSmartScroll(){if(soloIsAtBottom()){scrollToBottom();}else if(soloIsAtThreshold()){_soloNewMsgCount++;var b=document.getElementById('solo-scroll-down-btn');if(b){b.textContent='↓ '+_soloNewMsgCount+' NEW';b.classList.add('visible');}}}
 var _soloTxCache={};
-function _soloTxGoogle(text,from,to,ok,err){var url='https://translate.googleapis.com/translate_a/single?client=gtx&sl='+WL.Utils.baseLangCode(LANG_CODES[from])+'&tl='+WL.Utils.baseLangCode(LANG_CODES[to])+'&dt=t&q='+encodeURIComponent(text);fetch(url).then(function(r){return r.json();}).then(function(d){var r='';if(d&&d[0])d[0].forEach(function(p){if(p&&p[0])r+=p[0];});r.trim()?ok(r.trim(),null,'G'):err();}).catch(function(){err();});}
+function _soloTxGoogle(text,from,to,ok,err){var fc=WL.Utils.baseLangCode(LANG_CODES[from]);var tc=WL.Utils.baseLangCode(LANG_CODES[to]);var url='https://translate.googleapis.com/translate_a/single?client=gtx&sl='+fc+'&tl='+tc+'&dt=t&q='+encodeURIComponent(text);fetch(url).then(function(r){return r.json();}).then(function(d){var r='';if(d&&d[0])d[0].forEach(function(p){if(p&&p[0])r+=p[0];});r=r.trim();if(!r){err();return;}var verdict=WL.Fidelity.evaluate(text,r,{providerName:'G',fromLangCode:fc,toLangCode:tc});verdict.accept?ok(r,null,'G'):err();}).catch(function(){err();});}
 function _soloTxMyMemory(text,from,to,ok,err){
+  var fc=WL.Utils.baseLangCode(LANG_CODES[from]), tc=WL.Utils.baseLangCode(LANG_CODES[to]);
   var url='https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair='+LANG_CODES[from]+'|'+LANG_CODES[to]+'&de='+encodeURIComponent(WL.Config.myMemoryEmail);
   fetch(url).then(function(r){return r.json();}).then(function(d){
     var hasMatch=d&&d.responseData&&typeof d.responseData.match==='number';
     var match=hasMatch?d.responseData.match:0.75;
     var out=d&&d.responseData&&d.responseData.translatedText;
-    if(d&&d.responseStatus===200&&out&&out.toLowerCase()!==text.toLowerCase()&&match>=WL.Config.myMemoryMatchThreshold&&txExpansionOk(text,out)){
+    var apiOk=d&&d.responseStatus===200&&out;
+    var verdict=apiOk?WL.Fidelity.evaluate(text,out,{providerName:'M',providerScore:match,fromLangCode:fc,toLangCode:tc}):{accept:false};
+    if(verdict.accept){
       var conf=Math.min(99,Math.round(match*100));
       ok(out,conf,'M');
     }else{err();}
@@ -5379,6 +5632,10 @@ function _soloTxMyMemory(text,from,to,ok,err){
 function fetchTx(text,from,to,ok,err){
   /* Track A trust fix — mirrors tx()'s guard. See tx() for full reasoning. */
   if(!LANG_CODES[from] || !LANG_CODES[to]){ if(err) err(); return; }
+  /* Same-language fix: see tx() for full reasoning. Checked first --
+     if the pair matches, nothing else here (dictionary, cache,
+     providers) needs to run. */
+  if(LANG_CODES[from]===LANG_CODES[to]){ ok(text,100,'S'); return; }
   var tgt=WL.Utils.baseLangCode(LANG_CODES[to]);
   /* _ld is Chat's local phrase dictionary — shared here rather than
      duplicated. Safe: this only runs on a user action, well after
@@ -5390,10 +5647,22 @@ function fetchTx(text,from,to,ok,err){
   if(_soloTxCache[key]){ok(_soloTxCache[key].t,_soloTxCache[key].c,_soloTxCache[key].s);return;}
   _soloTxMyMemory(text,from,to,function(r,c,s){_soloTxCache[key]={t:r,c:c,s:s};ok(r,c,s);},function(){_soloTxGoogle(text,from,to,function(r,c,s){_soloTxCache[key]={t:r,c:c,s:s};ok(r,c,s);},function(){if(err)err();});});
 }
-function speakText(text,lang){if(!window.speechSynthesis)return;var u=new SpeechSynthesisUtterance(text);u.lang=LANG_CODES[lang]||'en';u.rate=0.88;u.volume=1;window.speechSynthesis.cancel();window.speechSynthesis.speak(u);}
+function speakText(text,lang){
+  if(!window.speechSynthesis)return;
+  var u=new SpeechSynthesisUtterance(text);
+  u.lang=LANG_CODES[lang]||'en';
+  var speedPref=(typeof _prefs!=='undefined'&&_prefs.ttsSpeed!==undefined)?String(_prefs.ttsSpeed):'1';
+  u.rate={'0':0.72,'1':0.88,'2':1.08}[speedPref]||0.88;
+  u.volume=1;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(u);
+}
 function soloRenderRight(text,ts){var msgs=document.getElementById('solo-messages');var emp=document.getElementById('solo-empty-state');if(emp)emp.style.display='none';var pair=document.createElement('div');pair.className='msg-pair';pair.innerHTML='<div class="bubble-right-wrap"><div class="bubble-right" data-text="'+escHtml(text)+'"><div class="bubble-right-text">'+escHtml(text)+'</div><div class="bubble-right-meta"><span class="bubble-time">'+fmtTime(ts)+'</span></div></div></div><div class="bubble-left-wrap" id="blw-'+ts+'"></div>';msgs.appendChild(pair);var rb=pair.querySelector('.bubble-right');rb.addEventListener('click',function(){copyText(text);});soloSmartScroll();return pair;}
 function soloRenderLeft(pair,translation,ts,offline,confScore,confSrc){var conf=confScore||0;var src=confSrc||'M';var cls=offline?'conf-medium':(src==='G'?'conf-high':confClass(conf));var icon=offline?'⚠':(src==='G'?'✓':confIcon(conf));var score=offline?'offline':(src==='G'?src:(conf+'% '+src));var wrap=pair.querySelector('.bubble-left-wrap');if(!wrap)return;wrap.innerHTML='<div class="bubble-left'+(offline?' offline':'')+'"><div class="bubble-left-text">'+escHtml(translation)+'</div><div class="bubble-left-meta"><span class="conf-badge '+cls+'">'+icon+' '+score+'</span><span class="bubble-left-time">'+fmtTime(ts)+'</span></div></div>';wrap.classList.add('visible');var bl=wrap.querySelector('.bubble-left');bl.addEventListener('click',function(){copyText(translation);});var lpt;bl.addEventListener('touchstart',function(){lpt=setTimeout(function(){speakText(translation,SoloApp._toLang);showToast('SPEAKING...');},600);});bl.addEventListener('touchend',function(){clearTimeout(lpt);});soloSmartScroll();}
-function saveMsg(text,translation,ts,offline,conf,src){try{var s=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');s.push({text:text,translation:translation,ts:ts,offline:!!offline,conf:conf,src:src});if(s.length>100)s=s.slice(-100);localStorage.setItem(STORAGE_KEY,JSON.stringify(s));}catch(e){}}
+function saveMsg(text,translation,ts,offline,conf,src){
+  if(typeof _prefs!=='undefined' && _prefs.saveHistory===false) return;
+  try{var s=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');s.push({text:text,translation:translation,ts:ts,offline:!!offline,conf:conf,src:src});if(s.length>100)s=s.slice(-100);localStorage.setItem(STORAGE_KEY,JSON.stringify(s));}catch(e){}
+}
 function loadHistory(){try{var s=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');if(!s.length)return;s.forEach(function(m){var pair=soloRenderRight(m.text,m.ts);soloRenderLeft(pair,m.translation,m.ts,m.offline,m.conf,m.src);});}catch(e){}}
 var SoloApp={
   _fromLang:'English',_toLang:'Arabic',_listening:false,_rec:null,_earpod:false,_invTimer:null,_invSecs:0,
@@ -5410,10 +5679,9 @@ var SoloApp={
     // UI was actually showing as selected.
     this._fromLang=document.getElementById('solo-from-select').value;
     this._toLang=document.getElementById('solo-to-select').value;
-    var p=PHRASES[MockProfile.industry]||PHRASES.General;
-    var wrap=document.getElementById('solo-phrases');
-    var html='';p.forEach(function(ph){html+='<button class="phrase-chip" onclick="SoloApp.sendPhrase(\''+ph.replace(/'/g,"\\'")+'\'">'+ph+'</button>';});
-    wrap.innerHTML=html;
+    if(typeof _prefs!=='undefined' && _prefs.invisibleDefault && !this._earpod){
+      this.toggleEarpod(true);
+    }
     document.getElementById('solo-industry-label').textContent=MockProfile.industry.toUpperCase()+' MODE';
     document.getElementById('empty-title').textContent='SOLO SESSION · '+MockProfile.industry.toUpperCase();
     document.getElementById('empty-sub').textContent='Type or speak in '+MockProfile.lang+'.\nTranslation appears instantly.';
@@ -5491,7 +5759,6 @@ var SoloApp={
     });
   },
   send:function(){var inp=document.getElementById('solo-chat-input');var text=inp.value.trim();if(!text)return;inp.value='';document.getElementById('dock-send-btn').classList.remove('enabled');inp.style.direction='ltr';this._sendText(text);},
-  sendPhrase:function(p){try{navigator.vibrate([20]);}catch(e){}this._sendText(p);},
   _sendText:function(text){var ts=Date.now();var pair=soloRenderRight(text,ts);try{navigator.vibrate([20]);}catch(e){}var self=this;setTimeout(function(){if(!navigator.onLine){soloRenderLeft(pair,text,ts,true,0,'✕');saveMsg(text,text,ts,true);showToast('OFFLINE · SHOWING ORIGINAL');return;}fetchTx(text,self._fromLang,self._toLang,function(result,conf,src){soloRenderLeft(pair,result,ts,false,conf,src);saveMsg(text,result,ts,false,conf,src);if(self._earpod)speakText(result,self._toLang);},function(){soloRenderLeft(pair,text,ts,true,0,'✕');saveMsg(text,text,ts,true);showToast('TRANSLATION FAILED');});},600);},
   onFromChange:function(){this._fromLang=document.getElementById('solo-from-select').value;document.getElementById('solo-from-label').textContent=this._fromLang;this.updateGenderHint();},
   onToChange:function(){this._toLang=document.getElementById('solo-to-select').value;document.getElementById('solo-to-label').textContent=this._toLang;this.updateGenderHint();},
@@ -5499,8 +5766,8 @@ var SoloApp={
   toggleMic:function(){this._listening?this._stopMic():this._startMic();},
   _startMic:function(){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){showToast('SPEECH NOT AVAILABLE');return;}this._listening=true;document.getElementById('dock-mic-btn').classList.add('listening');var rec=new SR();rec.lang=LANG_CODES[this._fromLang]||'en-US';rec.interimResults=false;var self=this;var settled=false;var micErrMsg={'not-allowed':'MIC PERMISSION DENIED','service-not-allowed':'MIC PERMISSION DENIED','audio-capture':'NO MICROPHONE FOUND','network':'MIC NEEDS NETWORK CONNECTION','no-speech':'DIDN\'T CATCH THAT — TRY AGAIN','aborted':null};rec.onstart=function(){settled=true;};rec.onresult=function(e){settled=true;var t=e.results[0][0].transcript;SoloApp._stopMic();SoloApp._sendText(t);};rec.onerror=function(e){settled=true;SoloApp._stopMic();var msg=(e.error in micErrMsg)?micErrMsg[e.error]:('MIC ERROR: '+e.error).toUpperCase();if(msg)showToast(msg);};rec.onend=function(){settled=true;SoloApp._stopMic();};try{rec.start();this._rec=rec;setTimeout(function(){if(!settled&&self._listening){self._stopMic();showToast('MIC UNAVAILABLE');}},8000);}catch(e){this._stopMic();showToast('MIC UNAVAILABLE');}},
   _stopMic:function(){this._listening=false;document.getElementById('dock-mic-btn').classList.remove('listening');if(this._rec){try{this._rec.stop();}catch(e){}this._rec=null;}},
-  toggleEarpod:function(){this._earpod=!this._earpod;document.getElementById('solo-ep-btn').classList.toggle('active',this._earpod);var ind=document.getElementById('invisible-indicator');if(this._earpod){ind.classList.add('active');this._invSecs=0;var self=this;this._invTimer=setInterval(function(){self._invSecs++;var m=String(Math.floor(self._invSecs/60)).padStart(2,'0');var s=String(self._invSecs%60).padStart(2,'0');document.getElementById('solo-inv-timer').textContent=m+':'+s;},1000);showToast('EARPOD MODE · AUTO-SPEAK ON');}else{ind.classList.remove('active');clearInterval(this._invTimer);this._invSecs=0;document.getElementById('solo-inv-timer').textContent='00:00';window.speechSynthesis&&window.speechSynthesis.cancel();showToast('EARPOD MODE OFF');}},
-  goBack:function(){showToast('RETURNING TO HOME...');WL.Router.go('home');},
+  toggleEarpod:function(silent){this._earpod=!this._earpod;document.getElementById('solo-ep-btn').classList.toggle('active',this._earpod);var ind=document.getElementById('invisible-indicator');if(this._earpod){ind.classList.add('active');this._invSecs=0;var self=this;this._invTimer=setInterval(function(){self._invSecs++;var m=String(Math.floor(self._invSecs/60)).padStart(2,'0');var s=String(self._invSecs%60).padStart(2,'0');document.getElementById('solo-inv-timer').textContent=m+':'+s;},1000);if(!silent)showToast('EARPOD MODE · AUTO-SPEAK ON');}else{ind.classList.remove('active');clearInterval(this._invTimer);this._invSecs=0;document.getElementById('solo-inv-timer').textContent='00:00';window.speechSynthesis&&window.speechSynthesis.cancel();if(!silent)showToast('EARPOD MODE OFF');}},
+  goBack:function(){WL.Router.go('home');},
   scrollToLatest:function(){scrollToBottom();}
 };
 WL.Components.solo = { onEnter:function(){ MockProfile.name=WL.State.user.name; MockProfile.lang=WL.State.user.lang; MockProfile.industry=WL.State.user.ind; SoloApp.init(); }, onExit:function(){ window.speechSynthesis && window.speechSynthesis.cancel(); } };
@@ -5528,7 +5795,16 @@ function cc(s){return s>=85?'conf-high':s>=65?'conf-medium':'conf-low';}
 function ci(s){return s>=85?'✓':s>=65?'⚠':'!';}
 // hap: provided globally by WL.Utils
 // cp: provided globally by WL.Utils
-function spk(t,l){if(!window.speechSynthesis)return;var u=new SpeechSynthesisUtterance(t);u.lang=LC[l]||'en';u.rate=0.88;u.volume=1;window.speechSynthesis.cancel();window.speechSynthesis.speak(u);}
+function spk(t,l){
+  if(!window.speechSynthesis)return;
+  var u=new SpeechSynthesisUtterance(t);
+  u.lang=LC[l]||'en';
+  var speedPref=(typeof _prefs!=='undefined'&&_prefs.ttsSpeed!==undefined)?String(_prefs.ttsSpeed):'1';
+  u.rate={'0':0.72,'1':0.88,'2':1.08}[speedPref]||0.88;
+  u.volume=1;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(u);
+}
 function isAtBottom(){var m=document.getElementById("chat-messages");return m.scrollHeight-m.scrollTop-m.clientHeight<200;}
 var _newMsgCount=0;
 function isAtThreshold(){var m=document.getElementById("chat-messages");return m.scrollHeight-m.scrollTop-m.clientHeight>(m.clientHeight*1.5);}
@@ -5562,12 +5838,15 @@ function _ldLookup(text){
 function _txLocal(text,to,ok,err){var tgt=WL.Utils.baseLangCode(LC[to]);var hit=_ldLookup(text);if(hit&&hit[tgt]){ok(hit[tgt],100,'★');}else{err();}}
 
 function _txMyMemory(text,from,to,ok,err){
+  var fc=WL.Utils.baseLangCode(LC[from]), tc=WL.Utils.baseLangCode(LC[to]);
   var url='https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair='+LC[from]+'|'+LC[to]+'&de='+encodeURIComponent(WL.Config.myMemoryEmail);
   fetch(url).then(function(r){return r.json();}).then(function(d){
     var hasMatch=d&&d.responseData&&typeof d.responseData.match==='number';
     var match=hasMatch?d.responseData.match:0.75;
     var out=d&&d.responseData&&d.responseData.translatedText;
-    if(d&&d.responseStatus===200&&out&&out.toLowerCase()!==text.toLowerCase()&&match>=WL.Config.myMemoryMatchThreshold&&txExpansionOk(text,out)){
+    var apiOk=d&&d.responseStatus===200&&out;
+    var verdict=apiOk?WL.Fidelity.evaluate(text,out,{providerName:'M',providerScore:match,fromLangCode:fc,toLangCode:tc}):{accept:false};
+    if(verdict.accept){
       var conf=Math.min(99,Math.round(match*100));
       ok(out,conf,'M');
     }else{err();}
@@ -5575,10 +5854,14 @@ function _txMyMemory(text,from,to,ok,err){
 }
 
 function _txGoogle(text,from,to,ok,err){
-  var url='https://translate.googleapis.com/translate_a/single?client=gtx&sl='+WL.Utils.baseLangCode(LC[from])+'&tl='+WL.Utils.baseLangCode(LC[to])+'&dt=t&q='+encodeURIComponent(text);
+  var fc=WL.Utils.baseLangCode(LC[from]), tc=WL.Utils.baseLangCode(LC[to]);
+  var url='https://translate.googleapis.com/translate_a/single?client=gtx&sl='+fc+'&tl='+tc+'&dt=t&q='+encodeURIComponent(text);
   fetch(url).then(function(r){return r.json();}).then(function(d){
     var r='';if(d&&d[0])d[0].forEach(function(p){if(p&&p[0])r+=p[0];});
-    r.trim()?ok(r.trim(),null,'G'):err();
+    r=r.trim();
+    if(!r){ err(); return; }
+    var verdict=WL.Fidelity.evaluate(text,r,{providerName:'G',fromLangCode:fc,toLangCode:tc});
+    verdict.accept?ok(r,null,'G'):err();
   }).catch(function(){err();});
 }
 
@@ -5591,6 +5874,15 @@ function tx(text,from,to,ok,err){
      with no error. Fail honestly instead, through the same TRANSLATION
      FAILED path used for any other provider failure. */
   if(!LC[from] || !LC[to]){ if(err) err(); return; }
+  /* Same-language fix: compare resolved codes, not raw names, so this
+     also catches the case where two different display names resolve to
+     the same underlying code. Skips the whole provider cascade -- there
+     is genuinely nothing to translate, and this must never be routed
+     through WL.Fidelity's UNCHANGED check, which exists to catch a
+     provider that failed to translate, not a pair that never needed
+     translating in the first place. 'S' marks this honestly as its own
+     case, distinct from M/G/★, with a real ✓ (this always succeeds). */
+  if(LC[from]===LC[to]){ ok(text,100,'S'); return; }
   var key=LC[from]+'|'+LC[to]+'|'+text;
   if(_txCache[key]){ok(_txCache[key].t,_txCache[key].c,_txCache[key].s);return;}
   _txLocal(text,to,
@@ -5762,6 +6054,11 @@ var Chat={
     var cn=document.getElementById('chat-name'); if(cn) cn.textContent=sessionName;
     document.getElementById('your-lang-val').textContent=U.lang;
     document.getElementById('chat-ind').textContent=U.ind.toUpperCase();
+    var vms=document.getElementById('voice-mode-sel');
+    if(vms) vms.value=(typeof _prefs!=='undefined'&&_prefs.autoSend)?'auto':'confirm';
+    if(typeof _prefs!=='undefined' && _prefs.invisibleDefault && !this._earpod){
+      this.toggleEarpod(true);
+    }
     this._active=false;
     var self=this;
     WL.loadParticipants(function(err){
@@ -6057,7 +6354,7 @@ var Chat={
       .catch(function(err){ console.error('[WL] onRealtimeMessage sender lookup failed:', err); withSender(null); });
   },
 
-  toggleEarpod:function(){
+  toggleEarpod:function(silent){
     this._earpod=!this._earpod;
     document.getElementById('ep-btn').classList.toggle('active',this._earpod);
     document.getElementById('chip-ep').classList.toggle('hidden',!this._earpod);
@@ -6070,14 +6367,14 @@ var Chat={
       this._invSecs=0;
       var self=this;
       this._invT=setInterval(function(){self._invSecs++;document.getElementById('inv-timer').textContent=fmtD(self._invSecs);},1000);
-      showToast('EARPOD MODE ON · NOISEGUARD ACTIVE');
+      if(!silent)showToast('EARPOD MODE ON · NOISEGUARD ACTIVE');
     }else{
       // NoiseGuard can stay on even if Earpod mode is off
       ind.classList.remove('active');
       clearInterval(this._invT);this._invSecs=0;
       document.getElementById('inv-timer').textContent='00:00';
       window.speechSynthesis&&window.speechSynthesis.cancel();
-      showToast('EARPOD MODE OFF');
+      if(!silent)showToast('EARPOD MODE OFF');
     }
   },
 
@@ -6136,19 +6433,6 @@ var Chat={
     if(this._rec){try{this._rec.stop();}catch(e){}this._rec=null;}
   },
 
-  sendEmg:function(phrase){
-    this.closeEmg();
-    hap([100,50,100,50,100]);
-    this._doSend(phrase,true);
-    if(window.speechSynthesis){var u=new SpeechSynthesisUtterance(phrase);u.rate=0.85;u.volume=1;window.speechSynthesis.speak(u);}
-  },
-
-  toggleEmg:function(){
-    var p=document.getElementById('emg-panel'),b=document.getElementById('emg-bd'),btn=document.getElementById('emg-btn');
-    var o=p.classList.toggle('visible');b.classList.toggle('visible',o);btn.classList.toggle('open',o);
-  },
-  closeEmg:function(){document.getElementById('emg-panel').classList.remove('visible');document.getElementById('emg-bd').classList.remove('visible');document.getElementById('emg-btn').classList.remove('open');},
-
   promptLeave:function(){document.getElementById('leave-sheet').classList.add('visible');document.getElementById('leave-bd').classList.add('visible');},
   closeLeave:function(){document.getElementById('leave-sheet').classList.remove('visible');document.getElementById('leave-bd').classList.remove('visible');},
   confirmLeave:function(){
@@ -6162,7 +6446,6 @@ var Chat={
       });
     }
     if(window.WL){ WL.Session.id=null; WL.Session.dbId=null; WL.Session.status='inactive'; WL._participants=[]; }
-    showToast('LEFT SESSION · RETURNING HOME...');
     WL.Router.go('home');
   },
 
@@ -6246,8 +6529,8 @@ function renderList(){
 function buildCard(p){
   var langCode=(p.lang||'??').substring(0,2).toUpperCase();
   return '<div class="ppl-card" id="card-'+pplDomKey(p)+'">'
-    +'<div class="ppl-card-inner" onclick="Ppl.openProfile(\''+p.id+'\')" style="display:flex;align-items:center;gap:12px;flex:1;">'
-    +buildAvRing(p,46)
+    +'<div class="ppl-card-inner" onclick="Ppl.openProfile(\''+p.id+'\')" style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;">'
+    +buildAvRing(p,52)
     +'<div class="ppl-card-info">'
       +'<div class="ppl-card-name">'+pplEsc(p.name)+'</div>'
       +'<div class="ppl-card-lang"><span class="ppl-lang-pill">'+langCode+'</span><span class="ppl-lang-name">'+pplEsc(p.lang||'—')+'</span></div>'
@@ -6421,7 +6704,7 @@ var STG_DOCS={
     title:'TERMS OF SERVICE',
     html:`
       <div class="doc-pending">DRAFT — the full Terms of Service text has not been supplied to this session. This is a placeholder so the screen is real and functional rather than a "coming soon" stub. Replace with the approved document before release.</div>
-      <p>By using WhisperLink you agree to use it lawfully and not to rely on it for safety-critical or emergency communication beyond what its built-in emergency phrases are designed for.</p>
+      <p>By using WhisperLink you agree to use it lawfully and not to rely on it for safety-critical or emergency communication.</p>
       <p>WhisperLink translations are generated by third-party providers and may not be perfectly accurate. Do not rely on WhisperLink as the sole means of communication in a medical, legal, or safety-critical situation.</p>
       <h4>Contact</h4>
       <p>stellatechofficial@gmail.com</p>
@@ -6430,7 +6713,7 @@ var STG_DOCS={
 };
 
 var Stg={
-  goBack:function(){showToast('RETURNING TO HOME...');WL.Router.go('home');},
+  goBack:function(){WL.Router.go('home');},
 
   toggleSearch:function(){
     var bar=document.getElementById('stg-search-bar');
@@ -6448,22 +6731,32 @@ var Stg={
 
   savePref:function(key,val){
     _prefs[key]=val;savePrefs();
-    showToast('SAVED');
   },
   /* Phase D conditional gender UI: reflects Your Language's audited
      classification (see GENDER_CLASS near the registry). Read-only
      display logic -- never feeds a translation call (Phase E boundary:
      no provider currently accepts this, see the audit). UNVERIFIED is
-     shown as genuinely unresolved, never silently treated as NONE. */
+     shown as genuinely unresolved, never silently treated as NONE --
+     which is also why the row stays visible for UNVERIFIED: "not yet
+     confirmed" is not the same as "confirmed not needed," and hiding
+     it would silently take the option away from a language that may
+     turn out to need it. Only NONE (confirmed not needed) hides the
+     row entirely. */
   updateGenderRowHint:function(){
+    var row=document.getElementById('gender-row');
     var sub=document.getElementById('gender-row-sub');
-    if(!sub) return;
+    if(!sub||!row) return;
     var ylEl=document.getElementById('sel-your-lang');
     var yourLang=ylEl&&ylEl.value?ylEl.value:'English';
     var entry=WL.Languages.byName[yourLang];
     var cls=entry?entry.genderClass:'NONE';
     var gEl=document.getElementById('sel-gender');
     var gender=gEl?gEl.value:'unspecified';
+    if(cls==='NONE'){
+      row.style.display='none';
+      return;
+    }
+    row.style.display='';
     if(cls==='SPEAKER'||cls==='SPEAKER_AND_RECIPIENT'){
       sub.textContent = (gender==='unspecified')
         ? yourLang+' phrasing can depend on this — currently unspecified.'
@@ -6477,24 +6770,14 @@ var Stg={
     }
   },
 
-  quickToggle:function(key,btn){
-    btn.classList.toggle('on');
-    var isOn=btn.classList.contains('on');
-    if(key==='ng'){document.getElementById('tog-ng').checked=isOn;Stg.savePref('noiseGuard',isOn);}
-    if(key==='as'){document.getElementById('tog-autosend').checked=isOn;Stg.savePref('autoSend',isOn);}
-    if(key==='sh'){document.getElementById('tog-history').checked=isOn;Stg.savePref('saveHistory',isOn);}
-  },
-
-  syncQuick:function(key,val){
-    var btn=document.getElementById('quick-'+key);
-    if(btn)btn.classList.toggle('on',val);
-  },
-
-  tapAvatar:function(){showToast('PROFILE PHOTOS COMING IN V1.1');},
-
   selectIndustry:function(btn,ind){
     document.querySelectorAll('.stg-ind-pill').forEach(function(b){b.classList.remove('selected');});
     btn.classList.add('selected');
+    // WL.State.user.ind is what Solo/Chat/Home actually read for the
+    // mode label and default session name -- previously this only
+    // wrote to the unread _prefs.industry, so selecting an industry
+    // here had no visible effect anywhere. Now writes both.
+    WL.State.user.ind = ind;
     Stg.savePref('industry',ind);
   },
 
@@ -6556,8 +6839,7 @@ var Stg={
           WL._signInPromise=null;
           WL.State.onboarded=false;
         }
-        showToast('SIGNED OUT · RETURNING TO SETUP...');
-        setTimeout(function(){WL.Router.go('onboarding');},900);
+        WL.Router.go('onboarding');
       });
     }
     Stg.closeSheet();
@@ -6582,16 +6864,33 @@ document.getElementById('stg-search-input').addEventListener('input',function(){
 
 WL.Components.settings = { onEnter:function(){
   loadPrefs();
-  // Pre-existing gap found while adding the Gender field: these three
-  // selects were never synced from the saved preference on screen
-  // entry -- savePref() wrote to _prefs correctly, but nothing read it
-  // back on the next visit, so the visible selection silently reset to
-  // populateSelectors()'s default every time. Fixed for all three
-  // together rather than leaving Gender the only one that works.
+  // Pre-existing gap found while adding the Gender field: these
+  // selects/toggles were never synced from the saved preference on
+  // screen entry -- savePref() wrote to _prefs correctly, but nothing
+  // read it back on the next visit, so the visible control silently
+  // reset to its HTML default every time. Fixed for all of them
+  // together, extended as each one moved from "saved but unused" to
+  // "actually wired" this pass.
   var yl=document.getElementById('sel-your-lang'); if(yl && _prefs.yourLang) yl.value=_prefs.yourLang;
   var tl=document.getElementById('sel-target-lang'); if(tl && _prefs.targetLang) tl.value=_prefs.targetLang;
+  WL.LangPicker.refreshTrigger('sel-your-lang');
+  WL.LangPicker.refreshTrigger('sel-target-lang');
   var g=document.getElementById('sel-gender'); if(g) g.value=_prefs.gender||'unspecified';
   Stg.updateGenderRowHint();
+  var as=document.getElementById('tog-autosend'); if(as) as.checked=!!_prefs.autoSend;
+  var sp=document.getElementById('slider-speed'); if(sp && _prefs.ttsSpeed!==undefined) sp.value=_prefs.ttsSpeed;
+  var sh=document.getElementById('tog-history'); if(sh) sh.checked=(_prefs.saveHistory!==false);
+  var inv=document.getElementById('tog-invisible'); if(inv) inv.checked=!!_prefs.invisibleDefault;
+  document.querySelectorAll('.stg-ind-pill').forEach(function(b){
+    b.classList.toggle('selected', b.textContent===WL.State.user.ind);
+  });
+  // Real profile identity -- these three were hardcoded placeholder
+  // text ("Eugene Biketi"/"E") that never reflected the actual
+  // signed-in user, regardless of who was using the app.
+  var name=(WL.State.user && WL.State.user.name) ? WL.State.user.name : 'You';
+  var nameEl=document.getElementById('stg-profile-name'); if(nameEl) nameEl.textContent=name;
+  var valEl=document.getElementById('val-name'); if(valEl) valEl.textContent=name;
+  var initEl=document.getElementById('stg-av-initials'); if(initEl) initEl.textContent=(name.trim()[0]||'?').toUpperCase();
 }, onExit:function(){ savePrefs(); } };
 } catch(e) { console.error('[WL] settings script failed:', e); if(window.WL && WL.Utils && WL.Utils.toast) WL.Utils.toast('SCREEN LOAD ERROR — see console'); }
 </script>
@@ -6607,56 +6906,41 @@ try {
 
 /* ── SESSION TAXONOMY — Industry → Role → Purpose (Eugene's Path 2 spec) ── */
 var SESSION_TAXONOMY = {
-  /* Role UX simplified per feedback: a long pill list per industry felt
-     crowded. Manual text entry is now the primary path (~95% of real
-     usage) -- role is a single text field. quickRoles is a short (3-item)
-     set of tap-to-fill suggestions, not a scrollable list. The fuller
-     `roles` arrays are kept as reference taxonomy data (not rendered as
-     UI) since they're still useful groundwork for the future terminology/
-     intelligence layer this is explicitly laying context for. Purposes
-     stay industry-level and optional, unchanged from last round. */
+  /* Role UX simplified: a pill list / quick-fill suggestions / purpose
+     step all felt like too many concepts for what is now a single
+     "type your role" field. quickRoles and purposes existed solely for
+     that removed UI and are gone. The `roles` arrays stay -- reference
+     taxonomy data, not rendered as UI, kept as groundwork for the
+     future terminology/intelligence layer this is laying context for. */
   Aviation: {
-    quickRoles: ['Pilot','Cabin Crew','Ground Operations'],
     roles: ['Pilot','First Officer / Co-pilot','Aircraft Maintenance Engineer','Aircraft Maintenance Technician',
             'Avionics Engineer / Technician','Ground Operations','Ramp Agent','Air Traffic Controller',
             'Flight Dispatcher','Cabin Crew','Airport Operations','Aviation Safety / Compliance',
             'MRO Manager / Supervisor','Passenger Services / Check-in Agent','Airport Security / Customs',
-            'Aviation Student / Trainee'],
-    purposes: ['Pre-flight Briefing','In-flight Coordination','Post-flight Report','Turnaround Coordination',
-               'Clearance & Routing','Maintenance Check','Defect Report','Incident Report','Handover Briefing']
+            'Aviation Student / Trainee']
   },
   Healthcare: {
-    quickRoles: ['Physician / Doctor','Nurse','Patient'],
     roles: ['Physician / Doctor','Nurse','Nurse Practitioner / Physician Assistant','Paramedic / EMT',
             'Medical Interpreter','Pharmacist','Radiology / Lab Technician','Mental Health Counselor / Therapist',
             'Hospital Administrator','Receptionist / Front Desk','Patient','Family Member / Caregiver',
-            'Healthcare Student / Trainee'],
-    purposes: ['General Consultation','Emergency / Triage','Follow-up Visit','Patient Care','Handover Briefing','Ask a Question']
+            'Healthcare Student / Trainee']
   },
   Legal: {
-    quickRoles: ['Attorney / Lawyer','Client','Paralegal'],
     roles: ['Attorney / Lawyer','Paralegal','Judge','Court Reporter','Legal Interpreter','Notary',
-            'Legal Assistant / Clerk','Law Enforcement Officer','Client','Witness','Law Student / Trainee'],
-    purposes: ['Client Consultation','Deposition Support','Contract Review','Court Proceeding Support','Document Review','Ask a Question']
+            'Legal Assistant / Clerk','Law Enforcement Officer','Client','Witness','Law Student / Trainee']
   },
   Education: {
-    quickRoles: ['Teacher / Instructor','Student','Parent / Guardian'],
     roles: ['Teacher / Instructor','Professor','Teaching Assistant','Tutor','Special Education Specialist',
-            'School Administrator','Counselor / Advisor','Student','Parent / Guardian','Education Student / Trainee'],
-    purposes: ['Classroom Instruction','Parent Conference','Tutoring Session','Staff Meeting','Enrollment Support','Ask a Question']
+            'School Administrator','Counselor / Advisor','Student','Parent / Guardian','Education Student / Trainee']
   },
   Industrial: {
-    quickRoles: ['Supervisor / Shift Lead','Machine Operator','Safety Officer / EHS Specialist'],
     roles: ['Plant Manager','Supervisor / Shift Lead','Machine Operator','Maintenance Technician','Electrician',
             'Welder / Fabricator','Quality Control Inspector','Safety Officer / EHS Specialist',
-            'Warehouse / Logistics Worker','Industrial Engineer','New Employee / Trainee'],
-    purposes: ['Safety Briefing','Shift Handover','Incident Report','Equipment Instruction','Compliance Check']
+            'Warehouse / Logistics Worker','Industrial Engineer','New Employee / Trainee']
   },
   General: {
-    quickRoles: ['Business Professional','Customer / Client','Traveler / Tourist'],
     roles: ['Business Professional','Customer / Client','Service Provider','Traveler / Tourist',
-            'Host / Local Guide','Volunteer','Student','Family Member / Friend','Other Professional'],
-    purposes: ['Conversation','Business Meeting','Customer Service','Travel Assistance']
+            'Host / Local Guide','Volunteer','Student','Family Member / Friend','Other Professional']
   }
 };
 
@@ -6664,20 +6948,14 @@ var Ov1={
   _industry:'Aviation',_created:false,
 
   open:function(){
-    this._created=false;this._role=null;this._purpose=null;
-    document.getElementById('ov1-roles').innerHTML='';document.getElementById('ov1-roles').classList.remove('visible');
-    document.getElementById('ov1-purposes').innerHTML='';document.getElementById('ov1-purposes').classList.remove('visible');
-    document.getElementById('ov1-role-other-wrap').style.display='none';
+    this._created=false;this._role=null;
     document.getElementById('ov1-role-other-input').value='';
-    document.getElementById('ov1-role-label').style.display='none';
-    document.getElementById('ov1-purpose-label').style.display='none';
     document.getElementById('ov1-create-btn').textContent='CREATE SESSION →';
     document.getElementById('ov1-create-btn').classList.remove('enabled');
     document.getElementById('ov1-code-display').style.display='none';
     document.getElementById('ov1-qr').style.display='none';
     document.getElementById('ov1-qr-label').style.display='none';
     document.getElementById('ov1-qr-canvas').innerHTML='';
-    document.getElementById('ov1-name').value='';
     document.getElementById('ov1-bd').classList.add('visible');
     document.getElementById('ov1-sheet').classList.add('visible');
     this.selectInd(document.querySelector('#ov1-industries .ov-ind-pill.selected'),this._industry);
@@ -6689,67 +6967,22 @@ var Ov1={
   },
 
   selectInd:function(btn,ind){
-    this._industry=ind;this._role=null;this._purpose=null;
+    this._industry=ind;
     document.querySelectorAll('#ov1-industries .ov-ind-pill').forEach(function(b){b.classList.remove('selected');});
     if(btn)btn.classList.add('selected');
-    var tax=SESSION_TAXONOMY[ind];
-    var roleWrap=document.getElementById('ov1-roles'),roleLbl=document.getElementById('ov1-role-label');
-    var otherWrap=document.getElementById('ov1-role-other-wrap'),otherInput=document.getElementById('ov1-role-other-input');
-    var purpWrap=document.getElementById('ov1-purposes'),purpLbl=document.getElementById('ov1-purpose-label');
-    otherInput.value='';
-    purpWrap.innerHTML='';purpWrap.classList.remove('visible');purpLbl.style.display='none';
-    roleLbl.style.display='block';
-    otherWrap.style.display='block';
-    // A few tap-to-fill suggestions, not a scrollable list — filling the
-    // same single text field rather than acting as separate selections.
-    var html='';
-    tax.quickRoles.forEach(function(r){html+='<button class="ov-ind-pill ov-role-quick" onclick="Ov1.fillRole(\''+r.replace(/'/g,"\\'")+'\')">'+r+'</button>';});
-    roleWrap.innerHTML=html;roleWrap.classList.add('visible');
     this._checkReady();
-  },
-
-  fillRole:function(role){
-    document.getElementById('ov1-role-other-input').value=role;
-    this.onRoleOtherInput();
   },
 
   onRoleOtherInput:function(){
-    /* The role text IS whatever's in the field, preserved exactly as
-       typed (or as filled by a quick-suggestion tap) -- never collapsed
-       to a generic "Other". This is the single, primary path now. */
     var v=document.getElementById('ov1-role-other-input').value.trim();
-    var hadRole=!!this._role;
     this._role=v||null;
-    document.querySelectorAll('#ov1-roles .ov-ind-pill').forEach(function(b){
-      b.classList.toggle('selected', b.textContent===v);
-    });
-    if(this._role && !hadRole){
-      this._renderPurposes(SESSION_TAXONOMY[this._industry].purposes);
-    } else if(!this._role){
-      document.getElementById('ov1-purposes').innerHTML='';
-      document.getElementById('ov1-purposes').classList.remove('visible');
-      document.getElementById('ov1-purpose-label').style.display='none';
-    }
-    this._checkReady();
-  },
-
-  _renderPurposes:function(list){
-    var wrap=document.getElementById('ov1-purposes'),lbl=document.getElementById('ov1-purpose-label');
-    lbl.style.display='block';
-    var html='';list.forEach(function(p){html+='<button class="ov-ind-pill" onclick="Ov1.selectPurpose(this,\''+p.replace(/'/g,"\\'")+'\')">'+p+'</button>';});
-    wrap.innerHTML=html;wrap.classList.add('visible');
-  },
-
-  selectPurpose:function(btn,purpose){
-    this._purpose=purpose;
-    document.querySelectorAll('#ov1-purposes .ov-ind-pill').forEach(function(b){b.classList.remove('selected');});
-    btn.classList.add('selected');
     this._checkReady();
   },
 
   _checkReady:function(){
-    /* Role is now the sole hard requirement for every industry.
-       Purpose is context, never a blocker. */
+    /* Industry always has exactly one pill selected by default (the UI
+       never allows zero-selected), so role is the only condition that
+       actually gates readiness here. */
     var ready=!!this._role;
     document.getElementById('ov1-create-btn').classList.toggle('enabled',ready||this._created);
   },
@@ -6793,9 +7026,11 @@ var Ov1={
     // Generate session code (client-side preview — nothing persisted yet)
     var code='WL-'+Math.random().toString(36).substr(2,6).toUpperCase();
     this._generatedCode=code;
-    var autoName=this._role+(this._purpose?' · '+this._purpose:'');
-    var name=document.getElementById('ov1-name').value.trim()||autoName;
-    this._generatedName=name;
+    // No user-facing session-name concept in v1.0 -- the backend's
+    // sessions.name column still needs a value, generated here from
+    // already-known information rather than asking the user to name
+    // a temporary session. Same schema, same insert shape as before.
+    this._generatedName=this._industry+' · '+this._role;
     var link='https://stellawhisperlink.app/join/'+code;
 
     // Show code
@@ -6823,7 +7058,9 @@ var Ov1={
 
   /* Real INSERT, with one-time-per-attempt retry on a code collision
      (sessions.code is UNIQUE — Postgres error 23505). Up to 3 tries;
-     ~2.2 billion possible codes makes more than that pointless. */
+     ~2.2 billion possible codes makes more than that pointless.
+     purpose is sent as null -- the column stays in the schema
+     unchanged, v1.0 just no longer has a UI concept that populates it. */
   _insertSession:function(code, attempt, cb){
     var self=this;
     WL.Supabase.from('sessions').insert({
@@ -6831,7 +7068,7 @@ var Ov1={
       name: this._generatedName,
       industry: this._industry,
       role: this._role,
-      purpose: this._purpose,
+      purpose: null,
       created_by: WL.State.uid
     }).select().single().then(function(res){
       if(res.error){
