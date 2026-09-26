@@ -680,99 +680,15 @@ html, body {
   transform: rotate(180deg);
 }
 
-.lang-dropdown {
-  position: fixed;
-  background: rgba(4,5,13,0.97);
-  border: 1px solid rgba(0,229,255,0.18);
-  border-radius: 8px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-  z-index: 1000;
-  max-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  opacity: 0;
-  transition: max-height 0.3s ease, opacity 0.3s ease;
-  display: none;
-  min-width: 280px;
-}
-
-.lang-dropdown.open {
-  display: block;
-  max-height: 380px;
-  opacity: 1;
-}
-
-/* Custom scrollbar */
-.lang-dropdown::-webkit-scrollbar {
-  width: 4px;
-}
-
-.lang-dropdown::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.lang-dropdown::-webkit-scrollbar-thumb {
-  background: rgba(0,229,255,0.3);
-  border-radius: 2px;
-}
-
-.lang-section-header {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  padding: 10px 14px 6px;
-  color: rgba(0,229,255,0.9);
-  position: sticky;
-  top: 0;
-  background: rgba(4,5,13,0.98);
-  z-index: 10;
-}
-
-.lang-section-header.tier2 {
-  color: rgba(255,255,255,0.35);
-}
-
-.lang-divider {
-  height: 1px;
-  background: rgba(0,229,255,0.08);
-  margin: 0;
-}
-
-.lang-option {
-  height: 44px;
-  padding: 0 14px;
+/* Tier-1 row content layout for the shared WL.LangPicker sheet, used
+   only when a caller opts into showBadges (currently just Auth — see
+   WL.LangPicker.open). Tier-2 rows render as plain text and don't use
+   this. */
+.langpick-row-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  cursor: pointer;
-  transition: background 0.15s ease;
-  color: #ffffff;
-  font-size: 14px;
-}
-
-.lang-option:hover {
-  background: rgba(0,229,255,0.06);
-}
-
-.lang-option.tier2 {
-  height: 40px;
-  color: rgba(255,255,255,0.75);
-}
-
-.lang-option.tier2:hover {
-  background: rgba(255,255,255,0.04);
-}
-
-.lang-option-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.lang-option-star {
-  color: #00e5ff;
-  font-size: 14px;
+  width: 100%;
 }
 
 .lang-option-badges {
@@ -788,11 +704,6 @@ html, body {
   padding: 2px 6px;
   border-radius: 4px;
   font-family: 'Plus Jakarta Sans', sans-serif;
-}
-
-/* Hidden input for form submission */
-#li-lang {
-  display: none;
 }
 
 /* ── Button ── */
@@ -870,8 +781,7 @@ html, body {
   .auth-content { animation: none; opacity: 1; }
   .auth-circle  { animation: none; }
   .lang-trigger-chevron,
-  .lang-option,
-  .lang-dropdown {
+  .langpick-row {
     transition: none;
   }
 }
@@ -1758,6 +1668,7 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
 .chat-empty-title{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.2);}
 .chat-empty-sub{font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:rgba(255,255,255,0.15);text-align:center;line-height:1.6;}
 .msg-pair{display:flex;flex-direction:column;margin-bottom:10px;}
+.chat-sys-msg{align-self:center;margin:4px 0 12px;padding:4px 12px;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1.5px;color:rgba(255,255,255,0.35);background:rgba(255,255,255,0.04);border-radius:20px;text-align:center;}
 /* Right bubble (own messages) — single definition, shared by Solo and
    Chat. Previously defined once per screen with drifted values; same
    selector meant whichever rule appeared later in this stylesheet was
@@ -2008,7 +1919,6 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
 .legal-sheet-body p{margin:0 0 10px;}
 .legal-sheet-body ol,.legal-sheet-body ul{margin:0 0 10px;padding-left:20px;}
 .legal-sheet-body li{margin-bottom:4px;}
-.legal-sheet-body .doc-pending{margin-top:14px;padding:10px 12px;border:1px dashed rgba(245,158,11,0.4);border-radius:10px;background:rgba(245,158,11,0.06);color:rgba(245,158,11,0.85);font-size:11px;line-height:1.5;}
 .info-title{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.4);text-align:center;margin-bottom:12px;}
 
 .langpick-sheet{position:fixed;bottom:0;left:0;right:0;top:6%;background:#0a0d1e;border-top:1px solid rgba(99,102,241,0.2);border-radius:22px 22px 0 0;padding:14px 16px calc(env(safe-area-inset-bottom,0px)+14px);z-index:85;transform:translateY(100%);transition:transform 0.3s cubic-bezier(.34,1.56,.64,1);display:flex;flex-direction:column;}
@@ -2784,37 +2694,29 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
         <div class="auth-label">Your Language</div>
         <div class="auth-field-note">★ Optimised for offline &amp; industry use</div>
         
-        <!-- Custom Language Selector -->
+        <!-- Language selector — same shared WL.LangPicker bottom sheet
+             used by Demo/Solo/Settings (see WL.Languages.populateSelectors
+             and WL.LangPicker), not a separate hand-rolled dropdown. The
+             <select> is the real state/event holder; this button is the
+             visible, tappable trigger. showBadges=true keeps this field's
+             Tier-1 Offline/Industry badges (Eugene's explicit call —
+             Demo/Solo/Settings pickers stay badge-free, unchanged). -->
         <div class="custom-lang-selector">
-          <button class="lang-trigger" id="lang-trigger" type="button">
+          <select class="lang-select-hidden" id="li-lang"></select>
+          <button class="lang-trigger" id="li-lang-trigger" type="button" data-format="name"
+            onclick="WL.LangPicker.open('li-lang','name',false,'YOUR LANGUAGE',true)">
             <!-- Globe icon -->
             <svg class="lang-trigger-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
               <circle cx="12" cy="12" r="10"/>
               <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
             </svg>
-            <span class="lang-trigger-text" id="lang-trigger-text">Select your language</span>
+            <span class="lang-trigger-text selected" id="li-lang-trigger-text">English</span>
             <!-- Chevron icon -->
             <svg class="lang-trigger-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="6,9 12,15 18,9"/>
             </svg>
           </button>
-
-          <div class="lang-dropdown" id="lang-dropdown">
-            <!-- Tier 1 Section -->
-            <div class="lang-section-header">★ TIER 1 — OPTIMISED</div>
-            <div id="tier1-options"></div>
-            
-            <!-- Divider -->
-            <div class="lang-divider"></div>
-            
-            <!-- Tier 2 Section -->
-            <div class="lang-section-header tier2">TIER 2 — MORE LANGUAGES</div>
-            <div id="tier2-options"></div>
-          </div>
         </div>
-
-        <!-- Hidden input for form submission -->
-        <input type="hidden" id="li-lang" value="">
       </div>
 
       <!-- Button -->
@@ -3227,7 +3129,7 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
     <div class="status-chip chip-earpod hidden" id="chip-ep"><div class="s-dot"></div>EARPOD</div>
     <div class="status-chip chip-ng hidden" id="chip-ng"><div class="s-dot"></div>NOISEGUARD</div>
     <div class="status-chip chip-listen hidden" id="chip-lst"><div class="s-dot"></div>LISTENING</div>
-    <div class="status-chip chip-trans hidden" id="chip-tx"><div class="s-dot"></div>TRANSLATING</div>
+    <div class="status-chip chip-trans hidden" id="chip-tx"><div class="s-dot"></div>SENDING</div>
   </div>
 </div>
 <!-- LANG INDICATOR -->
@@ -3624,20 +3526,6 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
           <div class="stg-row-label">WhisperLink v1.0</div>
           <div class="stg-row-sub">Stella Tech · Protection First. Precision Always.</div>
         </div>
-        <div class="stg-row-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></div>
-      </div>
-      <div class="stg-row tappable" onclick="Stg.openDoc('privacy')">
-        <div class="stg-row-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        </div>
-        <div class="stg-row-body"><div class="stg-row-label">Privacy Policy</div></div>
-        <div class="stg-row-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></div>
-      </div>
-      <div class="stg-row tappable" onclick="Stg.openDoc('terms')">
-        <div class="stg-row-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        </div>
-        <div class="stg-row-body"><div class="stg-row-label">Terms of Service</div></div>
         <div class="stg-row-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></div>
       </div>
       <div class="stg-row tappable" onclick="window.location.href='mailto:stellatechofficial@gmail.com'">
@@ -4139,6 +4027,22 @@ WL.Fidelity._record=function(entry){
    two Layer C signals rather than guessing. */
 WL.Fidelity.evaluate=function(source,candidate,opts){
   opts=opts||{};
+  /* Same-language pass-through fix: Layer A's "unchanged from source"
+     signal assumes a real language change happened -- across an actual
+     translation, getting the input back unchanged is a strong sign the
+     provider silently failed. But when fromLangCode===toLangCode there
+     was never a language change to begin with, so an unchanged (or
+     near-identical) result is the CORRECT output, not a failure. Before
+     this fix every same-language pair (e.g. an English-English Chat
+     session) had every message hard-rejected by Layer A, surfaced to
+     the user as a false "TRANSLATION FAILED". Layer B/C are equally
+     meaningless for a non-translation, so skip the whole cascade and
+     accept immediately, distinctly logged for auditability. */
+  if(opts.fromLangCode && opts.toLangCode && opts.fromLangCode===opts.toLangCode){
+    var rSame={accept:true,reasonCode:WL.Fidelity.REASON.ACCEPTED,layer:null,signals:['same_language_passthrough']};
+    WL.Fidelity._record({decision:'accept',reason:'same_language_passthrough',provider:opts.providerName,source:source,candidate:candidate});
+    return rSame;
+  }
   var a=WL.Fidelity._layerA(source,candidate,opts);
   if(!a.ok){ var rA={accept:false,reasonCode:a.reason,layer:'A',signals:[]}; WL.Fidelity._record({decision:'reject',reason:a.reason,layer:'A',provider:opts.providerName,source:source,candidate:candidate}); return rA; }
   var b=WL.Fidelity._layerB(source,candidate);
@@ -4370,7 +4274,8 @@ WL.Languages.populateSelectors = function(){
     ['solo-from-select','name',false,'English'],
     ['solo-to-select','name',false,'Arabic'],
     ['sel-your-lang','name',false,'English'],
-    ['sel-target-lang','name',false,'Spanish']
+    ['sel-target-lang','name',false,'Spanish'],
+    ['li-lang','name',false,'English']
   ];
   sels.forEach(function(s){
     var el = document.getElementById(s[0]);
@@ -4393,14 +4298,21 @@ WL.Languages.populateSelectors();
    as it would from native interaction. Nothing downstream needed to
    change. */
 WL.LangPicker = {
-  _targetId:null, _valueFormat:'name', _includeAuto:false,
+  _targetId:null, _valueFormat:'name', _includeAuto:false, _showBadges:false,
   _valueOf:function(entry){
     return this._valueFormat==='code' ? WL.Utils.baseLangCode(entry.code) : entry.name;
   },
-  open:function(selectId, valueFormat, includeAuto, title){
+  /* showBadges (optional, default false): shows the Offline/Industry
+     badges on Tier-1 rows. Opt-in per caller so this stays a purely
+     additive, backward-compatible change — Demo/Solo/Settings keep
+     their already-verified badge-free rows exactly as-is; only Auth
+     passes true, to keep the badge detail from its old dedicated
+     dropdown now that it uses this shared picker. */
+  open:function(selectId, valueFormat, includeAuto, title, showBadges){
     this._targetId=selectId;
     this._valueFormat=valueFormat||'name';
     this._includeAuto=!!includeAuto;
+    this._showBadges=!!showBadges;
     var sel=document.getElementById(selectId);
     var currentValue=sel?sel.value:null;
     document.getElementById('langpick-title').textContent=title||'SELECT LANGUAGE';
@@ -4421,7 +4333,10 @@ WL.LangPicker = {
     html+='<div class="langpick-group-label">★ TIER 1</div>';
     WL.Languages.tier1.forEach(function(e){
       var v=self._valueOf(e);
-      html+='<button class="langpick-row'+(v===currentValue?' selected':'')+'" onclick="WL.LangPicker.choose(\''+esc(v)+'\')">'+e.name+'</button>';
+      var inner=self._showBadges
+        ? '<span class="langpick-row-content"><span>'+e.name+'</span><span class="lang-option-badges"><span class="lang-badge">Offline</span><span class="lang-badge">Industry</span></span></span>'
+        : e.name;
+      html+='<button class="langpick-row'+(v===currentValue?' selected':'')+'" onclick="WL.LangPicker.choose(\''+esc(v)+'\')">'+inner+'</button>';
     });
     html+='<div class="langpick-group-label">TIER 2</div>';
     WL.Languages.list.forEach(function(e){
@@ -4827,6 +4742,14 @@ WL.subscribeToSession = function(sessionDbId){
         }
       }
     )
+    .on('postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'participants', filter: 'session_id=eq.' + sessionDbId },
+      function(payload){
+        if(window.Chat && Chat.onRealtimeParticipantLeave){
+          Chat.onRealtimeParticipantLeave(payload);
+        }
+      }
+    )
     .subscribe();
 };
 
@@ -4928,105 +4851,14 @@ setTimeout(function(){
 <script>
 try {
 /* ══════ AUTH SCRIPT ══════ */
-// Language data
-// Language picker options — derived from the canonical registry
-// (WL.Languages, built in the WL core script block, which has already
-// run by the time this one loads) rather than a second hardcoded list.
-// That second list existed before and had already drifted from both
-// the old 29-language build and this spec — this is what "one source
-// of truth" is actually for.
-const tier1Languages = WL.Languages.tier1.map(function(e){ return e.name; });
-const tier2Languages = WL.Languages.list.filter(function(e){ return e.tier===2; }).map(function(e){ return e.name; });
-
-// Initialize custom selector
-function initCustomSelector() {
-  const trigger = document.getElementById('lang-trigger');
-  const dropdown = document.getElementById('lang-dropdown');
-  const tier1Container = document.getElementById('tier1-options');
-  const tier2Container = document.getElementById('tier2-options');
-  const langInput = document.getElementById('li-lang');
-  const triggerText = document.getElementById('lang-trigger-text');
-
-  // Populate Tier 1
-  tier1Languages.forEach(lang => {
-    const option = document.createElement('div');
-    option.className = 'lang-option';
-    option.innerHTML = `
-      <div class="lang-option-left">
-        <span class="lang-option-star">★</span>
-        <span>${lang}</span>
-      </div>
-      <div class="lang-option-badges">
-        <div class="lang-badge">Offline</div>
-        <div class="lang-badge">Industry</div>
-      </div>
-    `;
-    option.addEventListener('click', () => selectLanguage(lang));
-    tier1Container.appendChild(option);
-  });
-
-  // Populate Tier 2
-  tier2Languages.forEach(lang => {
-    const option = document.createElement('div');
-    option.className = 'lang-option tier2';
-    option.textContent = lang;
-    option.addEventListener('click', () => selectLanguage(lang));
-    tier2Container.appendChild(option);
-  });
-
-  // Toggle dropdown with smart positioning
-  trigger.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const isOpen = dropdown.classList.contains('open');
-    
-    if (!isOpen) {
-      // Calculate positioning
-      const triggerRect = trigger.getBoundingClientRect();
-      const dropdownHeight = 380; // max-height of dropdown
-      const spaceBelow = window.innerHeight - triggerRect.bottom;
-      const spaceAbove = triggerRect.top;
-      
-      // Determine if dropdown should open above or below
-      if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
-        // Open above
-        dropdown.style.bottom = 'auto';
-        dropdown.style.top = (triggerRect.top - dropdownHeight - 8) + 'px';
-        dropdown.style.left = triggerRect.left + 'px';
-      } else {
-        // Open below
-        dropdown.style.top = 'auto';
-        dropdown.style.bottom = (window.innerHeight - triggerRect.bottom - 8) + 'px';
-        dropdown.style.left = triggerRect.left + 'px';
-      }
-      
-      dropdown.classList.add('open');
-      trigger.classList.add('open');
-    } else {
-      dropdown.classList.remove('open');
-      trigger.classList.remove('open');
-    }
-  });
-
-  // Close dropdown when clicking outside
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.custom-lang-selector')) {
-      dropdown.classList.remove('open');
-      trigger.classList.remove('open');
-    }
-  });
-
-  // Select language
-  function selectLanguage(lang) {
-    langInput.value = lang;
-    triggerText.textContent = lang;
-    triggerText.classList.add('selected');
-    dropdown.classList.remove('open');
-    trigger.classList.remove('open');
-  }
-}
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', initCustomSelector);
+// Language field: li-lang is a hidden <select>, populated by
+// WL.Languages.populateSelectors() from the canonical registry (same
+// mechanism as Demo/Solo/Settings — see near WL.Utils.baseLangCode) and
+// opened via the shared WL.LangPicker bottom sheet (see li-lang-trigger
+// in the markup above). No separate selector code needed here anymore —
+// a second hand-rolled dropdown implementation existed before this and
+// had already drifted from both the old 29-language build and this
+// spec, which is exactly what "one source of truth" is for.
 
 function handleLogin() {
   var nameEl = document.getElementById('li-user');
@@ -5211,13 +5043,14 @@ var LANG_NAMES={
 };
 
 var Demo={
-  _debounce:null,_firstDone:false,_busy:false,
+  _debounce:null,_firstDone:false,_reqId:0,
 
   clearInput:function(){
     var inp=document.getElementById('demo-input');
     inp.value='';inp.style.direction='ltr';inp.style.textAlign='left';
     document.getElementById('demo-clear').classList.remove('visible');
     document.getElementById('demo-input-card').classList.remove('focused');
+    this._reqId++; // invalidate any in-flight request so a stale result can't repopulate the now-empty field
     this._hideResult();
   },
 
@@ -5249,24 +5082,27 @@ var Demo={
   },
 
   _translate:function(text){
-    if(this._busy)return;
-    this._busy=true;
+    var myReqId=++this._reqId; // this call is now the current one; any older in-flight call becomes stale
     this._showTranslating(text);
     var srcLang=document.getElementById('demo-src-lang').value;
     var tgtLang=document.getElementById('demo-tgt-lang').value;
     // Primary translation
     this._fetchTranslation(text,srcLang,tgtLang,function(primary){
-      Demo._busy=false;
+      if(myReqId!==Demo._reqId)return; // superseded by a newer keystroke's request -- discard
       // Reference: if target isn't English, also get English
       if(tgtLang!=='en'){
         Demo._fetchTranslation(text,srcLang,'en',function(ref){
+          if(myReqId!==Demo._reqId)return;
           Demo._showResult(primary,ref,text);
-        },function(){Demo._showResult(primary,'',text);});
+        },function(){
+          if(myReqId!==Demo._reqId)return;
+          Demo._showResult(primary,'',text);
+        });
       } else {
         Demo._showResult(primary,'',text);
       }
     },function(){
-      Demo._busy=false;
+      if(myReqId!==Demo._reqId)return;
       Demo._showResult(text,'',text,true);
       showToast('OFFLINE · SHOWING ORIGINAL');
     });
@@ -5340,7 +5176,6 @@ var Demo={
   },
 
   _hideResult:function(){
-    this._busy=false;
     var card=document.getElementById('demo-result-card');
     card.classList.remove('visible','instant');
     setTimeout(function(){if(!card.classList.contains('visible'))card.style.display='none';},500);
@@ -5355,7 +5190,7 @@ var Demo={
       // Reset for re-testing
       btn.textContent='LET\'S GO →';
       btn.style.pointerEvents='';btn.style.opacity='';
-      Demo._firstDone=false;Demo._busy=false;
+      Demo._firstDone=false;
       Demo.clearInput();
       document.getElementById('demo-magic').classList.remove('visible');
       document.getElementById('demo-go-btn').classList.remove('visible');
@@ -5632,10 +5467,6 @@ function _soloTxMyMemory(text,from,to,ok,err){
 function fetchTx(text,from,to,ok,err){
   /* Track A trust fix — mirrors tx()'s guard. See tx() for full reasoning. */
   if(!LANG_CODES[from] || !LANG_CODES[to]){ if(err) err(); return; }
-  /* Same-language fix: see tx() for full reasoning. Checked first --
-     if the pair matches, nothing else here (dictionary, cache,
-     providers) needs to run. */
-  if(LANG_CODES[from]===LANG_CODES[to]){ ok(text,100,'S'); return; }
   var tgt=WL.Utils.baseLangCode(LANG_CODES[to]);
   /* _ld is Chat's local phrase dictionary — shared here rather than
      duplicated. Safe: this only runs on a user action, well after
@@ -5813,7 +5644,7 @@ function setHealth(state){
   var chip=document.getElementById('health-chip');var lbl=document.getElementById('health-lbl');
   if(!chip||!lbl)return;
   chip.className='health-chip '+state;
-  var labels={stable:'STABLE',translating:'TRANSLATING',offline:'OFFLINE',delivered:'DELIVERED'};
+  var labels={stable:'STABLE',translating:'SENDING',offline:'OFFLINE',delivered:'DELIVERED'};
   lbl.textContent=labels[state]||'STABLE';
 }
 
@@ -5874,15 +5705,6 @@ function tx(text,from,to,ok,err){
      with no error. Fail honestly instead, through the same TRANSLATION
      FAILED path used for any other provider failure. */
   if(!LC[from] || !LC[to]){ if(err) err(); return; }
-  /* Same-language fix: compare resolved codes, not raw names, so this
-     also catches the case where two different display names resolve to
-     the same underlying code. Skips the whole provider cascade -- there
-     is genuinely nothing to translate, and this must never be routed
-     through WL.Fidelity's UNCHANGED check, which exists to catch a
-     provider that failed to translate, not a pair that never needed
-     translating in the first place. 'S' marks this honestly as its own
-     case, distinct from M/G/★, with a real ✓ (this always succeeds). */
-  if(LC[from]===LC[to]){ ok(text,100,'S'); return; }
   var key=LC[from]+'|'+LC[to]+'|'+text;
   if(_txCache[key]){ok(_txCache[key].t,_txCache[key].c,_txCache[key].s);return;}
   _txLocal(text,to,
@@ -6007,6 +5829,21 @@ function attachBubbleGestures(el,replyText,onLongPress){
 }
 function ctxTruncate(t){t=String(t||'');return t.length>60?t.slice(0,60)+'…':t;}
 
+/* Persistent join/leave (and future system) line in the actual message
+   thread -- separate from showToast(), which is transient and leaves
+   no record once it fades. Eugene's reported gap was exactly that: a
+   join/leave toast fired, but nothing stayed in the conversation. */
+function renderSystemMsg(text){
+  var m=document.getElementById('chat-messages');
+  var wm=m.querySelector('.chat-watermark');if(wm)wm.remove();
+  var atB=isAtBottom();
+  var el=document.createElement('div');
+  el.className='chat-sys-msg';
+  el.textContent=text;
+  m.appendChild(el);
+  if(atB){scrollB();}else if(isAtThreshold()){_newMsgCount++;var sdb=document.getElementById('scroll-down-btn');sdb.textContent='↓ '+_newMsgCount+' NEW';sdb.classList.add('visible');}
+}
+
 function renderRight(text,ts){
   var m=document.getElementById('chat-messages');
   var wm=m.querySelector('.chat-watermark');if(wm)wm.remove();
@@ -6026,22 +5863,6 @@ function renderRight(text,ts){
 function setDoubleCheck(ts){
   var bc=document.getElementById('bc-'+ts);
   if(bc){bc.textContent='✓✓';bc.style.color='rgba(0,229,255,0.55)';}
-}
-
-function renderLeft(pair,translation,partner,ts,offline,emergency,confScore,confSrc){
-  var conf=confScore||0;var src=confSrc||'M';
-  var cls=offline?'conf-medium':(src==='G'?'conf-high':cc(conf));var ico=offline?'⚠':(src==='G'?'✓':ci(conf));
-  var score=offline?'✕':(src==='G'?src:(conf+'% '+src));
-  var wrap=document.getElementById('blw-'+ts);if(!wrap)return;
-  var bCls='bubble-left'+(offline?' offline':'')+(emergency?' emergency-bubble':'');
-  var tLang=(partner?partner.lang.substring(0,2).toUpperCase():'??');
-  wrap.insertAdjacentHTML('beforeend','<div class="bubble-left-outer"><div class="bubble-left-av" style="background:'+AVCOLS[(partner?partner.col:1)%4]+'">'+((partner&&partner.code)||'?')+'</div><div class="bubble-left-body"><div class="bubble-left-wrap visible"><div class="'+bCls+'"><div class="bubble-left-text">'+esc(translation)+'</div><div class="bubble-left-meta"><span class="conf-badge '+cls+'">'+ico+' '+score+'</span><span class="b-left-lang">'+tLang+'</span><span class="b-left-time">'+fmtT(ts)+'</span></div></div></div></div></div>');
-  wrap.querySelector('.bubble-left-wrap').classList.add('visible');
-  var bl=wrap.querySelector('.bubble-left');
-  bl.addEventListener('click',function(){cp(translation);});
-  attachBubbleGestures(bl,translation,function(){spk(translation,U.lang);showToast('SPEAKING...');});
-  var atB=isAtBottom();
-  if(atB){scrollB();}else if(isAtThreshold()){_newMsgCount++;var sdb=document.getElementById('scroll-down-btn');sdb.textContent='↓ '+_newMsgCount+' NEW';sdb.classList.add('visible');}
 }
 
 var Chat={
@@ -6138,13 +5959,41 @@ var Chat={
         self._activateSession();
         hap([80,40,80]);
         showToast('● '+label+' JOINED SESSION');
+        renderSystemMsg('● '+label+' JOINED SESSION');
         if(joined){
           var key=chatDomKey(joined);
           setTimeout(function(){ var r=document.getElementById('pring-'+key); if(r) r.classList.add('joining'); },50);
         }
       } else {
         showToast('● '+label+' JOINED SESSION');
+        renderSystemMsg('● '+label+' JOINED SESSION');
       }
+    });
+  },
+
+  /* Fires on a participants UPDATE for this session (Step 6's third
+     subscription, added alongside the existing INSERT one). The only
+     UPDATE this schema makes to a participants row today is
+     leave_session setting left_at -- guarded below so a future
+     unrelated UPDATE to this table can't be misread as a leave.
+     [ASSUMPTION] this depends on Supabase Realtime sending the
+     pre-image (payload.old) for UPDATE events, which needs REPLICA
+     IDENTITY FULL (or at least left_at) set on `participants` -- a
+     backend/RLS decision, not made here (same boundary as the rest of
+     this file's realtime work). Verify before relying on this in
+     production; if old isn't sent, this silently never fires rather
+     than misfiring, which is the safer failure direction. */
+  onRealtimeParticipantLeave:function(payload){
+    var newRow=payload&&payload.new, oldRow=payload&&payload.old;
+    if(!newRow || !newRow.left_at || (oldRow && oldRow.left_at)) return;
+    if(newRow.user_id===WL.State.uid) return;
+    var leaving=(WL._participants||[]).filter(function(p){ return p.id===newRow.user_id; })[0];
+    var label=leaving?leaving.name.split(' ')[0].toUpperCase():'PARTICIPANT';
+    showToast('● '+label+' LEFT SESSION');
+    renderSystemMsg('● '+label+' LEFT SESSION');
+    WL.loadParticipants(function(err){
+      if(err){ console.error('[WL] loadParticipants (realtime leave) failed:', err); return; }
+      renderStrip();
     });
   },
 
@@ -6221,7 +6070,7 @@ var Chat={
     }
     var wasReply=this._ctxMode==='reply';
     inp.value='';document.getElementById('send-btn').classList.remove('on');inp.style.direction='ltr';
-    this._doSend(text,false);
+    this._doSend(text);
     if(wasReply){
       /* PHASE 3 BACKEND DEPENDENCY -- a reply-to-message relationship
          (e.g. a reply_to_message_id-style reference -- exact schema is
@@ -6235,71 +6084,54 @@ var Chat={
     }
   },
 
-  _doSend:function(text,emergency){
+  _doSend:function(text){
     var ts=Date.now();
-    var pair=renderRight(text,ts);
+    renderRight(text,ts);
     hap([20]);
 
-    /* Real persistence (Step 5) — independent of the Ahmed/Marie
-       simulation below. translated_text/lang stay null on purpose:
-       each recipient translates on arrival into their own language
-       (Chat.onRealtimeMessage), since a group session can have more
-       than one target language and there's no single "the" pair. */
-    if(WL.Session.dbId){
-      WL.Supabase.from('messages').insert({
-        session_id: WL.Session.dbId,
-        sender_id: WL.State.uid,
-        original_text: text,
-        original_lang: U.lang
-      }).then(function(res){
-        if(res.error) console.error('[WL] message insert failed:', res.error);
-      }).catch(function(err){ console.error('[WL] message insert failed:', err); });
-    }
+    /* Real persistence — the only thing this function does now. Each
+       recipient's own device independently translates the incoming
+       message into their own language on arrival (see
+       Chat.onRealtimeMessage, which already has a
+       sender_id===WL.State.uid guard) — a group session can have more
+       than one target language, so there is no single "the" translation
+       to render on the sender's own screen. A prior version of this
+       function additionally looped over every partner, translated the
+       outgoing text into each partner's language, and rendered that
+       result as a received-style bubble (renderLeft) on the SENDER's
+       own screen. That was backwards: it's the direct, confirmed cause
+       of Eugene's reported duplicate/wrong-language-bubble bug, doubled
+       every provider call for no correct purpose, and has been removed
+       entirely, not disabled. Delivery/health state below now reflects
+       whether the message actually reached the backend (the INSERT),
+       not whether a since-removed sender-side translation preview
+       succeeded for every partner — that concept no longer exists. */
+    if(!WL.Session.dbId){ return; }
 
     document.getElementById('chip-tx').classList.remove('hidden');
     setHealth('translating');
-    var activePartners = (WL._participants||[]).slice();
-    if(activePartners.length === 0){document.getElementById('chip-tx').classList.add('hidden');setHealth('stable');scrollB();return;}
-    
-    var self=this;
-    setTimeout(function(){
+    WL.Supabase.from('messages').insert({
+      session_id: WL.Session.dbId,
+      sender_id: WL.State.uid,
+      original_text: text,
+      original_lang: U.lang
+    }).then(function(res){
       document.getElementById('chip-tx').classList.add('hidden');
-      setHealth(navigator.onLine?'stable':'offline');
-      /* P7 — 'Delivered' state (Track A, genuine only): tracks real
-         completion across every partner in this send. Only shown when
-         every partner's translation actually succeeded; any failure
-         falls back to 'stable' as before, never a fabricated
-         'delivered'. Auto-reverts to 'stable' after a short beat so
-         it reads as a completion pulse, matching the 'translating'
-         pulse pattern already used for the in-flight state. */
-      var deliveryTotal = activePartners.length;
-      var deliverySettled = 0, deliverySucceeded = 0;
-      function noteSettled(ok){
-        deliverySettled++;
-        if(ok) deliverySucceeded++;
-        if(deliverySettled >= deliveryTotal && deliveryTotal > 0){
-          if(deliverySucceeded === deliveryTotal){
-            setHealth('delivered');
-            setTimeout(function(){ setHealth(navigator.onLine?'stable':'offline'); }, 1200);
-          } else {
-            setHealth(navigator.onLine?'stable':'offline');
-          }
-        }
+      if(res.error){
+        console.error('[WL] message insert failed:', res.error);
+        setHealth(navigator.onLine?'stable':'offline');
+        showToast('MESSAGE FAILED TO SEND');
+        return;
       }
-
-      activePartners.forEach(function(partner) {
-        if(!navigator.onLine){renderLeft(pair,text,partner,ts,true,emergency,0,'✕');showToast('OFFLINE · SHOWING ORIGINAL');noteSettled(false);return;}
-        tx(text,U.lang,partner.lang,
-          function(result,conf,src){
-            renderLeft(pair,result,partner,ts,false,emergency,conf,src);
-            setDoubleCheck(ts);
-            if(self._earpod)spk(result,U.lang);
-            noteSettled(true);
-          },
-          function(){setHealth('stable');renderLeft(pair,text,partner,ts,true,emergency,0,'✕');showToast('TRANSLATION FAILED');noteSettled(false);}
-        );
-      });
-    },600);
+      setDoubleCheck(ts);
+      setHealth('delivered');
+      setTimeout(function(){ setHealth(navigator.onLine?'stable':'offline'); }, 1200);
+    }).catch(function(err){
+      document.getElementById('chip-tx').classList.add('hidden');
+      console.error('[WL] message insert failed:', err);
+      setHealth(navigator.onLine?'stable':'offline');
+      showToast('MESSAGE FAILED TO SEND');
+    });
   },
 
   /* Real incoming message from another real participant (Step 6).
@@ -6407,7 +6239,7 @@ var Chat={
       var mode=document.getElementById('voice-mode-sel');
       var autoSend=mode&&mode.value==='auto';
       if(autoSend){
-        Chat._doSend(t,false);
+        Chat._doSend(t);
       } else {
         // Confirm mode — fill input, user reviews and taps send
         var inp=document.getElementById('chat-input');
@@ -6647,15 +6479,12 @@ function savePrefs(){
   try{localStorage.setItem('wl_settings',JSON.stringify(_prefs));}catch(e){}
 }
 
-/* ── ABOUT / PRIVACY / TERMS CONTENT ───────────────────────────
-   About: product copy is Eugene's own spec, used as supplied.
-   Privacy/Terms: legal clauses (governing law, dispute resolution,
-   age minimum) reflect prior founder direction but are NOT the
-   executed policy documents -- marked DRAFT until the approved
-   Privacy Policy / Terms of Service text is supplied and pasted in
-   here. The technical description under Privacy is verified against
-   this file's actual code (Supabase writes, translation providers,
-   local storage keys), not asserted from design intent. */
+/* ── ABOUT CONTENT ───────────────────────────────────────────
+   Privacy Policy / Terms of Service removed per Eugene's explicit
+   instruction (no legal counsel behind that DRAFT content yet) — see
+   /areas/whisperlink-deployment.md. The one substantive line from the
+   old Terms draft that wasn't legal boilerplate -- the safety-critical
+   usage warning -- is preserved here rather than dropped silently. */
 var STG_DOCS={
   about:{
     title:'ABOUT WHISPERLINK',
@@ -6675,39 +6504,9 @@ var STG_DOCS={
       <p>Open the session link/code → confirm your language → join → communicate.</p>
       <h4>Starting a session</h4>
       <p>Choose your language → start a session → invite the other person → choose the appropriate languages → speak or type → continue the conversation.</p>
-      <p style="color:rgba(255,255,255,0.4);font-size:11px;">WhisperLink v1.0 · Stella Tech · Protection First. Precision Always.</p>
-    `
-  },
-  privacy:{
-    title:'PRIVACY POLICY',
-    html:`
-      <div class="doc-pending">DRAFT — reflects prior founder direction, not the final executed Privacy Policy. Replace this content with the approved document before release.</div>
-      <h4>What actually happens in v1.0</h4>
-      <p>Verified against this build's code, not design intention:</p>
-      <ul>
-        <li>Sign-in is anonymous only — no email or password is collected.</li>
-        <li>Typed or spoken text you send is sent to a translation provider (MyMemory or Google Translate) to produce a translation.</li>
-        <li>Solo mode: your conversation history is saved only on your device (local storage). Nothing is sent to Stella Tech's own servers beyond the translation request itself.</li>
-        <li>Session mode (multiple participants): your original message text and chosen language <em>are</em> stored on Stella Tech's backend (Supabase) so other participants in the session can receive it. The translated text is not stored server-side — each participant's device generates its own translation on arrival.</li>
-        <li>Voice input uses your browser's built-in speech recognition, which — depending on your browser — may send audio to that browser vendor's own speech-recognition service, not to Stella Tech.</li>
-        <li>"Clear All History" (Settings) deletes your local device history. It does not delete messages already stored server-side for a session — server-side retention/deletion is a backend policy question, not yet finalized here.</li>
-      </ul>
-      <h4>Minimum age</h4>
-      <p>16+. Under 16 requires parental consent. <em>(Carried from prior direction — confirm before release.)</em></p>
-      <h4>Governing law &amp; disputes</h4>
-      <p>Kenya-based governing-law language until a Singapore entity exists. Disputes: email first, then binding SIAC arbitration; class-action waiver. <em>(Carried from prior direction — confirm exact clause wording before release.)</em></p>
-      <h4>Contact</h4>
-      <p>stellatechofficial@gmail.com</p>
-    `
-  },
-  terms:{
-    title:'TERMS OF SERVICE',
-    html:`
-      <div class="doc-pending">DRAFT — the full Terms of Service text has not been supplied to this session. This is a placeholder so the screen is real and functional rather than a "coming soon" stub. Replace with the approved document before release.</div>
-      <p>By using WhisperLink you agree to use it lawfully and not to rely on it for safety-critical or emergency communication.</p>
+      <h4>Please note</h4>
       <p>WhisperLink translations are generated by third-party providers and may not be perfectly accurate. Do not rely on WhisperLink as the sole means of communication in a medical, legal, or safety-critical situation.</p>
-      <h4>Contact</h4>
-      <p>stellatechofficial@gmail.com</p>
+      <p style="color:rgba(255,255,255,0.4);font-size:11px;">WhisperLink v1.0 · Stella Tech · Protection First. Precision Always.</p>
     `
   }
 };
