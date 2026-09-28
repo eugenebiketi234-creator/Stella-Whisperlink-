@@ -1908,17 +1908,21 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
 .info-sheet{position:fixed;bottom:0;left:0;right:0;background:#0a0d1e;border-top:1px solid rgba(99,102,241,0.2);border-radius:20px 20px 0 0;padding:14px 20px calc(env(safe-area-inset-bottom,0px)+18px);z-index:82;transform:translateY(100%);transition:transform 0.3s cubic-bezier(.34,1.56,.64,1);}
 .info-sheet.visible{transform:translateY(0);}
 /* About / Privacy / Terms document sheet */
-.legal-sheet{position:fixed;bottom:0;left:0;right:0;top:8%;background:#0a0d1e;border-top:1px solid rgba(99,102,241,0.2);border-radius:20px 20px 0 0;padding:14px 20px calc(env(safe-area-inset-bottom,0px)+18px);z-index:82;transform:translateY(100%);transition:transform 0.3s cubic-bezier(.34,1.56,.64,1);display:flex;flex-direction:column;}
-.legal-sheet.visible{transform:translateY(0);}
-.legal-sheet-head{display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;border-bottom:1px solid rgba(99,102,241,0.12);flex-shrink:0;}
-.legal-sheet-title{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.75);}
 .legal-sheet-close{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(99,102,241,0.2);color:rgba(255,255,255,0.5);font-size:16px;line-height:1;cursor:pointer;}
-.legal-sheet-body{overflow-y:auto;padding-top:12px;color:rgba(255,255,255,0.65);font-size:13px;line-height:1.6;-webkit-overflow-scrolling:touch;}
-.legal-sheet-body h4{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1.5px;color:#818cf8;margin:16px 0 6px;text-transform:uppercase;}
-.legal-sheet-body h4:first-child{margin-top:0;}
-.legal-sheet-body p{margin:0 0 10px;}
-.legal-sheet-body ol,.legal-sheet-body ul{margin:0 0 10px;padding-left:20px;}
-.legal-sheet-body li{margin-bottom:4px;}
+
+/* ── ABOUT (full screen, not a sheet) ── deliberately generous
+   typography -- the old sheet version of this content ran 13px body /
+   9px headers in a panel starting 8% down the screen, which read as
+   cramped. This is a real screen with its own header, like Settings. */
+#about{position:relative;width:100vw;height:100dvh;height:100vh;background:#04050d;overflow:hidden;display:flex;flex-direction:column;}
+.about-body{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;position:relative;z-index:10;padding:28px 22px 48px;color:rgba(255,255,255,0.78);font-size:16px;line-height:1.75;}
+.about-body h4{font-family:'Share Tech Mono',monospace;font-size:13px;letter-spacing:2px;color:#818cf8;margin:30px 0 12px;text-transform:uppercase;}
+.about-body h4:first-child{margin-top:2px;}
+.about-body p{margin:0 0 16px;}
+.about-body ol,.about-body ul{margin:0 0 16px;padding-left:24px;}
+.about-body li{margin-bottom:9px;}
+.about-body .about-footer{color:rgba(255,255,255,0.35);font-size:12px;letter-spacing:0.3px;margin-top:10px;padding-top:22px;border-top:1px solid rgba(255,255,255,0.06);}
+@media (max-width:360px){ .about-body{padding:24px 18px 40px;font-size:15px;} }
 .info-title{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.4);text-align:center;margin-bottom:12px;}
 
 .langpick-sheet{position:fixed;bottom:0;left:0;right:0;top:6%;background:#0a0d1e;border-top:1px solid rgba(99,102,241,0.2);border-radius:22px 22px 0 0;padding:14px 16px calc(env(safe-area-inset-bottom,0px)+14px);z-index:85;transform:translateY(100%);transition:transform 0.3s cubic-bezier(.34,1.56,.64,1);display:flex;flex-direction:column;}
@@ -3327,7 +3331,7 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
         </div>
       </div>
       <!-- Display name -->
-      <div class="stg-row">
+      <div class="stg-row tappable" onclick="Stg.editName()">
         <div class="stg-row-icon cyan">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </div>
@@ -3336,6 +3340,7 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
           <div class="stg-row-sub">Shown to session participants</div>
         </div>
         <span class="stg-row-value" id="val-name">—</span>
+        <div class="stg-row-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></div>
       </div>
       <!-- Your language -->
       <div class="stg-row">
@@ -3467,15 +3472,6 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
           <div class="stg-toggle-thumb"></div>
         </label>
       </div>
-      <div class="stg-row">
-        <div class="stg-row-icon green">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        </div>
-        <div class="stg-row-body">
-          <div class="stg-row-label">How your data moves</div>
-          <div class="stg-row-sub">Local Solo history stays on this device. Session messages go through the session backend so other participants can receive them. Translation may use third-party translation providers.</div>
-        </div>
-      </div>
     </div>
     <div style="padding:12px 0 0;">
       <button class="stg-destructive" onclick="Stg.confirmClearHistory()">CLEAR ALL HISTORY</button>
@@ -3518,7 +3514,7 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
       <span class="stg-section-title">ABOUT</span>
     </div>
     <div class="stg-section-body">
-      <div class="stg-row tappable" onclick="Stg.openDoc('about')">
+      <div class="stg-row tappable" onclick="WL.Router.go('about')">
         <div class="stg-row-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2L13.5 10.5L22 12L13.5 13.5L12 22L10.5 13.5L2 12L10.5 10.5Z" fill="currentColor" stroke="none"/></svg>
         </div>
@@ -3558,18 +3554,53 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
   </div>
 </div>
 
-<!-- ABOUT / PRIVACY / TERMS DOCUMENT SHEET -->
-<div class="sheet-bd" id="stg-doc-bd" onclick="Stg.closeDoc()"></div>
-<div class="legal-sheet" id="stg-doc-sheet">
-  <div class="confirm-handle"></div>
-  <div class="legal-sheet-head">
-    <div class="legal-sheet-title" id="stg-doc-title">ABOUT</div>
-    <button class="legal-sheet-close" onclick="Stg.closeDoc()" aria-label="Close">&times;</button>
-  </div>
-  <div class="legal-sheet-body" id="stg-doc-body"></div>
+<div id="stg-toast"></div>
+</div>
 </div>
 
-<div id="stg-toast"></div>
+<!-- ══════════════════════════════════
+     ABOUT — its own screen, not a sheet
+══════════════════════════════════ -->
+<div id="screen-about" class="wl-screen" style="display:none;">
+<div id="about">
+  <div class="stg-bg-glow"></div>
+  <div class="stg-header">
+    <button class="stg-back" onclick="WL.Router.go('settings')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="stg-title-block">
+      <div class="stg-title">ABOUT</div>
+      <div class="stg-title-sub">STELLA WHISPERLINK · V1.0</div>
+    </div>
+  </div>
+  <div class="about-body">
+    <h4>What is WhisperLink?</h4>
+    <p>WhisperLink is a real-time multilingual communication platform that helps people who speak different languages communicate and understand each other.</p>
+
+    <h4>How does it work?</h4>
+    <ol>
+      <li>Choose your language.</li>
+      <li>Start or join a session.</li>
+      <li>Share the session link/code.</li>
+      <li>Speak or type.</li>
+      <li>WhisperLink translates.</li>
+      <li>Continue communicating in each participant's language.</li>
+    </ol>
+
+    <h4>Joining a session</h4>
+    <p>Open the session link/code → confirm your language → join → communicate.</p>
+
+    <h4>Starting a session</h4>
+    <p>Choose your language → start a session → invite the other person → choose the appropriate languages → speak or type → continue the conversation.</p>
+
+    <h4>How your data moves</h4>
+    <p>Local Solo history stays on this device. Session messages go through the session backend so other participants can receive them. Translation may use third-party translation providers.</p>
+
+    <h4>Please note</h4>
+    <p>WhisperLink translations are generated by third-party providers and may not be perfectly accurate. Do not rely on WhisperLink as the sole means of communication in a medical, legal, or safety-critical situation.</p>
+
+    <div class="about-footer">WhisperLink v1.0 · Stella Tech · Protection First. Precision Always.</div>
+  </div>
 </div>
 </div>
 
@@ -3622,7 +3653,7 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
   <!-- Role — a single, always-visible text field. This is the role
        mechanism, not a picker trigger; no pill list, no taxonomy
        browsing. -->
-  <div class="ov-step-label">YOUR ROLE</div>
+  <div class="ov-step-label" id="ov1-role-label">YOUR ROLE</div>
   <div id="ov1-role-other-wrap">
     <input class="ov-input ov-input-role" id="ov1-role-other-input" type="text"
       placeholder="Enter your role" autocomplete="off" autocorrect="off"
@@ -4576,7 +4607,7 @@ WL.joinSessionByCode = function(code, cb){
    text, so Ov2/Home don't each re-implement this matching. */
 WL.Utils.joinErrorMessage = function(err){
   var msg = (err && err.message) || '';
-  if(msg === 'NEEDS_CONNECTION') return 'SESSIONS NEED A CONNECTION · SOLO WORKS OFFLINE';
+  if(msg === 'NEEDS_CONNECTION') return 'SESSIONS NEED A CONNECTION · SOLO PHRASES WORK OFFLINE';
   if(msg.indexOf('SESSION_FULL') === 0) return 'SESSION FULL · MAX 4 PARTICIPANTS';
   if(msg.indexOf('Session not found') === 0) return 'SESSION NOT FOUND OR ENDED';
   if(msg === 'EMPTY_CODE') return 'ENTER A SESSION CODE';
@@ -4747,6 +4778,19 @@ WL.subscribeToSession = function(sessionDbId){
       function(payload){
         if(window.Chat && Chat.onRealtimeParticipantLeave){
           Chat.onRealtimeParticipantLeave(payload);
+        }
+      }
+    )
+    /* Hand-raise sync (Eugene's call: ephemeral broadcast, not a
+       persisted column) -- deliberately NOT postgres_changes. This is
+       a transient in-the-moment signal, not state worth a DB write or
+       a row to keep clean; it naturally resets on refresh/reconnect,
+       which is the correct behavior for it. */
+    .on('broadcast',
+      { event: 'hand_raise' },
+      function(payload){
+        if(window.Chat && Chat.onRealtimeHandRaise){
+          Chat.onRealtimeHandRaise(payload);
         }
       }
     )
@@ -5086,6 +5130,23 @@ var Demo={
     this._showTranslating(text);
     var srcLang=document.getElementById('demo-src-lang').value;
     var tgtLang=document.getElementById('demo-tgt-lang').value;
+    /* Offline: try the local phrase dictionary before ever attempting a
+       network call. Demo's own selects already store base codes (see
+       byBaseCode note elsewhere in this file), which is exactly what
+       WL.Offline's phrase objects are keyed by -- no name resolution
+       needed here, unlike Solo/Chat's _txLocal wrapper. Never falls
+       through to _fetchTranslation while offline; that would just be a
+       real network call failing slowly with no connection. */
+    if(!navigator.onLine){
+      var offlineHit=_ldLookup(text);
+      if(offlineHit && offlineHit[tgtLang]){
+        Demo._showResult(offlineHit[tgtLang],'',text);
+      } else {
+        Demo._showResult(text,'',text,true);
+        showToast('NOT IN OFFLINE LIBRARY · SHOWING ORIGINAL');
+      }
+      return;
+    }
     // Primary translation
     this._fetchTranslation(text,srcLang,tgtLang,function(primary){
       if(myReqId!==Demo._reqId)return; // superseded by a newer keystroke's request -- discard
@@ -5590,7 +5651,36 @@ var SoloApp={
     });
   },
   send:function(){var inp=document.getElementById('solo-chat-input');var text=inp.value.trim();if(!text)return;inp.value='';document.getElementById('dock-send-btn').classList.remove('enabled');inp.style.direction='ltr';this._sendText(text);},
-  _sendText:function(text){var ts=Date.now();var pair=soloRenderRight(text,ts);try{navigator.vibrate([20]);}catch(e){}var self=this;setTimeout(function(){if(!navigator.onLine){soloRenderLeft(pair,text,ts,true,0,'✕');saveMsg(text,text,ts,true);showToast('OFFLINE · SHOWING ORIGINAL');return;}fetchTx(text,self._fromLang,self._toLang,function(result,conf,src){soloRenderLeft(pair,result,ts,false,conf,src);saveMsg(text,result,ts,false,conf,src);if(self._earpod)speakText(result,self._toLang);},function(){soloRenderLeft(pair,text,ts,true,0,'✕');saveMsg(text,text,ts,true);showToast('TRANSLATION FAILED');});},600);},
+  _sendText:function(text){
+    var ts=Date.now();var pair=soloRenderRight(text,ts);
+    try{navigator.vibrate([20]);}catch(e){}
+    var self=this;
+    /* The 600ms setTimeout this used to run through wasn't translating
+       anything -- it was a fake delay that made Solo feel slower than
+       it needed to be. Removed; both branches below now resolve as
+       fast as they actually can. */
+    if(!navigator.onLine){
+      /* Offline: try the local phrase dictionary before giving up --
+         previously this branch never even looked, going straight to
+         "OFFLINE · SHOWING ORIGINAL" regardless of whether the phrase
+         was one of the ones the app has always claimed to support
+         offline. _txLocal is dict-only, no network attempt. */
+      _txLocal(text, self._toLang,
+        function(result,conf,src){
+          soloRenderLeft(pair,result,ts,false,conf,src);
+          saveMsg(text,result,ts,false,conf,src);
+          if(self._earpod)speakText(result,self._toLang);
+        },
+        function(){
+          soloRenderLeft(pair,text,ts,true,0,'✕');
+          saveMsg(text,text,ts,true);
+          showToast('NOT IN OFFLINE LIBRARY · SHOWING ORIGINAL');
+        }
+      );
+      return;
+    }
+    fetchTx(text,self._fromLang,self._toLang,function(result,conf,src){soloRenderLeft(pair,result,ts,false,conf,src);saveMsg(text,result,ts,false,conf,src);if(self._earpod)speakText(result,self._toLang);},function(){soloRenderLeft(pair,text,ts,true,0,'✕');saveMsg(text,text,ts,true);showToast('TRANSLATION FAILED');});
+  },
   onFromChange:function(){this._fromLang=document.getElementById('solo-from-select').value;document.getElementById('solo-from-label').textContent=this._fromLang;this.updateGenderHint();},
   onToChange:function(){this._toLang=document.getElementById('solo-to-select').value;document.getElementById('solo-to-label').textContent=this._toLang;this.updateGenderHint();},
   swapLangs:function(){var fs=document.getElementById('solo-from-select');var ts=document.getElementById('solo-to-select');var fv=fs.value,tv=ts.value;var fo=Array.from(fs.options).map(function(o){return o.value;});var to2=Array.from(ts.options).map(function(o){return o.value;});if(to2.indexOf(fv)>-1)ts.value=fv;if(fo.indexOf(tv)>-1)fs.value=tv;this._fromLang=fs.value;this._toLang=ts.value;document.getElementById('solo-from-label').textContent=this._fromLang;document.getElementById('solo-to-label').textContent=this._toLang;this.updateGenderHint();try{navigator.vibrate([20]);}catch(e){}},
@@ -5652,19 +5742,204 @@ function setHealth(state){
 var _txCache={};
 
 /* Local dict */
-var _ld={}; /* Track A scope decision: the 8-phrase emergency offline dictionary is deferred to a future version, not v1.0. Content intentionally emptied rather than deleted -- _ldLookup/_txLocal/fetchTx and the local-match (★) badge path are all still fully wired and already fixed/verified; re-populating this object is the only step needed to bring it back. */
+/* ── OFFLINE PHRASE DICTIONARY ──────────────────────────────
+   116 real phrases × 15 Tier-1 languages (en zh hi ja ko id ar es pt fr
+   sw ha am so bn), organized in 6 industry packs. Replaces the empty
+   _ld={} placeholder -- offline was promising this (Auth: "Optimised
+   for offline & industry use", Home: "OFFLINE — Using offline phrases",
+   Solo banner: "OFFLINE · PHRASE MODE ACTIVE") while actually having
+   nothing behind it.
+
+   Quality/confidence, stated plainly rather than presented as uniform:
+   es/pt/fr/ar/zh/hi/ja/ko/id/bn are produced with high confidence --
+   these are common, well-resourced languages for exactly this register
+   of short, simple phrasebook sentences. sw/ha/am/so (Swahili, Hausa,
+   Amharic, Somali) are produced in good faith and to the same care,
+   but as lower-resource languages I cannot independently verify them
+   against a ground truth from inside this sandbox -- they warrant a
+   native-speaker review pass before this ships, especially given
+   several packs are safety/medical/emergency content. Nothing here is
+   a silent English fallback: every cell is a real, deliberate attempt
+   at that specific language, not a placeholder.
+
+   Industry does NOT wall off other packs -- WL.Offline.build() indexes
+   every phrase's every language variant into the SAME flat _ld map, so
+   a Healthcare phrase typed while in Aviation mode still resolves.
+   Industry only matters for chip ranking (not built this pass -- see
+   the reply to Eugene). */
+WL.Offline = { version:1, industries:['General','Healthcare','Aviation','Industrial','Education','Legal'], packs:{
+General:[
+{en:"Yes",zh:"是",hi:"हाँ",ja:"はい",ko:"네",id:"Ya",ar:"نعم",es:"Sí",pt:"Sim",fr:"Oui",sw:"Ndiyo",ha:"Ee",am:"አዎ",so:"Haa",bn:"হ্যাঁ"},
+{en:"No",zh:"不",hi:"नहीं",ja:"いいえ",ko:"아니요",id:"Tidak",ar:"لا",es:"No",pt:"Não",fr:"Non",sw:"Hapana",ha:"A'a",am:"አይ",so:"Maya",bn:"না"},
+{en:"Thank you",zh:"谢谢",hi:"धन्यवाद",ja:"ありがとう",ko:"감사합니다",id:"Terima kasih",ar:"شكرا",es:"Gracias",pt:"Obrigado(a)",fr:"Merci",sw:"Asante",ha:"Na gode",am:"አመሰግናለሁ",so:"Mahadsanid",bn:"ধন্যবাদ"},
+{en:"Please",zh:"请",hi:"कृपया",ja:"お願いします",ko:"부탁합니다",id:"Tolong",ar:"من فضلك",es:"Por favor",pt:"Por favor",fr:"S'il vous plaît",sw:"Tafadhali",ha:"Don Allah",am:"እባክዎ",so:"Fadlan",bn:"অনুগ্রহ করে"},
+{en:"Sorry",zh:"对不起",hi:"माफ़ कीजिये",ja:"すみません",ko:"죄송합니다",id:"Maaf",ar:"أعتذر",es:"Lo siento",pt:"Desculpe",fr:"Excusez-moi",sw:"Samahani",ha:"Yi haƙuri",am:"ይቅርታ",so:"Waan ka xumahay",bn:"দুঃখিত"},
+{en:"I don't understand",zh:"我不明白",hi:"मुझे समझ नहीं आया",ja:"分かりません",ko:"이해가 안 돼요",id:"Saya tidak mengerti",ar:"لا أفهم",es:"No entiendo",pt:"Não entendo",fr:"Je ne comprends pas",sw:"Sielewi",ha:"Ban gane ba",am:"አልገባኝም",so:"Ma fahmin",bn:"আমি বুঝিনি"},
+{en:"Please repeat",zh:"请重复一遍",hi:"कृपया दोहराएं",ja:"もう一度言ってください",ko:"다시 말해 주세요",id:"Tolong ulangi",ar:"من فضلك كرر",es:"Repita, por favor",pt:"Repita, por favor",fr:"Répétez, s'il vous plaît",sw:"Tafadhali rudia",ha:"Don Allah maimaita",am:"እባክዎ ይድገሙ",so:"Fadlan ku celi",bn:"অনুগ্রহ করে আবার বলুন"},
+{en:"Please speak slowly",zh:"请说慢一点",hi:"कृपया धीरे बोलें",ja:"ゆっくり話してください",ko:"천천히 말씀해 주세요",id:"Tolong bicara pelan-pelan",ar:"تكلم ببطء من فضلك",es:"Hable despacio, por favor",pt:"Fale devagar, por favor",fr:"Parlez lentement, s'il vous plaît",sw:"Tafadhali ongea polepole",ha:"Don Allah yi magana a hankali",am:"እባክዎ በቀስታ ይናገሩ",so:"Fadlan si tartiib ah u hadal",bn:"অনুগ্রহ করে ধীরে কথা বলুন"},
+{en:"Help",zh:"救命",hi:"मदद",ja:"助けて",ko:"도와주세요",id:"Tolong saya",ar:"النجدة",es:"Ayuda",pt:"Socorro",fr:"Au secours",sw:"Msaada",ha:"Taimako",am:"እርዳታ",so:"Caawimaad",bn:"সাহায্য"},
+{en:"Stop",zh:"停",hi:"रुको",ja:"止まって",ko:"멈춰요",id:"Berhenti",ar:"توقف",es:"Alto",pt:"Pare",fr:"Arrêtez",sw:"Simama",ha:"Tsaya",am:"ይቁሙ",so:"Jooji",bn:"থামুন"},
+{en:"Wait",zh:"等等",hi:"रुकिए",ja:"待って",ko:"기다려요",id:"Tunggu",ar:"انتظر",es:"Espere",pt:"Espere",fr:"Attendez",sw:"Subiri",ha:"Jira",am:"ይጠብቁ",so:"Sug",bn:"অপেক্ষা করুন"},
+{en:"Emergency",zh:"紧急情况",hi:"आपातकाल",ja:"緊急事態",ko:"응급상황",id:"Darurat",ar:"طوارئ",es:"Emergencia",pt:"Emergência",fr:"Urgence",sw:"Dharura",ha:"Gaggawa",am:"አደጋ ጊዜ",so:"Xaalad degdeg ah",bn:"জরুরী অবস্থা"},
+{en:"I need a doctor",zh:"我需要医生",hi:"मुझे डॉक्टर चाहिए",ja:"医者が必要です",ko:"의사가 필요해요",id:"Saya butuh dokter",ar:"أحتاج إلى طبيب",es:"Necesito un médico",pt:"Preciso de um médico",fr:"J'ai besoin d'un médecin",sw:"Nahitaji daktari",ha:"Ina bukatar likita",am:"ሐኪም ያስፈልገኛል",so:"Waxaan u baahanahay dhakhtar",bn:"আমার একজন ডাক্তার দরকার"},
+{en:"I am in pain",zh:"我很疼",hi:"मुझे दर्द हो रहा है",ja:"痛いです",ko:"아파요",id:"Saya kesakitan",ar:"أشعر بألم",es:"Tengo dolor",pt:"Estou com dor",fr:"J'ai mal",sw:"Nina maumivu",ha:"Ina ciwo",am:"ህመም ይሰማኛል",so:"Waan xanuunsanayaa",bn:"আমার ব্যথা হচ্ছে"},
+{en:"I can't breathe",zh:"我无法呼吸",hi:"मुझे सांस लेने में तकलीफ़ है",ja:"息ができません",ko:"숨을 쉴 수 없어요",id:"Saya tidak bisa bernapas",ar:"لا أستطيع التنفس",es:"No puedo respirar",pt:"Não consigo respirar",fr:"Je n'arrive pas à respirer",sw:"Sipumui",ha:"Ba na iya numfashi",am:"መተንፈስ አልችልም",so:"Ma neefsan karo",bn:"আমি শ্বাস নিতে পারছি না"},
+{en:"Call an ambulance",zh:"叫救护车",hi:"एम्बुलेंस बुलाओ",ja:"救急車を呼んでください",ko:"구급차를 불러 주세요",id:"Panggil ambulans",ar:"اتصل بسيارة إسعاف",es:"Llame a una ambulancia",pt:"Chame uma ambulância",fr:"Appelez une ambulance",sw:"Piga simu gari la wagonjwa",ha:"Ka kira motar asibiti",am:"አምቡላንስ ይጥሩ",so:"Wac ambalaas",bn:"একটি অ্যাম্বুলেন্স ডাকুন"},
+{en:"Where is the bathroom?",zh:"洗手间在哪里？",hi:"बाथरूम कहाँ है?",ja:"トイレはどこですか？",ko:"화장실이 어디예요?",id:"Di mana kamar mandi?",ar:"أين الحمام؟",es:"¿Dónde está el baño?",pt:"Onde fica o banheiro?",fr:"Où sont les toilettes ?",sw:"Choo kiko wapi?",ha:"Ina bayan gida yake?",am:"መጸዳጃ ቤት የት ነው?",so:"Musqusha xagee buu ku yaal?",bn:"বাথরুম কোথায়?"},
+{en:"How much?",zh:"多少钱？",hi:"कितना पैसा?",ja:"いくらですか？",ko:"얼마예요?",id:"Berapa harganya?",ar:"كم الثمن؟",es:"¿Cuánto cuesta?",pt:"Quanto custa?",fr:"Combien ça coûte ?",sw:"Bei gani?",ha:"Nawa ne?",am:"ስንት ነው?",so:"Immisa buu ku baahan yahay?",bn:"কত টাকা?"},
+{en:"I am lost",zh:"我迷路了",hi:"मुझे रास्ता नहीं मिल रहा",ja:"迷子になりました",ko:"길을 잃었어요",id:"Saya tersesat",ar:"لا أعرف أين أنا",es:"Me he perdido",pt:"Me perdi",fr:"Je ne sais pas où je suis",sw:"Nimepotea",ha:"Na ɓace",am:"ጠፍቻለሁ",so:"Waan lumay",bn:"আমি হারিয়ে গেছি"},
+{en:"My name is…",zh:"我叫…",hi:"मेरा नाम है…",ja:"私の名前は…です",ko:"제 이름은…입니다",id:"Nama saya…",ar:"اسمي…",es:"Me llamo…",pt:"Meu nome é…",fr:"Je m'appelle…",sw:"Jina langu ni…",ha:"Sunana…",am:"ስሜ… ነው",so:"Magacaygu waa…",bn:"আমার নাম…"},
+{en:"Where?",zh:"哪里？",hi:"कहाँ?",ja:"どこですか？",ko:"어디예요?",id:"Di mana?",ar:"أين؟",es:"¿Dónde?",pt:"Onde?",fr:"Où ?",sw:"Wapi?",ha:"Ina?",am:"የት?",so:"Xaggee?",bn:"কোথায়?"},
+{en:"When?",zh:"什么时候？",hi:"कब?",ja:"いつですか？",ko:"언제예요?",id:"Kapan?",ar:"متى؟",es:"¿Cuándo?",pt:"Quando?",fr:"Quand ?",sw:"Lini?",ha:"Yaushe?",am:"መቼ?",so:"Goorma?",bn:"কখন?"},
+{en:"Water",zh:"水",hi:"पानी",ja:"水",ko:"물",id:"Air",ar:"ماء",es:"Agua",pt:"Água",fr:"Eau",sw:"Maji",ha:"Ruwa",am:"ውሃ",so:"Biyo",bn:"পানি"},
+{en:"I need help",zh:"我需要帮助",hi:"मुझे मदद चाहिए",ja:"助けが必要です",ko:"도움이 필요해요",id:"Saya butuh bantuan",ar:"أحتاج إلى مساعدة",es:"Necesito ayuda",pt:"Preciso de ajuda",fr:"J'ai besoin d'aide",sw:"Nahitaji msaada",ha:"Ina bukatar taimako",am:"እርዳታ ያስፈልገኛል",so:"Waxaan u baahanahay caawimaad",bn:"আমার সাহায্য দরকার"}
+],
+Healthcare:[
+{en:"Where does it hurt?",zh:"哪里疼？",hi:"कहाँ दर्द हो रहा है?",ja:"どこが痛いですか？",ko:"어디가 아파요?",id:"Di mana yang sakit?",ar:"أين يؤلمك؟",es:"¿Dónde le duele?",pt:"Onde dói?",fr:"Où avez-vous mal ?",sw:"Inauma wapi?",ha:"Ina ke ciwo?",am:"የት ነው የሚያመው?",so:"Xagee ku xanuunaysaa?",bn:"কোথায় ব্যথা করছে?"},
+{en:"It hurts here",zh:"这里疼",hi:"यहाँ दर्द है",ja:"ここが痛いです",ko:"여기가 아파요",id:"Di sini sakit",ar:"يؤلمني هنا",es:"Me duele aquí",pt:"Dói aqui",fr:"J'ai mal ici",sw:"Inauma hapa",ha:"Yana ciwo a nan",am:"እዚህ ያመኛል",so:"Halkan ayaa i xanuunaya",bn:"এখানে ব্যথা করছে"},
+{en:"I have a fever",zh:"我发烧了",hi:"मुझे बुखार है",ja:"熱があります",ko:"열이 있어요",id:"Saya demam",ar:"لدي حمى",es:"Tengo fiebre",pt:"Estou com febre",fr:"J'ai de la fièvre",sw:"Nina homa",ha:"Ina zazzabi",am:"ትኩሳት አለብኝ",so:"Waxaan qabaa qandho",bn:"আমার জ্বর হয়েছে"},
+{en:"I feel nauseous",zh:"我感觉恶心",hi:"मुझे मतली महसूस हो रही है",ja:"吐き気がします",ko:"메스꺼워요",id:"Saya merasa mual",ar:"أشعر بالغثيان",es:"Tengo náuseas",pt:"Estou com náusea",fr:"J'ai la nausée",sw:"Ninaona kichefuchefu",ha:"Ina jin tashin zuciya",am:"ማቅለሽለሽ ይሰማኛል",so:"Waan lallabsanahay",bn:"আমার বমি বমি ভাব হচ্ছে"},
+{en:"I am allergic to…",zh:"我对…过敏",hi:"मुझे … से एलर्जी है",ja:"私は…にアレルギーがあります",ko:"저는 …에 알레르기가 있어요",id:"Saya alergi terhadap…",ar:"لدي حساسية من…",es:"Tengo alergia a…",pt:"Tenho alergia a…",fr:"Je suis allergique à…",sw:"Nina mzio wa…",ha:"Ina fama da rashin lafiyar…",am:"ለ… አለርጂክ ነኝ",so:"Waxaan ka xasaasi ahay…",bn:"আমার … থেকে অ্যালার্জি আছে"},
+{en:"I take this medicine",zh:"我在服用这种药",hi:"मेरी यह दवा चल रही है",ja:"この薬を飲んでいます",ko:"이 약을 복용하고 있어요",id:"Saya minum obat ini",ar:"أتناول هذا الدواء",es:"Tomo este medicamento",pt:"Tomo este remédio",fr:"Je prends ce médicament",sw:"Ninatumia dawa hii",ha:"Ina shan wannan magani",am:"ይህን መድሃኒት እወስዳለሁ",so:"Waxaan qaataa dawadan",bn:"আমি এই ওষুধ খাই"},
+{en:"I cannot swallow",zh:"我无法吞咽",hi:"मुझे निगलने में तकलीफ़ है",ja:"飲み込めません",ko:"삼킬 수가 없어요",id:"Saya tidak bisa menelan",ar:"لا أستطيع البلع",es:"No puedo tragar",pt:"Não consigo engolir",fr:"Je n'arrive pas à avaler",sw:"Siwezi kumeza",ha:"Ba na iya haɗiya",am:"መዋጥ አልችልም",so:"Ma liqi karo",bn:"আমি গিলতে পারছি না"},
+{en:"I am pregnant",zh:"我怀孕了",hi:"मैं गर्भवती हूँ",ja:"妊娠しています",ko:"임신했어요",id:"Saya sedang hamil",ar:"أنا حامل",es:"Estoy embarazada",pt:"Estou grávida",fr:"Je suis enceinte",sw:"Nina mimba",ha:"Ina da ciki",am:"እርጉዝ ነኝ",so:"Waan uur leedahay",bn:"আমি গর্ভবতী"},
+{en:"I have diabetes",zh:"我有糖尿病",hi:"मुझे मधुमेह है",ja:"糖尿病があります",ko:"저는 당뇨병이 있어요",id:"Saya punya diabetes",ar:"لدي مرض السكري",es:"Tengo diabetes",pt:"Tenho diabetes",fr:"J'ai du diabète",sw:"Nina kisukari",ha:"Ina da ciwon suga",am:"የስኳር በሽታ አለብኝ",so:"Waxaan qabaa sokorow",bn:"আমার ডায়াবেটিস আছে"},
+{en:"Blood pressure",zh:"血压",hi:"रक्तचाप",ja:"血圧",ko:"혈압",id:"Tekanan darah",ar:"ضغط الدم",es:"Presión arterial",pt:"Pressão arterial",fr:"Tension artérielle",sw:"Shinikizo la damu",ha:"Hawan jini",am:"የደም ግፊት",so:"Cadaadiska dhiigga",bn:"রক্তচাপ"},
+{en:"I need water",zh:"我需要水",hi:"मुझे पानी चाहिए",ja:"水が必要です",ko:"물이 필요해요",id:"Saya butuh air",ar:"أحتاج إلى ماء",es:"Necesito agua",pt:"Preciso de água",fr:"J'ai besoin d'eau",sw:"Nahitaji maji",ha:"Ina bukatar ruwa",am:"ውሃ ያስፈልገኛል",so:"Waxaan u baahanahay biyo",bn:"আমার পানি দরকার"},
+{en:"I cannot breathe well",zh:"我呼吸不畅",hi:"मुझे ठीक से सांस नहीं आ रही",ja:"うまく息ができません",ko:"숨쉬기가 힘들어요",id:"Saya sulit bernapas",ar:"لا أستطيع التنفس جيدا",es:"No puedo respirar bien",pt:"Não consigo respirar bem",fr:"J'ai du mal à respirer",sw:"Sipumui vizuri",ha:"Ba na numfashi sosai",am:"በደንብ መተንፈስ አልችልም",so:"Si fiican uma neefsan karo",bn:"আমি ঠিকমতো শ্বাস নিতে পারছি না"},
+{en:"I feel dizzy",zh:"我感到头晕",hi:"मुझे चक्कर आ रहा है",ja:"めまいがします",ko:"어지러워요",id:"Saya merasa pusing",ar:"أشعر بالدوار",es:"Tengo mareos",pt:"Estou com tontura",fr:"J'ai des vertiges",sw:"Ninahisi kizunguzungu",ha:"Ina jin jiri",am:"ማዞር ይሰማኛል",so:"Waan dawakhsanahay",bn:"আমার মাথা ঘুরছে"},
+{en:"I have chest pain",zh:"我胸痛",hi:"मुझे सीने में दर्द है",ja:"胸が痛いです",ko:"가슴이 아파요",id:"Saya sakit dada",ar:"أشعر بألم في الصدر",es:"Tengo dolor en el pecho",pt:"Tenho dor no peito",fr:"J'ai mal à la poitrine",sw:"Nina maumivu ya kifua",ha:"Ina jin zafi a ƙirji",am:"የደረት ህመም አለብኝ",so:"Waxaan qabaa xanuun laab",bn:"আমার বুকে ব্যথা করছে"},
+{en:"I have a headache",zh:"我头疼",hi:"मुझे सिरदर्द है",ja:"頭が痛いです",ko:"두통이 있어요",id:"Saya sakit kepala",ar:"أعاني من صداع",es:"Tengo dolor de cabeza",pt:"Estou com dor de cabeça",fr:"J'ai mal à la tête",sw:"Nina maumivu ya kichwa",ha:"Ina ciwon kai",am:"ራስ ምታት አለብኝ",so:"Waxaan qabaa madax xanuun",bn:"আমার মাথাব্যথা করছে"},
+{en:"I was in an accident",zh:"我出事故了",hi:"मेरे साथ दुर्घटना हुई है",ja:"事故に遭いました",ko:"사고를 당했어요",id:"Saya mengalami kecelakaan",ar:"تعرضت لحادث",es:"Tuve un accidente",pt:"Sofri um acidente",fr:"J'ai eu un accident",sw:"Nilipata ajali",ha:"Na yi hatsari",am:"አደጋ ደርሶብኛል",so:"Shil ayaa igu dhacay",bn:"আমি একটি দুর্ঘটনায় পড়েছি"},
+{en:"Do you have pain now?",zh:"你现在疼吗？",hi:"क्या अभी दर्द हो रहा है?",ja:"今、痛みはありますか？",ko:"지금 아프세요?",id:"Apakah Anda sakit sekarang?",ar:"هل تشعر بألم الآن؟",es:"¿Tiene dolor ahora?",pt:"Você está com dor agora?",fr:"Avez-vous mal maintenant ?",sw:"Una maumivu sasa?",ha:"Kana jin zafi yanzu?",am:"አሁን ህመም ይሰማዎታል?",so:"Hadda ma xanuunsanaysaa?",bn:"আপনার এখন ব্যথা হচ্ছে কি?"},
+{en:"Take this medicine",zh:"服用这种药",hi:"यह दवा लीजिए",ja:"この薬を飲んでください",ko:"이 약을 드세요",id:"Minum obat ini",ar:"تناول هذا الدواء",es:"Tome este medicamento",pt:"Tome este remédio",fr:"Prenez ce médicament",sw:"Tumia dawa hii",ha:"Sha wannan magani",am:"ይህን መድሃኒት ይውሰዱ",so:"Qaado dawadan",bn:"এই ওষুধ খান"},
+{en:"I do not consent",zh:"我不给予同意",hi:"मेरी सहमति नहीं है",ja:"同意しません",ko:"동의하지 않습니다",id:"Saya tidak memberikan persetujuan",ar:"أنا لا أعطي موافقتي",es:"No doy mi consentimiento",pt:"Não dou meu consentimento",fr:"Je ne consens pas",sw:"Sikubali",ha:"Ban ba da izini ba",am:"ፈቃድ አልሰጥም",so:"Ma oggolayn",bn:"আমি সম্মতি দিচ্ছি না"},
+{en:"I need an interpreter",zh:"我需要翻译",hi:"मुझे दुभाषिया चाहिए",ja:"通訳が必要です",ko:"통역사가 필요해요",id:"Saya butuh penerjemah",ar:"أحتاج إلى مترجم",es:"Necesito un intérprete",pt:"Preciso de um intérprete",fr:"J'ai besoin d'un interprète",sw:"Nahitaji mkalimani",ha:"Ina bukatar mai fassara",am:"ተርጓሚ ያስፈልገኛል",so:"Waxaan u baahanahay turjubaan",bn:"আমার একজন দোভাষী দরকার"}
+],
+Aviation:[
+{en:"Go around",zh:"复飞",hi:"गो अराउंड करें",ja:"ゴーアラウンド",ko:"복행",id:"Go around (batalkan pendaratan)",ar:"إلغاء الهبوط وإعادة المحاولة",es:"Motor y al aire",pt:"Arremetida",fr:"Remise des gaz",sw:"Rudi angani",ha:"Koma sama",am:"ዳግም ይብረሩ",so:"Ku noqo hawada",bn:"গো অ্যারাউন্ড"},
+{en:"Hold short",zh:"在此等待，不要进入跑道",hi:"रनवे से पहले रुकें",ja:"手前で待機",ko:"활주로 진입 전 대기",id:"Tunggu sebelum landasan",ar:"انتظر قبل المدرج",es:"Mantenga posición antes de la pista",pt:"Aguarde antes da pista",fr:"Attendez avant la piste",sw:"Subiri kabla ya njia ya kurukia",ha:"Jira kafin titin jirgi",am:"ከመንገዱ በፊት ይጠብቁ",so:"Sug ka hor mareeka",bn:"রানওয়ের আগে অপেক্ষা করুন"},
+{en:"Ready for pushback",zh:"准备好推出",hi:"पुशबैक के लिए तैयार",ja:"プッシュバック準備完了",ko:"푸시백 준비 완료",id:"Siap untuk pushback",ar:"جاهز للدفع للخلف",es:"Listo para pushback",pt:"Pronto para o push-back",fr:"Prêt pour le repoussage",sw:"Tayari kwa kusukumwa nyuma",ha:"A shirye don tura baya",am:"ወደ ኋላ ለመግፋት ዝግጁ ነኝ",so:"Diyaar u ah riixista dib",bn:"পুশব্যাকের জন্য প্রস্তুত"},
+{en:"Request taxi",zh:"请求滑行",hi:"टैक्सी के लिए अनुरोध",ja:"タキシー許可要求",ko:"지상 활주 요청",id:"Minta izin taxi",ar:"طلب التدحرج",es:"Solicito rodaje",pt:"Solicito táxi",fr:"Demande de roulage",sw:"Omba kuruka kwa taxi",ha:"Neman izinin taksi",am:"ለታክሲ ጥያቄ",so:"Codso taksi",bn:"ট্যাক্সি অনুরোধ"},
+{en:"Confirm",zh:"确认",hi:"पुष्टि करें",ja:"確認",ko:"확인",id:"Konfirmasi",ar:"تأكيد",es:"Confirme",pt:"Confirme",fr:"Confirmez",sw:"Thibitisha",ha:"Tabbatar",am:"ያረጋግጡ",so:"Xaqiiji",bn:"নিশ্চিত করুন"},
+{en:"Say again",zh:"请再说一遍",hi:"फिर से कहें",ja:"もう一度言ってください",ko:"다시 말씀해주세요",id:"Ulangi",ar:"كرر من فضلك",es:"Repita",pt:"Repita",fr:"Répétez",sw:"Sema tena",ha:"Sake fada",am:"ይድገሙ",so:"Ku celi",bn:"আবার বলুন"},
+{en:"Unable",zh:"无法执行",hi:"असमर्थ",ja:"不可能です",ko:"불가능합니다",id:"Tidak bisa",ar:"غير قادر",es:"No puedo cumplir",pt:"Incapaz",fr:"Incapable",sw:"Siwezi",ha:"Ba zan iya ba",am:"አልችልም",so:"Ma awoodo",bn:"অক্ষম"},
+{en:"Stand by",zh:"待命",hi:"प्रतीक्षा करें",ja:"待機してください",ko:"대기하세요",id:"Tunggu sebentar",ar:"انتظر",es:"Espere",pt:"Aguarde",fr:"Attendez",sw:"Ngoja",ha:"Jira",am:"ይጠብቁ",so:"Sug",bn:"অপেক্ষা করুন"},
+{en:"Maintenance required",zh:"需要维修",hi:"रखरखाव की आवश्यकता है",ja:"整備が必要です",ko:"정비가 필요합니다",id:"Perlu perawatan",ar:"يلزم الصيانة",es:"Se requiere mantenimiento",pt:"Manutenção necessária",fr:"Maintenance requise",sw:"Matengenezo yanahitajika",ha:"Ana bukatar kulawa",am:"ጥገና ያስፈልጋል",so:"Dayactir baa loo baahan yahay",bn:"রক্ষণাবেক্ষণ প্রয়োজন"},
+{en:"Tow bar connected",zh:"牵引杆已连接",hi:"टो बार जुड़ा हुआ है",ja:"トーバー接続済み",ko:"견인봉 연결됨",id:"Tow bar terpasang",ar:"تم توصيل قضيب الجر",es:"Barra de remolque conectada",pt:"Barra de reboque conectada",fr:"Barre de remorquage connectée",sw:"Fimbo ya kuvuta imeunganishwa",ha:"An haɗa sandar ja",am:"መጎተቻ ዘንግ ተገናኝቷል",so:"Ulaha jiidista waa la xidhay",bn:"টো বার সংযুক্ত"},
+{en:"Chocks in",zh:"轮挡已放置",hi:"चॉक्स लगे हैं",ja:"車輪止め装着",ko:"고임목 설치됨",id:"Ganjal roda terpasang",ar:"تم وضع مصدات العجلات",es:"Calzos puestos",pt:"Calços colocados",fr:"Cales mises",sw:"Vizuizi vimewekwa",ha:"An sanya toshe",am:"ማገጃዎቹ ገብተዋል",so:"Bloogyada waa la geliyay",bn:"চক ইন করা হয়েছে"},
+{en:"Chocks out",zh:"轮挡已移除",hi:"चॉक्स हटा दिए गए",ja:"車輪止め撤去",ko:"고임목 제거됨",id:"Ganjal roda dilepas",ar:"تمت إزالة مصدات العجلات",es:"Calzos retirados",pt:"Calços removidos",fr:"Cales retirées",sw:"Vizuizi vimeondolewa",ha:"An cire toshe",am:"ማገጃዎቹ ወጥተዋል",so:"Bloogyada waa la saaray",bn:"চক আউট করা হয়েছে"},
+{en:"Fuel on",zh:"加油开始",hi:"ईंधन भरना शुरू",ja:"給油開始",ko:"급유 시작",id:"Pengisian bahan bakar dimulai",ar:"بدء التزود بالوقود",es:"Repostaje activado",pt:"Abastecimento ligado",fr:"Ravitaillement en cours",sw:"Mafuta yanajazwa",ha:"An fara sanya man fetur",am:"ነዳጅ መሙላት ተጀምሯል",so:"Shidaalka waa la shubayaa",bn:"জ্বালানি চালু"},
+{en:"Fuel off",zh:"加油停止",hi:"ईंधन भरना बंद",ja:"給油停止",ko:"급유 중지",id:"Pengisian bahan bakar dihentikan",ar:"توقف التزود بالوقود",es:"Repostaje detenido",pt:"Abastecimento desligado",fr:"Ravitaillement arrêté",sw:"Mafuta yamesimamishwa",ha:"An dakatar da sanya man fetur",am:"ነዳጅ መሙላት ቆሟል",so:"Shidaalka waa la joojiyay",bn:"জ্বালানি বন্ধ"},
+{en:"Passenger door",zh:"客舱门",hi:"यात्री द्वार",ja:"旅客ドア",ko:"승객용 문",id:"Pintu penumpang",ar:"باب الركاب",es:"Puerta de pasajeros",pt:"Porta de passageiros",fr:"Porte passagers",sw:"Mlango wa abiria",ha:"Kofar fasinja",am:"የመንገደኞች በር",so:"Albaabka rakaabka",bn:"যাত্রী দরজা"},
+{en:"Cargo door",zh:"货舱门",hi:"कार्गो द्वार",ja:"貨物ドア",ko:"화물칸 문",id:"Pintu kargo",ar:"باب البضائع",es:"Puerta de carga",pt:"Porta de carga",fr:"Porte cargo",sw:"Mlango wa mizigo",ha:"Kofar kaya",am:"የጭነት በር",so:"Albaabka xamuulka",bn:"কার্গো দরজা"},
+{en:"Safety briefing",zh:"安全简报",hi:"सुरक्षा जानकारी",ja:"安全ブリーフィング",ko:"안전 브리핑",id:"Pengarahan keselamatan",ar:"إحاطة السلامة",es:"Instrucciones de seguridad",pt:"Instruções de segurança",fr:"Briefing de sécurité",sw:"Maelekezo ya usalama",ha:"Bayanin tsaro",am:"የደህንነት መግለጫ",so:"Sharraxaadda badbaadada",bn:"নিরাপত্তা ব্রিফিং"},
+{en:"Evacuate",zh:"疏散",hi:"निकासी करें",ja:"避難してください",ko:"대피하세요",id:"Evakuasi",ar:"أخلوا المكان",es:"Evacuen",pt:"Evacuem",fr:"Évacuez",sw:"Ondokeni haraka",ha:"Ku fice",am:"ልቀቁ",so:"Ka bixi",bn:"সরে যান"},
+{en:"Fire",zh:"着火了",hi:"आग लगी है",ja:"火事です",ko:"불이야",id:"Kebakaran",ar:"حريق",es:"Fuego",pt:"Fogo",fr:"Feu",sw:"Moto",ha:"Wuta",am:"እሳት",so:"Dab",bn:"আগুন"},
+{en:"Injured person",zh:"有人受伤",hi:"घायल व्यक्ति",ja:"負傷者",ko:"부상자",id:"Ada yang terluka",ar:"شخص مصاب",es:"Persona herida",pt:"Pessoa ferida",fr:"Personne blessée",sw:"Mtu amejeruhiwa",ha:"Wanda ya jikkata",am:"የቆሰለ ሰው",so:"Qof dhaawacan",bn:"আহত ব্যক্তি"}
+],
+Industrial:[
+{en:"Stop work",zh:"停止工作",hi:"काम बंद करें",ja:"作業中止",ko:"작업 중지",id:"Hentikan pekerjaan",ar:"أوقف العمل",es:"Detenga el trabajo",pt:"Pare o trabalho",fr:"Arrêtez le travail",sw:"Simamisha kazi",ha:"Dakatar da aiki",am:"ስራ ያቁሙ",so:"Shaqada jooji",bn:"কাজ বন্ধ করুন"},
+{en:"Hard hat required",zh:"需要戴安全帽",hi:"सुरक्षा हेलमेट आवश्यक",ja:"ヘルメット着用必須",ko:"안전모 착용 필수",id:"Wajib memakai helm keselamatan",ar:"يلزم ارتداء خوذة الأمان",es:"Se requiere casco",pt:"Capacete obrigatório",fr:"Casque obligatoire",sw:"Kofia ngumu inahitajika",ha:"Ana bukatar hular kwano",am:"የራስ ቁር ያስፈልጋል",so:"Koofiyad adag ayaa loo baahan yahay",bn:"হার্ড হ্যাট প্রয়োজন"},
+{en:"Watch your step",zh:"注意脚下",hi:"कदम संभालकर रखें",ja:"足元に注意",ko:"발밑을 조심하세요",id:"Hati-hati melangkah",ar:"انتبه لخطوتك",es:"Cuidado al caminar",pt:"Cuidado ao andar",fr:"Attention où vous marchez",sw:"Angalia hatua yako",ha:"Kula da matakinka",am:"እርምጃዎን ይጠንቀቁ",so:"Isha ku hay tallaabadaada",bn:"পা সামলে চলুন"},
+{en:"Hot surface",zh:"表面高温",hi:"गर्म सतह",ja:"高温注意",ko:"표면이 뜨거움",id:"Permukaan panas",ar:"سطح ساخن",es:"Superficie caliente",pt:"Superfície quente",fr:"Surface chaude",sw:"Uso wa moto",ha:"Farfajiya mai zafi",am:"ትኩስ ወለል",so:"Dusha kulul",bn:"গরম পৃষ্ঠ"},
+{en:"Live wire",zh:"带电电线",hi:"बिजली का तार",ja:"通電中の電線",ko:"통전 중인 전선",id:"Kabel bertegangan",ar:"سلك كهربائي مكهرب",es:"Cable con corriente",pt:"Fio energizado",fr:"Fil sous tension",sw:"Waya yenye umeme",ha:"Wayar da ke da wutar lantarki",am:"የኤሌክትሪክ ሽቦ",so:"Waayirka korontada leh",bn:"বিদ্যুৎবাহী তার"},
+{en:"Confined space",zh:"密闭空间",hi:"सीमित स्थान",ja:"閉鎖空間",ko:"밀폐 공간",id:"Ruang terbatas",ar:"مكان ضيق مغلق",es:"Espacio confinado",pt:"Espaço confinado",fr:"Espace confiné",sw:"Nafasi finyu",ha:"Wurin da aka rufe",am:"ጠባብ ቦታ",so:"Meel cidhiidhi ah",bn:"সংকীর্ণ স্থান"},
+{en:"Lockout",zh:"上锁挂牌",hi:"लॉकआउट",ja:"ロックアウト",ko:"잠금 조치",id:"Penguncian peralatan",ar:"إغلاق الأمان",es:"Bloqueo de energía",pt:"Bloqueio de energia",fr:"Consignation",sw:"Kufunga usalama",ha:"Kulle na tsaro",am:"ደህንነት መቆለፊያ",so:"Xiritaanka amniga",bn:"লকআউট"},
+{en:"Forklift coming",zh:"叉车来了",hi:"फोर्कलिफ्ट आ रही है",ja:"フォークリフト接近中",ko:"지게차 접근 중",id:"Forklift sedang lewat",ar:"رافعة شوكية قادمة",es:"Viene un montacargas",pt:"Empilhadeira se aproximando",fr:"Chariot élévateur en approche",sw:"Forklift inakuja",ha:"Forklift na zuwa",am:"ፎርክሊፍት እየመጣ ነው",so:"Foorklift ayaa soo socda",bn:"ফর্কলিফট আসছে"},
+{en:"Do not enter",zh:"禁止进入",hi:"प्रवेश न करें",ja:"立入禁止",ko:"출입 금지",id:"Dilarang masuk",ar:"ممنوع الدخول",es:"No entrar",pt:"Não entre",fr:"Ne pas entrer",sw:"Usiingie",ha:"Kada ka shiga",am:"አይግቡ",so:"Ha gelin",bn:"প্রবেশ নিষেধ"},
+{en:"Assembly point",zh:"集合点",hi:"सभा स्थल",ja:"集合場所",ko:"집결지",id:"Titik kumpul",ar:"نقطة التجمع",es:"Punto de encuentro",pt:"Ponto de encontro",fr:"Point de rassemblement",sw:"Sehemu ya kukusanyika",ha:"Wurin taruwa",am:"መሰብሰቢያ ቦታ",so:"Goobta isu-imaanshaha",bn:"সমাবেশ স্থল"},
+{en:"First aid",zh:"急救",hi:"प्राथमिक चिकित्सा",ja:"応急処置",ko:"응급처치",id:"Pertolongan pertama",ar:"إسعافات أولية",es:"Primeros auxilios",pt:"Primeiros socorros",fr:"Premiers secours",sw:"Huduma ya kwanza",ha:"Agajin gaggawa",am:"የመጀመሪያ እርዳታ",so:"Gargaarka degdegga ah",bn:"প্রাথমিক চিকিৎসা"},
+{en:"Report this hazard",zh:"报告这个危险",hi:"इस खतरे की रिपोर्ट करें",ja:"この危険を報告してください",ko:"이 위험을 신고하세요",id:"Laporkan bahaya ini",ar:"أبلغ عن هذا الخطر",es:"Reporte este peligro",pt:"Reporte este perigo",fr:"Signalez ce danger",sw:"Ripoti hatari hii",ha:"Ka ba da rahoto game da wannan haɗari",am:"ይህን አደጋ ያሳውቁ",so:"Kasoo warran khatartan",bn:"এই বিপদ রিপোর্ট করুন"},
+{en:"Wear eye protection",zh:"佩戴护目镜",hi:"आँखों की सुरक्षा पहनें",ja:"保護メガネを着用してください",ko:"보안경을 착용하세요",id:"Kenakan pelindung mata",ar:"ارتد نظارات واقية",es:"Use protección ocular",pt:"Use proteção ocular",fr:"Portez une protection oculaire",sw:"Vaa kinga za macho",ha:"Sa tabarau na kariya",am:"የዓይን መከላከያ ያድርጉ",so:"Xir ilaalinta indhaha",bn:"চোখের সুরক্ষা পরুন"},
+{en:"Hearing protection",zh:"听力防护",hi:"श्रवण सुरक्षा",ja:"聴覚保護",ko:"청력 보호구",id:"Pelindung telinga",ar:"حماية السمع",es:"Protección auditiva",pt:"Proteção auditiva",fr:"Protection auditive",sw:"Kinga za masikio",ha:"Kariyar kunne",am:"የመስማት መከላከያ",so:"Ilaalinta dhagaha",bn:"শ্রবণ সুরক্ষা"},
+{en:"Fall hazard",zh:"坠落危险",hi:"गिरने का खतरा",ja:"転落の危険",ko:"추락 위험",id:"Bahaya jatuh",ar:"خطر السقوط",es:"Peligro de caída",pt:"Perigo de queda",fr:"Risque de chute",sw:"Hatari ya kuanguka",ha:"Haɗarin faɗuwa",am:"የመውደቅ አደጋ",so:"Khatarta dhicidda",bn:"পতনের ঝুঁকি"},
+{en:"Crane overhead",zh:"头顶有起重机",hi:"ऊपर क्रेन है",ja:"頭上にクレーン",ko:"머리 위 크레인 주의",id:"Ada crane di atas",ar:"رافعة فوق الرأس",es:"Grúa sobre su cabeza",pt:"Guindaste acima",fr:"Grue au-dessus",sw:"Crane iko juu",ha:"Injin ɗaga abu na sama",am:"መስቀያ ከላይ አለ",so:"Qalabka wax kor u qaada ayaa kor taagan",bn:"মাথার ওপরে ক্রেন"},
+{en:"Gas leak",zh:"天然气泄漏",hi:"गैस रिसाव",ja:"ガス漏れ",ko:"가스 누출",id:"Kebocoran gas",ar:"تسرب الغاز",es:"Fuga de gas",pt:"Vazamento de gás",fr:"Fuite de gaz",sw:"Uvujaji wa gesi",ha:"Zubar iskar gas",am:"የጋዝ ፍሳሽ",so:"Gaas oo daadanaya",bn:"গ্যাস লিক"},
+{en:"Evacuate now",zh:"立即疏散",hi:"तुरंत निकासी करें",ja:"今すぐ避難してください",ko:"지금 즉시 대피하세요",id:"Evakuasi sekarang",ar:"أخلوا المكان الآن",es:"Evacúen ahora",pt:"Evacuem agora",fr:"Évacuez maintenant",sw:"Ondokeni sasa hivi",ha:"Ku fice yanzu",am:"አሁኑኑ ልቀቁ",so:"Hadda ka bax",bn:"এখনই সরে যান"},
+{en:"All clear",zh:"安全解除",hi:"सब सुरक्षित है",ja:"安全確認完了",ko:"안전 확인 완료",id:"Aman, semua jelas",ar:"كل شيء آمن الآن",es:"Todo despejado",pt:"Tudo liberado",fr:"Fin d'alerte",sw:"Salama sasa",ha:"Duk lafiya",am:"ሁሉም ደህና ነው",so:"Wax walba waa nabad",bn:"সব পরিষ্কার"},
+{en:"I need a supervisor",zh:"我需要主管",hi:"मुझे पर्यवेक्षक चाहिए",ja:"監督者が必要です",ko:"관리자가 필요해요",id:"Saya butuh supervisor",ar:"أحتاج إلى مشرف",es:"Necesito un supervisor",pt:"Preciso de um supervisor",fr:"J'ai besoin d'un superviseur",sw:"Nahitaji msimamizi",ha:"Ina bukatar shugaba",am:"ተቆጣጣሪ ያስፈልገኛል",so:"Waxaan u baahanahay kormeere",bn:"আমার একজন সুপারভাইজার দরকার"}
+],
+Education:[
+{en:"I do not understand this",zh:"我不明白这个",hi:"मुझे यह समझ नहीं आया",ja:"これが分かりません",ko:"이것을 이해하지 못했어요",id:"Saya tidak mengerti ini",ar:"لا أفهم هذا",es:"No entiendo esto",pt:"Não entendo isso",fr:"Je ne comprends pas ceci",sw:"Sielewi hii",ha:"Ban gane wannan ba",am:"ይህን አልገባኝም",so:"Kani ma fahmin",bn:"আমি এটা বুঝতে পারছি না"},
+{en:"Please repeat the question",zh:"请重复这个问题",hi:"कृपया प्रश्न दोहराएं",ja:"質問をもう一度言ってください",ko:"질문을 다시 말씀해 주세요",id:"Tolong ulangi pertanyaannya",ar:"من فضلك كرر السؤال",es:"Repita la pregunta, por favor",pt:"Repita a pergunta, por favor",fr:"Répétez la question, s'il vous plaît",sw:"Tafadhali rudia swali",ha:"Don Allah maimaita tambayar",am:"እባክዎ ጥያቄውን ይድገሙ",so:"Fadlan ku celi su'aasha",bn:"অনুগ্রহ করে প্রশ্নটি আবার বলুন"},
+{en:"What does this word mean?",zh:"这个词是什么意思？",hi:"इस शब्द का क्या अर्थ है?",ja:"この言葉はどういう意味ですか？",ko:"이 단어는 무슨 뜻이에요?",id:"Apa arti kata ini?",ar:"ماذا تعني هذه الكلمة؟",es:"¿Qué significa esta palabra?",pt:"O que significa esta palavra?",fr:"Que signifie ce mot ?",sw:"Neno hili lina maana gani?",ha:"Menene ma'anar wannan kalma?",am:"ይህ ቃል ምን ማለት ነው?",so:"Ereygani muxuu ka dhigan yahay?",bn:"এই শব্দের অর্থ কী?"},
+{en:"Can you explain more slowly?",zh:"你能讲慢一点吗？",hi:"क्या आप धीरे समझा सकते हैं?",ja:"もっとゆっくり説明してもらえますか？",ko:"더 천천히 설명해 주시겠어요?",id:"Bisakah Anda jelaskan lebih pelan?",ar:"هل يمكنك الشرح ببطء أكثر؟",es:"¿Puede explicar más despacio?",pt:"Pode explicar mais devagar?",fr:"Pouvez-vous expliquer plus lentement ?",sw:"Unaweza kueleza polepole zaidi?",ha:"Za ka iya bayyanawa a hankali?",am:"በቀስታ ሊያስረዱኝ ይችላሉ?",so:"Ma si tartiib ah ayaad u sharxi kartaa?",bn:"আপনি কি আরও ধীরে ব্যাখ্যা করতে পারেন?"},
+{en:"I need more time",zh:"我需要更多时间",hi:"मुझे और समय चाहिए",ja:"もっと時間が必要です",ko:"시간이 더 필요해요",id:"Saya butuh waktu lebih",ar:"أحتاج إلى وقت أكثر",es:"Necesito más tiempo",pt:"Preciso de mais tempo",fr:"J'ai besoin de plus de temps",sw:"Nahitaji muda zaidi",ha:"Ina bukatar ƙarin lokaci",am:"ተጨማሪ ጊዜ ያስፈልገኛል",so:"Waxaan u baahanahay wakhti dheeraad ah",bn:"আমার আরও সময় দরকার"},
+{en:"Page number",zh:"页码",hi:"पृष्ठ संख्या",ja:"ページ番号",ko:"페이지 번호",id:"Nomor halaman",ar:"رقم الصفحة",es:"Número de página",pt:"Número da página",fr:"Numéro de page",sw:"Nambari ya ukurasa",ha:"Lambar shafi",am:"የገጽ ቁጥር",so:"Lambarka boggga",bn:"পৃষ্ঠা নম্বর"},
+{en:"Homework",zh:"家庭作业",hi:"गृहकार्य",ja:"宿題",ko:"숙제",id:"Pekerjaan rumah",ar:"الواجب المنزلي",es:"Tarea",pt:"Trabalho de casa",fr:"Devoirs",sw:"Kazi ya nyumbani",ha:"Aikin gida",am:"የቤት ስራ",so:"Shaqada guriga",bn:"বাড়ির কাজ"},
+{en:"Exam",zh:"考试",hi:"परीक्षा",ja:"試験",ko:"시험",id:"Ujian",ar:"امتحان",es:"Examen",pt:"Exame",fr:"Examen",sw:"Mtihani",ha:"Jarrabawa",am:"ፈተና",so:"Imtixaan",bn:"পরীক্ষা"},
+{en:"I have a question",zh:"我有一个问题",hi:"मेरा एक प्रश्न है",ja:"質問があります",ko:"질문이 있어요",id:"Saya punya pertanyaan",ar:"لدي سؤال",es:"Tengo una pregunta",pt:"Tenho uma pergunta",fr:"J'ai une question",sw:"Nina swali",ha:"Ina da tambaya",am:"ጥያቄ አለኝ",so:"Su'aal ayaan qabaa",bn:"আমার একটি প্রশ্ন আছে"},
+{en:"I am lost in this lesson",zh:"我跟不上这节课",hi:"मुझे यह पाठ समझ नहीं आ रहा",ja:"この授業についていけません",ko:"이 수업을 따라가지 못하고 있어요",id:"Saya tidak mengikuti pelajaran ini",ar:"لم أعد أفهم هذا الدرس",es:"No logro seguir esta lección",pt:"Não estou conseguindo acompanhar esta aula",fr:"Je n'arrive pas à suivre cette leçon",sw:"Nimechanganyikiwa katika somo hili",ha:"Na ɓace a wannan darasi",am:"በዚህ ትምህርት ግራ ገብቶኛል",so:"Waan ka lumay casharkan",bn:"আমি এই পাঠে হারিয়ে গেছি"},
+{en:"Please write it down",zh:"请写下来",hi:"कृपया इसे लिख दें",ja:"書いてください",ko:"적어 주세요",id:"Tolong tuliskan",ar:"من فضلك اكتبها",es:"Por favor, escríbalo",pt:"Por favor, escreva",fr:"Écrivez-le, s'il vous plaît",sw:"Tafadhali iandike",ha:"Don Allah rubuta",am:"እባክዎ ይጻፉት",so:"Fadlan qor",bn:"অনুগ্রহ করে লিখে দিন"},
+{en:"Group work",zh:"小组作业",hi:"समूह कार्य",ja:"グループ活動",ko:"조별 활동",id:"Kerja kelompok",ar:"العمل الجماعي",es:"Trabajo en grupo",pt:"Trabalho em grupo",fr:"Travail de groupe",sw:"Kazi ya kikundi",ha:"Aikin ƙungiya",am:"የቡድን ስራ",so:"Shaqada kooxda",bn:"দলগত কাজ"},
+{en:"Break time",zh:"休息时间",hi:"विश्राम का समय",ja:"休憩時間",ko:"쉬는 시간",id:"Waktu istirahat",ar:"وقت الاستراحة",es:"Hora del descanso",pt:"Hora do intervalo",fr:"Pause",sw:"Muda wa mapumziko",ha:"Lokacin hutu",am:"የእረፍት ጊዜ",so:"Wakhtiga nasashada",bn:"বিরতির সময়"},
+{en:"I need help with this problem",zh:"我需要这道题的帮助",hi:"मुझे इस समस्या में मदद चाहिए",ja:"この問題を手伝ってほしいです",ko:"이 문제를 도와주세요",id:"Saya butuh bantuan soal ini",ar:"أحتاج إلى مساعدة في هذه المسألة",es:"Necesito ayuda con este problema",pt:"Preciso de ajuda com este problema",fr:"J'ai besoin d'aide pour ce problème",sw:"Nahitaji msaada na tatizo hili",ha:"Ina bukatar taimako da wannan matsala",am:"በዚህ ችግር እርዳታ ያስፈልገኛል",so:"Waxaan u baahanahay caawimaad dhibaatadan",bn:"এই সমস্যায় আমার সাহায্য দরকার"},
+{en:"Attendance",zh:"出勤",hi:"उपस्थिति",ja:"出席",ko:"출석",id:"Kehadiran",ar:"الحضور",es:"Asistencia",pt:"Presença",fr:"Présence",sw:"Mahudhurio",ha:"Halarta",am:"መገኘት",so:"Xaadiris",bn:"উপস্থিতি"},
+{en:"Thank you teacher",zh:"谢谢老师",hi:"धन्यवाद शिक्षक",ja:"先生、ありがとうございます",ko:"선생님 감사합니다",id:"Terima kasih, Bapak/Ibu Guru",ar:"شكرا لك يا معلم",es:"Gracias, profesor/a",pt:"Obrigado(a), professor(a)",fr:"Merci, professeur",sw:"Asante mwalimu",ha:"Na gode, malami",am:"አመሰግናለሁ መምህር",so:"Mahadsanid macallin",bn:"ধন্যবাদ শিক্ষক"}
+],
+Legal:[
+{en:"I do not understand",zh:"我不明白",hi:"मुझे समझ नहीं आया",ja:"分かりません",ko:"이해가 안 됩니다",id:"Saya tidak mengerti",ar:"لا أفهم",es:"No entiendo",pt:"Não entendo",fr:"Je ne comprends pas",sw:"Sielewi",ha:"Ban gane ba",am:"አልገባኝም",so:"Ma fahmin",bn:"আমি বুঝতে পারছি না"},
+{en:"I need a lawyer",zh:"我需要律师",hi:"मुझे वकील चाहिए",ja:"弁護士が必要です",ko:"변호사가 필요합니다",id:"Saya butuh pengacara",ar:"أحتاج إلى محام",es:"Necesito un abogado",pt:"Preciso de um advogado",fr:"J'ai besoin d'un avocat",sw:"Nahitaji wakili",ha:"Ina bukatar lauya",am:"ጠበቃ ያስፈልገኛል",so:"Waxaan u baahanahay qareen",bn:"আমার একজন আইনজীবী দরকার"},
+{en:"I do not consent",zh:"我不给予同意",hi:"मेरी सहमति नहीं है",ja:"同意しません",ko:"동의하지 않습니다",id:"Saya tidak memberikan persetujuan",ar:"أنا لا أعطي موافقتي",es:"No doy mi consentimiento",pt:"Não dou meu consentimento",fr:"Je ne consens pas",sw:"Sikubali",ha:"Ban ba da izini ba",am:"ፈቃድ አልሰጥም",so:"Ma oggolayn",bn:"আমি সম্মতি দিচ্ছি না"},
+{en:"I want an interpreter",zh:"我需要一位翻译",hi:"मुझे एक दुभाषिया चाहिए",ja:"通訳をお願いします",ko:"통역사를 원합니다",id:"Saya ingin penerjemah",ar:"أريد مترجما",es:"Quiero un intérprete",pt:"Quero um intérprete",fr:"Je veux un interprète",sw:"Nataka mkalimani",ha:"Ina son mai fassara",am:"ተርጓሚ እፈልጋለሁ",so:"Waxaan doonayaa turjubaan",bn:"আমি একজন দোভাষী চাই"},
+{en:"This is my name",zh:"这是我的名字",hi:"यह मेरा नाम है",ja:"これが私の名前です",ko:"이것이 제 이름입니다",id:"Ini nama saya",ar:"هذا اسمي",es:"Este es mi nombre",pt:"Este é o meu nome",fr:"Voici mon nom",sw:"Hili ni jina langu",ha:"Wannan sunana ne",am:"ይህ ስሜ ነው",so:"Kani waa magacayga",bn:"এটি আমার নাম"},
+{en:"Date of birth",zh:"出生日期",hi:"जन्म तिथि",ja:"生年月日",ko:"생년월일",id:"Tanggal lahir",ar:"تاريخ الميلاد",es:"Fecha de nacimiento",pt:"Data de nascimento",fr:"Date de naissance",sw:"Tarehe ya kuzaliwa",ha:"Ranar haihuwa",am:"የትውልድ ቀን",so:"Taariikhda dhalashada",bn:"জন্ম তারিখ"},
+{en:"I am a witness",zh:"我是证人",hi:"मैं एक गवाह हूँ",ja:"私は証人です",ko:"저는 증인입니다",id:"Saya seorang saksi",ar:"أنا شاهد/شاهدة",es:"Soy testigo",pt:"Sou testemunha",fr:"Je suis témoin",sw:"Mimi ni shahidi",ha:"Ni shaida ne",am:"እኔ ምስክር ነኝ",so:"Waxaan ahay markhaati",bn:"আমি একজন সাক্ষী"},
+{en:"I need to remain silent",zh:"我需要保持沉默",hi:"मुझे चुप रहना है",ja:"黙秘します",ko:"묵비권을 행사하겠습니다",id:"Saya ingin tetap diam",ar:"أرغب في التزام الصمت",es:"Necesito guardar silencio",pt:"Preciso permanecer em silêncio",fr:"Je dois garder le silence",sw:"Nahitaji kunyamaza kimya",ha:"Ina bukatar in yi shiru",am:"ዝም ማለት አለብኝ",so:"Waxaan u baahanahay inaan aamuso",bn:"আমাকে চুপ থাকতে হবে"},
+{en:"Please repeat",zh:"请重复",hi:"कृपया दोहराएं",ja:"もう一度言ってください",ko:"다시 말씀해 주세요",id:"Tolong ulangi",ar:"من فضلك كرر",es:"Repita, por favor",pt:"Repita, por favor",fr:"Répétez, s'il vous plaît",sw:"Tafadhali rudia",ha:"Don Allah maimaita",am:"እባክዎ ይድገሙ",so:"Fadlan ku celi",bn:"অনুগ্রহ করে আবার বলুন"},
+{en:"I do not sign",zh:"我不签字",hi:"मैं हस्ताक्षर नहीं करूँगा/करूँगी",ja:"署名しません",ko:"서명하지 않겠습니다",id:"Saya tidak menandatangani",ar:"أنا لا أوقع",es:"No firmo",pt:"Não assino",fr:"Je ne signe pas",sw:"Sisaini",ha:"Ba na sa hannu",am:"አልፈርምም",so:"Ma saxiixayo",bn:"আমি স্বাক্ষর করব না"},
+{en:"This is an emergency",zh:"这是紧急情况",hi:"यह एक आपात स्थिति है",ja:"これは緊急事態です",ko:"이것은 응급 상황입니다",id:"Ini keadaan darurat",ar:"هذه حالة طارئة",es:"Esto es una emergencia",pt:"Isto é uma emergência",fr:"C'est une urgence",sw:"Hii ni dharura",ha:"Wannan gaggawa ne",am:"ይህ የአደጋ ጊዜ ነው",so:"Tani waa xaalad degdeg ah",bn:"এটি একটি জরুরি অবস্থা"},
+{en:"Where is the court?",zh:"法院在哪里？",hi:"अदालत कहाँ है?",ja:"裁判所はどこですか？",ko:"법원이 어디예요?",id:"Di mana pengadilan?",ar:"أين المحكمة؟",es:"¿Dónde está el tribunal?",pt:"Onde fica o tribunal?",fr:"Où est le tribunal ?",sw:"Mahakama iko wapi?",ha:"Ina kotu take?",am:"ፍርድ ቤቱ የት ነው?",so:"Xaggee bay maxkamadu ku taal?",bn:"আদালত কোথায়?"},
+{en:"Case number",zh:"案件编号",hi:"मामला संख्या",ja:"事件番号",ko:"사건 번호",id:"Nomor perkara",ar:"رقم القضية",es:"Número de caso",pt:"Número do processo",fr:"Numéro de dossier",sw:"Nambari ya kesi",ha:"Lambar shari'a",am:"የክስ ቁጥር",so:"Lambarka kiiska",bn:"মামলা নম্বর"},
+{en:"I need more time",zh:"我需要更多时间",hi:"मुझे और समय चाहिए",ja:"もっと時間が必要です",ko:"시간이 더 필요합니다",id:"Saya butuh waktu lebih",ar:"أحتاج إلى وقت أكثر",es:"Necesito más tiempo",pt:"Preciso de mais tempo",fr:"J'ai besoin de plus de temps",sw:"Nahitaji muda zaidi",ha:"Ina bukatar ƙarin lokaci",am:"ተጨማሪ ጊዜ ያስፈልገኛል",so:"Waxaan u baahanahay wakhti dheeraad ah",bn:"আমার আরও সময় দরকার"},
+{en:"I understand",zh:"我明白了",hi:"मुझे समझ आ गया",ja:"分かりました",ko:"이해했습니다",id:"Saya mengerti",ar:"أنا أفهم",es:"Entiendo",pt:"Entendo",fr:"Je comprends",sw:"Naelewa",ha:"Na gane",am:"ተረድቻለሁ",so:"Waan fahmay",bn:"আমি বুঝেছি"},
+{en:"I do not agree",zh:"我不同意",hi:"मैं सहमत नहीं हूँ",ja:"賛成できません",ko:"저는 그렇게 생각하지 않아요",id:"Saya tidak setuju",ar:"أنا لا أتفق معك",es:"No estoy de acuerdo",pt:"Não concordo",fr:"Je ne suis pas d'accord",sw:"Sikubaliani",ha:"Ban yarda ba",am:"አልስማማም",so:"Ma raacsani",bn:"আমি একমত নই"}
+]
+}};
+
+/* Index every phrase's every language variant into the flat map
+   _txLocal/_ldLookup already expect -- one shared map, not per-industry,
+   so any pack's phrases resolve regardless of which industry mode the
+   session is in. Runs once, synchronously, before _ld's first real
+   lookup, so the existing lazy _ldNorm cache in _ldLookup builds
+   correctly on first use with no separate rebuild step needed. */
+var _ld=(function(){
+  var map={};
+  var codes=['en','zh','hi','ja','ko','id','ar','es','pt','fr','sw','ha','am','so','bn'];
+  Object.keys(WL.Offline.packs).forEach(function(packName){
+    WL.Offline.packs[packName].forEach(function(phrase){
+      codes.forEach(function(code){
+        /* First entry wins on a shared string (packs are indexed in
+           declared order, General first), so a word that two phrases
+           happen to share in some language resolves to the more
+           general meaning instead of whichever pack loaded last. */
+        if(phrase[code] && !map[phrase[code]]) map[phrase[code]]=phrase;
+      });
+    });
+  });
+  return map;
+})();
 
 var _ldNorm=null;
+function _ldNormKey(t){
+  /* Forgiving on typing noise, strict on meaning: lowercase, unify
+     apostrophes, collapse whitespace, and drop leading/trailing
+     punctuation (? ! . , ; : and their CJK/Arabic forms) so
+     "where is the bathroom" still finds "Where is the bathroom?".
+     Deliberately does NOT do fuzzy/partial matching -- a near-miss
+     must stay a miss, never a guessed sentence. */
+  return String(t||'').toLowerCase().replace(/[\u2018\u2019\u02BC]/g,"'").replace(/\s+/g,' ').trim()
+    .replace(/^[\s.,!?;:\u2026\u3002\uFF1F\uFF01\u060C\u061F\u00BF\u00A1]+|[\s.,!?;:\u2026\u3002\uFF1F\uFF01\u060C\u061F\u00BF\u00A1]+$/g,'');
+}
 function _ldLookup(text){
-  /* Track A fix: exact-match-only lookup silently missed real typing
-     variance (trailing space, different capitalization) even for a
-     phrase genuinely in the dictionary. Fast path unchanged; adds a
-     trimmed/case-insensitive fallback over the same 8 phrases -- no
-     expansion of what's supported, just no longer brittle about how
-     it's typed. */
+  if(!text) return null;
   if(_ld[text]) return _ld[text];
-  if(!_ldNorm){ _ldNorm={}; for(var k in _ld){ _ldNorm[k.trim().toLowerCase()]=_ld[k]; } }
-  return _ldNorm[text.trim().toLowerCase()] || null;
+  /* _ldNorm is built lazily on first lookup. _ld is fully populated at
+     parse time (see WL.Offline above), so this always indexes the real
+     dictionary. First entry wins on collisions, same as _ld itself. */
+  if(!_ldNorm){ _ldNorm={}; for(var k in _ld){ var nk=_ldNormKey(k); if(nk && !_ldNorm[nk]) _ldNorm[nk]=_ld[k]; } }
+  return _ldNorm[_ldNormKey(text)] || null;
 }
 function _txLocal(text,to,ok,err){var tgt=WL.Utils.baseLangCode(LC[to]);var hit=_ldLookup(text);if(hit&&hit[tgt]){ok(hit[tgt],100,'★');}else{err();}}
 
@@ -6166,10 +6441,23 @@ var Chat={
           wrap.querySelector('.bubble-left').addEventListener('click',function(){cp(text);});
           if(Chat._earpod) spk(text,U.lang);
         }
-        scrollB();
+        var atB=isAtBottom();
+        if(atB){scrollB();}else if(isAtThreshold()){_newMsgCount++;var sdb=document.getElementById('scroll-down-btn');sdb.textContent='↓ '+_newMsgCount+' NEW';sdb.classList.add('visible');}
       }
 
-      if(!navigator.onLine){ paint(row.original_text,true); return; }
+      if(!navigator.onLine){
+        /* Offline: try the local phrase dictionary directly -- never
+           fall through to tx()'s MyMemory/Google cascade here, since
+           those are real network calls that would just fail slowly (or
+           hang) with no connection. _txLocal already IS the dict-only
+           lookup tx() itself tries first; calling it directly gets the
+           same result with zero risk of a stray network attempt. */
+        _txLocal(row.original_text, U.lang,
+          function(translated,conf,src){ paint(translated,false,conf,src); },
+          function(){ paint(row.original_text,true); }
+        );
+        return;
+      }
       tx(row.original_text, row.original_lang, U.lang,
         function(translated,conf,src){ paint(translated,false,conf,src); },
         function(){ paint(row.original_text,true); }
@@ -6218,6 +6506,29 @@ var Chat={
     if(hb)hb.classList.toggle('raised',this._handRaised);
     showToast(this._handRaised?'✋ HAND RAISED':'HAND LOWERED');
     hap(this._handRaised?[30,20,30]:[20]);
+    /* Broadcast so every other participant's ring reflects this too --
+       previously this was local-only, which is the exact bug Eugene
+       reported ("ring only shows for the session owner"). Ephemeral by
+       design (Eugene's call): no DB write, no state to clean up, and it
+       naturally clears on refresh/reconnect for everyone. */
+    if(WL._realtimeChannel){
+      WL._realtimeChannel.send({
+        type:'broadcast',
+        event:'hand_raise',
+        payload:{ user_id: WL.State.uid, raised: this._handRaised }
+      });
+    }
+  },
+
+  /* Receives another participant's hand-raise broadcast and reflects it
+     on THEIR ring in this viewer's strip -- the piece that never
+     existed before. Guarded against our own echo, though Supabase
+     broadcast doesn't self-deliver by default anyway. */
+  onRealtimeHandRaise:function(payload){
+    var data=payload&&payload.payload;
+    if(!data || data.user_id===WL.State.uid) return;
+    var pring=document.getElementById('pring-'+chatDomKey({id:data.user_id}));
+    if(pring) pring.classList.toggle('raised', !!data.raised);
   },
 
   toggleMic:function(){this._listening?this._stopMic():this._startMic();},
@@ -6479,38 +6790,6 @@ function savePrefs(){
   try{localStorage.setItem('wl_settings',JSON.stringify(_prefs));}catch(e){}
 }
 
-/* ── ABOUT CONTENT ───────────────────────────────────────────
-   Privacy Policy / Terms of Service removed per Eugene's explicit
-   instruction (no legal counsel behind that DRAFT content yet) — see
-   /areas/whisperlink-deployment.md. The one substantive line from the
-   old Terms draft that wasn't legal boilerplate -- the safety-critical
-   usage warning -- is preserved here rather than dropped silently. */
-var STG_DOCS={
-  about:{
-    title:'ABOUT WHISPERLINK',
-    html:`
-      <h4>What is WhisperLink?</h4>
-      <p>WhisperLink is a real-time multilingual communication platform that helps people who speak different languages communicate and understand each other.</p>
-      <h4>How does it work?</h4>
-      <ol>
-        <li>Choose your language.</li>
-        <li>Start or join a session.</li>
-        <li>Share the session link/code.</li>
-        <li>Speak or type.</li>
-        <li>WhisperLink translates.</li>
-        <li>Continue communicating in each participant's language.</li>
-      </ol>
-      <h4>Joining a session</h4>
-      <p>Open the session link/code → confirm your language → join → communicate.</p>
-      <h4>Starting a session</h4>
-      <p>Choose your language → start a session → invite the other person → choose the appropriate languages → speak or type → continue the conversation.</p>
-      <h4>Please note</h4>
-      <p>WhisperLink translations are generated by third-party providers and may not be perfectly accurate. Do not rely on WhisperLink as the sole means of communication in a medical, legal, or safety-critical situation.</p>
-      <p style="color:rgba(255,255,255,0.4);font-size:11px;">WhisperLink v1.0 · Stella Tech · Protection First. Precision Always.</p>
-    `
-  }
-};
-
 var Stg={
   goBack:function(){WL.Router.go('home');},
 
@@ -6569,6 +6848,44 @@ var Stg={
     }
   },
 
+  /* Display Name had a value shown in Settings but no way to ever
+     change it -- exactly the "looks like a setting, isn't wired"
+     pattern this pass was asked to find. Deliberately a native prompt()
+     rather than a new custom sheet: this is a rare, one-off, single-line
+     action, and this pass is about closing dead controls, not adding
+     new UI surface. Persists the same way handleLogin's initial name
+     does (local identity cache + best-effort Supabase auth metadata) --
+     see the Phase 3 handoff doc for the open backend question this
+     surfaces: whether a rename should also propagate into past/current
+     session participant rows, which this frontend has no way to know
+     or decide on its own. */
+  editName:function(){
+    var current=(WL.State.user&&WL.State.user.name)||'';
+    var next=window.prompt('Display name (shown to session participants):',current);
+    if(next===null)return;
+    next=next.trim();
+    if(!next||next.length<2){ showToast('NAME MUST BE AT LEAST 2 CHARACTERS'); return; }
+    WL.State.user.name=next;
+    WL.State.user.username=next.toLowerCase().replace(/\s+/g,'_');
+    WL.State.user.code=WL.Utils.initialsCode(next);
+    try{
+      localStorage.setItem('wl_local_identity', JSON.stringify({
+        name: WL.State.user.name, username: WL.State.user.username, lang: WL.State.user.lang,
+        ind: WL.State.user.ind, col: WL.State.user.col, code: WL.State.user.code
+      }));
+    }catch(e){}
+    WL._cacheProfile();
+    if(WL.State.uid && WL.Supabase && WL.Supabase.auth && WL.Supabase.auth.updateUser){
+      WL.Supabase.auth.updateUser({ data:{ name:next } }).catch(function(err){
+        console.error('[WL] updateUser (display name) failed:', err);
+      });
+    }
+    var nameEl=document.getElementById('stg-profile-name'); if(nameEl) nameEl.textContent=next;
+    var valEl=document.getElementById('val-name'); if(valEl) valEl.textContent=next;
+    var initEl=document.getElementById('stg-av-initials'); if(initEl) initEl.textContent=(next.trim()[0]||'?').toUpperCase();
+    showToast('NAME UPDATED');
+  },
+
   selectIndustry:function(btn,ind){
     document.querySelectorAll('.stg-ind-pill').forEach(function(b){b.classList.remove('selected');});
     btn.classList.add('selected');
@@ -6578,19 +6895,6 @@ var Stg={
     // here had no visible effect anywhere. Now writes both.
     WL.State.user.ind = ind;
     Stg.savePref('industry',ind);
-  },
-
-  openDoc:function(type){
-    var d=STG_DOCS[type];
-    if(!d)return;
-    document.getElementById('stg-doc-title').textContent=d.title;
-    document.getElementById('stg-doc-body').innerHTML=d.html;
-    document.getElementById('stg-doc-sheet').classList.add('visible');
-    document.getElementById('stg-doc-bd').classList.add('visible');
-  },
-  closeDoc:function(){
-    document.getElementById('stg-doc-sheet').classList.remove('visible');
-    document.getElementById('stg-doc-bd').classList.remove('visible');
   },
 
   confirmClearHistory:function(){
@@ -6691,6 +6995,9 @@ WL.Components.settings = { onEnter:function(){
   var valEl=document.getElementById('val-name'); if(valEl) valEl.textContent=name;
   var initEl=document.getElementById('stg-av-initials'); if(initEl) initEl.textContent=(name.trim()[0]||'?').toUpperCase();
 }, onExit:function(){ savePrefs(); } };
+
+// About is fully static content -- nothing to populate or tear down.
+WL.Components.about = { onEnter:function(){}, onExit:function(){} };
 } catch(e) { console.error('[WL] settings script failed:', e); if(window.WL && WL.Utils && WL.Utils.toast) WL.Utils.toast('SCREEN LOAD ERROR — see console'); }
 </script>
 
@@ -6769,6 +7076,17 @@ var Ov1={
     this._industry=ind;
     document.querySelectorAll('#ov1-industries .ov-ind-pill').forEach(function(b){b.classList.remove('selected');});
     if(btn)btn.classList.add('selected');
+    /* Role is required for every industry except General (Eugene's
+       call) -- a general/ad-hoc session doesn't need one, so hide the
+       field entirely rather than just making it optional-but-visible.
+       _role is forced null for General regardless of any stray typed
+       text, and re-read from the (untouched) input when switching back
+       to a specific industry, so browsing between industries doesn't
+       lose what was already typed. */
+    var isGeneral=(ind==='General');
+    document.getElementById('ov1-role-label').style.display=isGeneral?'none':'';
+    document.getElementById('ov1-role-other-wrap').style.display=isGeneral?'none':'';
+    this._role=isGeneral?null:(document.getElementById('ov1-role-other-input').value.trim()||null);
     this._checkReady();
   },
 
@@ -6780,9 +7098,9 @@ var Ov1={
 
   _checkReady:function(){
     /* Industry always has exactly one pill selected by default (the UI
-       never allows zero-selected), so role is the only condition that
-       actually gates readiness here. */
-    var ready=!!this._role;
+       never allows zero-selected). Role gates readiness for every
+       industry except General, which never requires one. */
+    var ready=(this._industry==='General')||!!this._role;
     document.getElementById('ov1-create-btn').classList.toggle('enabled',ready||this._created);
   },
 
@@ -6795,7 +7113,7 @@ var Ov1={
         if(err){
           btn.textContent='ENTER SESSION →';
           btn.classList.add('enabled');
-          showToast('SESSIONS NEED A CONNECTION · SOLO WORKS OFFLINE');
+          showToast('SESSIONS NEED A CONNECTION · SOLO PHRASES WORK OFFLINE');
           console.error('[WL] ensureSignedIn before create failed:', err);
           return;
         }
@@ -6821,7 +7139,7 @@ var Ov1={
       });
       return;
     }
-    if(!this._role){ showToast('SELECT YOUR ROLE FIRST'); return; }
+    if(this._industry!=='General' && !this._role){ showToast('SELECT YOUR ROLE FIRST'); return; }
     // Generate session code (client-side preview — nothing persisted yet)
     var code='WL-'+Math.random().toString(36).substr(2,6).toUpperCase();
     this._generatedCode=code;
@@ -6829,7 +7147,9 @@ var Ov1={
     // sessions.name column still needs a value, generated here from
     // already-known information rather than asking the user to name
     // a temporary session. Same schema, same insert shape as before.
-    this._generatedName=this._industry+' · '+this._role;
+    // General has no role, so the name is just the industry alone --
+    // no dangling " · " separator with nothing after it.
+    this._generatedName=this._role?(this._industry+' · '+this._role):this._industry;
     var link='https://stellawhisperlink.app/join/'+code;
 
     // Show code
