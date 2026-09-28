@@ -1663,6 +1663,31 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
 .solo-swap-btn svg{width:16px;height:16px;}
 #solo-messages{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;padding:12px 0 96px;position:relative;z-index:10;display:flex;flex-direction:column;}
 #solo-messages::-webkit-scrollbar{display:none;}
+/* !! BEFORE RE-ENABLING (WL.Chips.VISIBLE=true): on a real Android Chrome device with
+   the URL bar showing, the second chip row rendered UNDER the fixed dock. Cause: these
+   screens are sized `height:100dvh;height:100vh` -- the later 100vh wins, so the page
+   box is taller than the visible viewport and anything positioned by the page box
+   (these in-flow chips) slides beneath the dock, which is fixed to the true bottom.
+   Fix the viewport-height order app-wide (100vh first, then 100dvh) or anchor the
+   chips to the dock, then re-test on a device. Playwright cannot reproduce this. */
+/* ── PHRASE CHIPS (Solo + Chat) ── sit IN the layout flow directly above the
+   fixed 56px dock, not position:fixed, so the message list shrinks to make
+   room instead of the last bubble hiding behind them. Two rows that swipe
+   sideways (never trapping vertical scroll): ~6 chips visible at once so
+   the industry emergencies aren't hidden behind a swipe, all 12 reachable.
+   Short screens (<=650px tall) drop to a single row. */
+.phrase-chips{display:none;flex-shrink:0;position:relative;z-index:15;gap:6px;align-items:center;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none;padding:6px 12px;margin-bottom:56px;-webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 26px),transparent 100%);mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 26px),transparent 100%);}
+.phrase-chips::-webkit-scrollbar{display:none;}
+.phrase-chips.on{display:grid;grid-auto-flow:column;grid-template-rows:repeat(2,auto);grid-auto-columns:max-content;align-content:center;}
+.phrase-chip{flex:0 0 auto;min-height:40px;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(0,229,255,0.15);color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;line-height:1.2;white-space:nowrap;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform 0.08s ease,background 0.15s ease;}
+.phrase-chip:focus{outline:none;}
+.phrase-chip:active{transform:scale(0.98);background:rgba(0,229,255,0.12);}
+.phrase-chip.critical{border-left:3px solid #ef4444;padding-left:10px;}
+#solo.has-chips #solo-messages,#chat.has-chips #chat-messages{padding-bottom:16px;}
+#solo.has-chips #solo-scroll-down-btn,#chat.has-chips #scroll-down-btn{bottom:168px;}
+@media(max-height:650px){.phrase-chips.on{grid-template-rows:auto;}#solo.has-chips #solo-scroll-down-btn{bottom:124px;}#chat .phrase-chips{margin-bottom:50px;}#chat.has-chips #scroll-down-btn{bottom:118px;}}
+@media (prefers-reduced-motion: reduce){.phrase-chip{transition:none;}}
+
 .chat-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px;opacity:0;animation:fadeIn 0.5s ease 0.3s forwards;}
 .chat-empty-star svg{width:28px;height:28px;color:rgba(0,229,255,0.25);}
 .chat-empty-title{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.2);}
@@ -3081,6 +3106,7 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
     <div class="chat-empty-sub" id="empty-sub">Type or speak in English.<br>Translation appears instantly.</div>
   </div>
 </div>
+<div class="phrase-chips" id="solo-chips" role="group" aria-label="Quick phrases"></div>
 <button id="solo-scroll-down-btn" onclick="SoloApp.scrollToLatest()">↓ NEW</button>
 <div id="invisible-indicator">
   <div class="inv-dot"></div>
@@ -3144,6 +3170,7 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
 </div>
 <!-- MESSAGES -->
 <div id="chat-messages"></div>
+<div class="phrase-chips" id="chat-chips" role="group" aria-label="Quick phrases"></div>
 <!-- SCROLL DOWN -->
 <button id="scroll-down-btn" onclick="Chat.scrollBottom()">↓ NEW</button>
 <!-- INV INDICATOR -->
@@ -5139,8 +5166,9 @@ var Demo={
        real network call failing slowly with no connection. */
     if(!navigator.onLine){
       var offlineHit=_ldLookup(text);
-      if(offlineHit && offlineHit[tgtLang]){
-        Demo._showResult(offlineHit[tgtLang],'',text);
+      var offlineKey=WL.Offline.key(tgtLang);
+      if(offlineHit && offlineHit[offlineKey]){
+        Demo._showResult(offlineHit[offlineKey],'',text);
       } else {
         Demo._showResult(text,'',text,true);
         showToast('NOT IN OFFLINE LIBRARY · SHOWING ORIGINAL');
@@ -5534,7 +5562,7 @@ function fetchTx(text,from,to,ok,err){
      every script block (including Chat's, which defines _ld) has
      already loaded, even though Chat's block appears later in the
      file than Solo's. */
-  if(typeof _ldLookup!=='undefined'){ var _hit=_ldLookup(text); if(_hit && _hit[tgt]){ ok(_hit[tgt],100,'★'); return; } }
+  if(typeof _ldLookup!=='undefined'){ var _hit=_ldLookup(text); var _hk=WL.Offline.key(tgt); if(_hit && _hit[_hk]){ ok(_hit[_hk],100,'★'); return; } }
   var key=LANG_CODES[from]+'|'+LANG_CODES[to]+'|'+text;
   if(_soloTxCache[key]){ok(_soloTxCache[key].t,_soloTxCache[key].c,_soloTxCache[key].s);return;}
   _soloTxMyMemory(text,from,to,function(r,c,s){_soloTxCache[key]={t:r,c:c,s:s};ok(r,c,s);},function(){_soloTxGoogle(text,from,to,function(r,c,s){_soloTxCache[key]={t:r,c:c,s:s};ok(r,c,s);},function(){if(err)err();});});
@@ -5577,6 +5605,7 @@ var SoloApp={
     document.getElementById('solo-industry-label').textContent=MockProfile.industry.toUpperCase()+' MODE';
     document.getElementById('empty-title').textContent='SOLO SESSION · '+MockProfile.industry.toUpperCase();
     document.getElementById('empty-sub').textContent='Type or speak in '+MockProfile.lang+'.\nTranslation appears instantly.';
+    WL.Chips.render('solo');
     this._checkConn();
     this._setupInput();
     loadHistory();
@@ -5681,9 +5710,9 @@ var SoloApp={
     }
     fetchTx(text,self._fromLang,self._toLang,function(result,conf,src){soloRenderLeft(pair,result,ts,false,conf,src);saveMsg(text,result,ts,false,conf,src);if(self._earpod)speakText(result,self._toLang);},function(){soloRenderLeft(pair,text,ts,true,0,'✕');saveMsg(text,text,ts,true);showToast('TRANSLATION FAILED');});
   },
-  onFromChange:function(){this._fromLang=document.getElementById('solo-from-select').value;document.getElementById('solo-from-label').textContent=this._fromLang;this.updateGenderHint();},
+  onFromChange:function(){this._fromLang=document.getElementById('solo-from-select').value;document.getElementById('solo-from-label').textContent=this._fromLang;this.updateGenderHint();WL.Chips.render('solo');},
   onToChange:function(){this._toLang=document.getElementById('solo-to-select').value;document.getElementById('solo-to-label').textContent=this._toLang;this.updateGenderHint();},
-  swapLangs:function(){var fs=document.getElementById('solo-from-select');var ts=document.getElementById('solo-to-select');var fv=fs.value,tv=ts.value;var fo=Array.from(fs.options).map(function(o){return o.value;});var to2=Array.from(ts.options).map(function(o){return o.value;});if(to2.indexOf(fv)>-1)ts.value=fv;if(fo.indexOf(tv)>-1)fs.value=tv;this._fromLang=fs.value;this._toLang=ts.value;document.getElementById('solo-from-label').textContent=this._fromLang;document.getElementById('solo-to-label').textContent=this._toLang;this.updateGenderHint();try{navigator.vibrate([20]);}catch(e){}},
+  swapLangs:function(){var fs=document.getElementById('solo-from-select');var ts=document.getElementById('solo-to-select');var fv=fs.value,tv=ts.value;var fo=Array.from(fs.options).map(function(o){return o.value;});var to2=Array.from(ts.options).map(function(o){return o.value;});if(to2.indexOf(fv)>-1)ts.value=fv;if(fo.indexOf(tv)>-1)fs.value=tv;this._fromLang=fs.value;this._toLang=ts.value;document.getElementById('solo-from-label').textContent=this._fromLang;document.getElementById('solo-to-label').textContent=this._toLang;this.updateGenderHint();WL.Chips.render('solo');try{navigator.vibrate([20]);}catch(e){}},
   toggleMic:function(){this._listening?this._stopMic():this._startMic();},
   _startMic:function(){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){showToast('SPEECH NOT AVAILABLE');return;}this._listening=true;document.getElementById('dock-mic-btn').classList.add('listening');var rec=new SR();rec.lang=LANG_CODES[this._fromLang]||'en-US';rec.interimResults=false;var self=this;var settled=false;var micErrMsg={'not-allowed':'MIC PERMISSION DENIED','service-not-allowed':'MIC PERMISSION DENIED','audio-capture':'NO MICROPHONE FOUND','network':'MIC NEEDS NETWORK CONNECTION','no-speech':'DIDN\'T CATCH THAT — TRY AGAIN','aborted':null};rec.onstart=function(){settled=true;};rec.onresult=function(e){settled=true;var t=e.results[0][0].transcript;SoloApp._stopMic();SoloApp._sendText(t);};rec.onerror=function(e){settled=true;SoloApp._stopMic();var msg=(e.error in micErrMsg)?micErrMsg[e.error]:('MIC ERROR: '+e.error).toUpperCase();if(msg)showToast(msg);};rec.onend=function(){settled=true;SoloApp._stopMic();};try{rec.start();this._rec=rec;setTimeout(function(){if(!settled&&self._listening){self._stopMic();showToast('MIC UNAVAILABLE');}},8000);}catch(e){this._stopMic();showToast('MIC UNAVAILABLE');}},
   _stopMic:function(){this._listening=false;document.getElementById('dock-mic-btn').classList.remove('listening');if(this._rec){try{this._rec.stop();}catch(e){}this._rec=null;}},
@@ -5898,6 +5927,17 @@ Legal:[
 ]
 }};
 
+/* Dictionary key for a base language code. WL.Utils.baseLangCode keeps
+   Chinese as 'zh-CN' / 'zh-TW' (both providers need that distinction),
+   but the packs are keyed by the bare 'zh' (Simplified, i.e. Mandarin).
+   Without this, Mandarin as a TARGET language silently missed the
+   offline dictionary in Solo, Chat and Demo -- 14 of the 15 Tier-1
+   languages resolved, Mandarin did not. zh-TW is deliberately NOT
+   mapped: the packs are Simplified only, and an honest miss beats
+   showing Simplified characters to a Traditional-Chinese reader. */
+WL.Offline.key=function(base){ return base==='zh-CN' ? 'zh' : base; };
+WL.Offline.codes=['en','zh','hi','ja','ko','id','ar','es','pt','fr','sw','ha','am','so','bn'];
+
 /* Index every phrase's every language variant into the flat map
    _txLocal/_ldLookup already expect -- one shared map, not per-industry,
    so any pack's phrases resolve regardless of which industry mode the
@@ -5906,7 +5946,7 @@ Legal:[
    correctly on first use with no separate rebuild step needed. */
 var _ld=(function(){
   var map={};
-  var codes=['en','zh','hi','ja','ko','id','ar','es','pt','fr','sw','ha','am','so','bn'];
+  var codes=WL.Offline.codes;
   Object.keys(WL.Offline.packs).forEach(function(packName){
     WL.Offline.packs[packName].forEach(function(phrase){
       codes.forEach(function(code){
@@ -5941,7 +5981,118 @@ function _ldLookup(text){
   if(!_ldNorm){ _ldNorm={}; for(var k in _ld){ var nk=_ldNormKey(k); if(nk && !_ldNorm[nk]) _ldNorm[nk]=_ld[k]; } }
   return _ldNorm[_ldNormKey(text)] || null;
 }
-function _txLocal(text,to,ok,err){var tgt=WL.Utils.baseLangCode(LC[to]);var hit=_ldLookup(text);if(hit&&hit[tgt]){ok(hit[tgt],100,'★');}else{err();}}
+function _txLocal(text,to,ok,err){var tgt=WL.Offline.key(WL.Utils.baseLangCode(LC[to]));var hit=_ldLookup(text);if(hit&&hit[tgt]){ok(hit[tgt],100,'★');}else{err();}}
+
+/* ── PHRASE CHIPS ────────────────────────────────────────────
+   One-tap shortcuts into the SAME send path typing uses (Solo:
+   SoloApp._sendText, Chat: Chat.sendChip -> _doSend) -- no second
+   translation path. Built from WL.Offline (read-only). Each chip is
+   labelled in the SENDER's own language (a Somali speaker sees Somali)
+   and sends that displayed string; _ldLookup already indexes every
+   language variant, so no per-chip lookup logic is needed.
+
+   Choice of phrases: 4 General pins first, then up to 8 from the
+   current industry's list, all resolved by the phrase's English text
+   (a stable id). Deduped by meaning (contraction-normalised English)
+   AND by displayed label. Phrases that end in "…" are fill-in-the-blank
+   stems ("My name is…") and are never chips. If the sender's language
+   isn't one of the 15 the dictionary covers (or is Traditional
+   Chinese, which it doesn't cover), NO chips are shown -- an English
+   chip a non-English speaker can't read is not a shortcut. */
+WL.Chips=(function(){
+  var GLOBAL=["Help","I don't understand","Emergency","Thank you"];
+  var BY_INDUSTRY={
+    General:["Please repeat","Please speak slowly","I need help","I am in pain","Call an ambulance","Where is the bathroom?","I am lost","Water"],
+    Healthcare:["Where does it hurt?","I can't breathe","I need a doctor","I am in pain","I have chest pain","It hurts here","I feel dizzy","I need an interpreter"],
+    Aviation:["Evacuate","Fire","Say again","Stop","Injured person","Confirm","Stand by","Unable"],
+    Industrial:["Stop work","Evacuate now","Gas leak","I need a supervisor","First aid","Do not enter","All clear","Watch your step"],
+    Education:["I do not understand this","Please repeat the question","I have a question","Can you explain more slowly?","I need more time","Please write it down","I need help with this problem","Thank you teacher"],
+    Legal:["I need a lawyer","I want an interpreter","I do not consent","I do not understand","I need more time","I understand","I do not sign","I do not agree","This is an emergency"]
+  };
+  var CRITICAL_EN=["Help","Emergency","Evacuate","Evacuate now","Fire","Stop work","Gas leak","I can't breathe","I have chest pain","Call an ambulance","Injured person","This is an emergency"];
+  var MAX_INDUSTRY=8;
+  var byEn=null, critSet=null, api;
+  var st={solo:{items:[],kb:false,on:true,bound:false},chat:{items:[],kb:false,on:false,bound:false}};
+  var cfg={
+    solo:{chips:'solo-chips',screen:'solo',input:'solo-chat-input',
+      industry:function(){ return (typeof MockProfile!=='undefined'&&MockProfile.industry)||WL.State.user.ind; },
+      lang:function(){ return (window.SoloApp&&SoloApp._fromLang)||WL.State.user.lang; },
+      send:function(t){ SoloApp._sendText(t); }},
+    chat:{chips:'chat-chips',screen:'chat',input:'chat-input',
+      industry:function(){ return (WL.Session&&WL.Session.industry)||WL.State.user.ind; },
+      lang:function(){ return WL.State.user.lang; },
+      send:function(t){ Chat.sendChip(t); }}
+  };
+  function norm(t){
+    return String(t||'').toLowerCase().replace(/[\u2018\u2019]/g,"'").replace(/can't/g,'can not').replace(/cannot/g,'can not').replace(/n't/g,' not').replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim();
+  }
+  function index(){
+    byEn={}; critSet={};
+    Object.keys(WL.Offline.packs).forEach(function(pk){ WL.Offline.packs[pk].forEach(function(p){ if(!byEn[p.en]) byEn[p.en]=p; }); });
+    CRITICAL_EN.forEach(function(e){ critSet[norm(e)]=1; });
+  }
+  function build(industry,langName){
+    if(!byEn) index();
+    var base=WL.Offline.key(WL.Utils.baseLangCode(LC[langName]));
+    if(WL.Offline.codes.indexOf(base)<0) return [];
+    var seenN={}, seenL={}, out=[];
+    function add(en){
+      var p=byEn[en]; if(!p||!p[base]) return false;
+      if(/\u2026$/.test(p.en)) return false;
+      var k=norm(p.en), lab=p[base], lk=lab.toLowerCase();
+      if(seenN[k]||seenL[lk]) return false;
+      seenN[k]=1; seenL[lk]=1;
+      out.push({en:p.en,label:lab,critical:!!critSet[k]});
+      return true;
+    }
+    GLOBAL.forEach(add);
+    var list=BY_INDUSTRY[industry]||BY_INDUSTRY.General, added=0;
+    list.forEach(function(en){ if(added<MAX_INDUSTRY && add(en)) added++; });
+    return out;
+  }
+  function layout(key){
+    var c=cfg[key], s=st[key], el=document.getElementById(c.chips), scr=document.getElementById(c.screen);
+    if(!el||!scr) return;
+    var show=api.VISIBLE && s.on && s.items.length>0 && !s.kb;
+    el.classList.toggle('on',show);
+    el.setAttribute('aria-hidden',show?'false':'true');
+    scr.classList.toggle('has-chips',show); // off => message padding and the scroll-down pill revert to exactly their pre-chip layout
+  }
+  function bind(key){
+    var s=st[key]; if(s.bound) return;
+    var inp=document.getElementById(cfg[key].input); if(!inp) return;
+    s.bound=true;
+    /* Keyboard open => get out of the way entirely (the row and the
+       message-list padding change together, so the latest bubble is
+       never left sitting behind the dock). */
+    inp.addEventListener('focus',function(){ s.kb=true; layout(key); });
+    inp.addEventListener('blur',function(){ s.kb=false; layout(key); });
+  }
+  function render(key){
+    try{
+      var c=cfg[key], s=st[key], el=document.getElementById(c.chips); if(!el) return;
+      s.items=build(c.industry(),c.lang());
+      el.innerHTML='';
+      s.items.forEach(function(it){
+        var b=document.createElement('button');
+        b.type='button'; b.className='phrase-chip'+(it.critical?' critical':'');
+        b.setAttribute('dir','auto'); b.dataset.en=it.en; b.textContent=it.label;
+        b.addEventListener('click',function(){ cfg[key].send(it.label); b.blur(); });
+        el.appendChild(b);
+      });
+      el.scrollLeft=0;
+      bind(key); layout(key);
+    }catch(e){ console.error('[WL] chips render failed:',e); }
+  }
+  function setEnabled(key,on){ st[key].on=!!on; if(on) render(key); else layout(key); }
+  api={ render:render, setEnabled:setEnabled, build:build, _cfg:cfg, _lists:{GLOBAL:GLOBAL,BY_INDUSTRY:BY_INDUSTRY},
+    /* Eugene's call: present but invisible. The rows are still built and
+       wired (Chat.sendChip, Solo path, dictionary) but never shown, so
+       there is no visible UI and no layout cost. Set to true to bring
+       the chips back -- but read the warning above the CSS first. */
+    VISIBLE:false };
+  return api;
+})();
 
 function _txMyMemory(text,from,to,ok,err){
   var fc=WL.Utils.baseLangCode(LC[from]), tc=WL.Utils.baseLangCode(LC[to]);
@@ -6149,13 +6300,14 @@ var Chat={
     var sessionName=(window.WL && WL.Session && WL.Session.name) ? WL.Session.name : (U.ind+' · '+U.name.split(' ')[0]);
     var cn=document.getElementById('chat-name'); if(cn) cn.textContent=sessionName;
     document.getElementById('your-lang-val').textContent=U.lang;
-    document.getElementById('chat-ind').textContent=U.ind.toUpperCase();
+    document.getElementById('chat-ind').textContent=((WL.Session&&WL.Session.industry)||U.ind).toUpperCase(); // the SESSION's industry, not the viewer's own profile industry -- a joiner's header used to show their own industry for someone else's session
     var vms=document.getElementById('voice-mode-sel');
     if(vms) vms.value=(typeof _prefs!=='undefined'&&_prefs.autoSend)?'auto':'confirm';
     if(typeof _prefs!=='undefined' && _prefs.invisibleDefault && !this._earpod){
       this.toggleEarpod(true);
     }
     this._active=false;
+    WL.Chips.setEnabled('chat',false); // waiting-for-partner state has no composer, so no chips
     var self=this;
     WL.loadParticipants(function(err){
       if(err) console.error('[WL] loadParticipants failed:', err);
@@ -6213,6 +6365,7 @@ var Chat={
     this._active=true;
     renderWatermark();
     document.getElementById('chat-dock').classList.add('active');
+    WL.Chips.setEnabled('chat',true);
     document.getElementById('session-dur').classList.remove('hidden');
     clearInterval(_durT); _durSecs=0;
     _durT=setInterval(function(){_durSecs++;var d=fmtD(_durSecs);document.getElementById('session-dur').textContent=d;document.getElementById('inf-dur').textContent=d;},1000);
@@ -6357,6 +6510,21 @@ var Chat={
          relationship yet, for either participant. */
       this.cancelComposerContext();
     }
+  },
+
+  /* A chip tap is a send, not a composer action: it never needs the
+     input filled and never touches a draft the user is mid-typing.
+     Edit mode is the one exception -- an edit-in-progress isn't a send
+     target, so the edit context is dropped first (which also clears the
+     restored text) and the chip goes out as a normal new message. In
+     reply mode it behaves exactly like Chat.send: sends, then clears
+     the reply context. */
+  sendChip:function(text){
+    if(!text) return;
+    if(this._ctxMode==='edit') this.cancelComposerContext();
+    var wasReply=this._ctxMode==='reply';
+    this._doSend(text);
+    if(wasReply) this.cancelComposerContext();
   },
 
   _doSend:function(text){
