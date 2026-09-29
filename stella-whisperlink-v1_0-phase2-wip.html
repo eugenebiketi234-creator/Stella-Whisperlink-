@@ -4632,6 +4632,22 @@ WL.joinSessionByCode = function(code, cb){
 
 /* Maps the specific errors join_session_by_code can raise to display
    text, so Ov2/Home don't each re-implement this matching. */
+/* The Join field's own placeholder says "Session code or paste link" but
+   the code was handing the whole input straight to joinSessionByCode,
+   which only understands a bare code -- pasting a real shared link
+   (shareLink() below generates .../join/<CODE>) would send the entire
+   URL as the "code" and fail. Pulls the code out of a /join/<code> path
+   if the input looks like one of this app's links; otherwise returns
+   the trimmed input unchanged, so a bare code still works exactly as
+   before. Deliberately loose on scheme/host so it survives a future
+   custom domain, not tied to stellawhisperlink.app specifically. */
+WL.Utils.extractSessionCode = function(input){
+  var raw = String(input||'').trim();
+  if(!raw) return '';
+  var m = raw.match(/\/join\/([A-Za-z0-9-]+)/i);
+  return m ? m[1].toUpperCase() : raw;
+};
+
 WL.Utils.joinErrorMessage = function(err){
   var msg = (err && err.message) || '';
   if(msg === 'NEEDS_CONNECTION') return 'SESSIONS NEED A CONNECTION · SOLO PHRASES WORK OFFLINE';
@@ -5371,6 +5387,20 @@ function homeTimeAgo(ts){
   if(h<24)return h+'h ago';
   return dd+'d ago';
 }
+/* Security fix: renderSessions/TranscriptModal/Ppl.openProfile all build
+   onclick="Foo('...')" strings by hand. A value with a single quote in
+   it breaks out of the JS string (not just HTML injection -- arbitrary
+   attribute/JS injection); a value with a double quote closes the
+   onclick attribute itself. Session name is free-text (the Role field
+   from New Session), so this was reachable by any user, not just a
+   theoretical attacker. esc() alone (only handles & < >) does not cover
+   either case -- this does both, in the order that keeps them from
+   interfering with each other. */
+function escJsAttr(t){
+  return String(t==null?'':t)
+    .replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/[\r\n]/g,' ')
+    .replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 function renderSessions(sessions){
   var zone=document.getElementById('home-sessions');
   if(!sessions||!sessions.length){
@@ -5381,8 +5411,8 @@ function renderSessions(sessions){
   sessions.forEach(function(s){
     var isR=s.status==='recent';
     var badge=isR?'<span class="session-badge badge-recent">RECENT</span>':'<span class="session-badge badge-ended">ENDED</span>';
-    var fn=isR?'Home.rejoinSession(\''+s.id+'\')':'TranscriptModal.open(\''+s.id+'\',\''+s.name+'\')';
-    html+='<div class="session-card" onclick="'+fn+'"><div class="session-info"><div class="session-name">'+s.name+'</div><div class="session-meta">'+(s.purpose?s.purpose+' · ':'')+s.ind+' · '+homeTimeAgo(s.created)+'</div></div>'+badge+'</div>';
+    var fn=isR?"Home.rejoinSession('"+escJsAttr(s.id)+"')":"TranscriptModal.open('"+escJsAttr(s.id)+"','"+escJsAttr(s.name)+"')";
+    html+='<div class="session-card" onclick="'+fn+'"><div class="session-info"><div class="session-name">'+esc(s.name)+'</div><div class="session-meta">'+(s.purpose?esc(s.purpose)+' · ':'')+esc(s.ind)+' · '+homeTimeAgo(s.created)+'</div></div>'+badge+'</div>';
   });
   zone.innerHTML=html;
 }
@@ -5441,9 +5471,17 @@ var ConnModal={
 
 // ── Transcript Modal ──
 var TranscriptModal={
+  /* id/name come from a session the CURRENT user created or joined, but
+     name is free-text (the Role field from New Session) -- escaped here
+     the same way renderSessions escapes it, not because this specific
+     caller is untrusted but because nothing downstream should have to
+     re-verify that a session name is safe to render. Retrieving the
+     real transcript needs a backend query (message history for an
+     ended session, scoped to participants) -- see the Phase 3 handoff
+     doc. This says so honestly instead of the vague previous copy. */
   open:function(id,name){
     document.getElementById('transcript-title').textContent='TRANSCRIPT · '+id;
-    document.getElementById('transcript-body').innerHTML='<div class="transcript-empty">This session has ended.<br><br>Transcript for <strong style="color:rgba(0,229,255,0.7)">'+name+'</strong><br>will appear here in the full app.</div>';
+    document.getElementById('transcript-body').innerHTML='<div class="transcript-empty">This session has ended.<br><br>Message history for <strong style="color:rgba(0,229,255,0.7)">'+esc(name)+'</strong><br>isn\'t available yet — retrieving past session messages needs a backend lookup that hasn\'t been built.</div>';
     document.getElementById('transcript-modal').classList.add('visible');
   },
   close:function(){document.getElementById('transcript-modal').classList.remove('visible');}
@@ -5455,7 +5493,7 @@ var Home={
   goSolo:function(){try{navigator.vibrate([30]);}catch(e){}WL.Router.go('solo');},
   joinSession:function(){
     var inp=document.getElementById('join-input');
-    var code=inp.value.trim();
+    var code=WL.Utils.extractSessionCode(inp.value);
     if(!code){showToast('ENTER A SESSION CODE');return;}
     try{navigator.vibrate([30]);}catch(e){}
     showToast('JOINING '+code.toUpperCase()+'...');
@@ -6166,7 +6204,7 @@ function renderStrip(){
     html+='<div class="p-av-wrap" id="pwrap-'+key+'">'
       +'<div class="'+ringCls+'" id="pring-'+key+'">'
         +'<div class="p-av" style="background:'+AVCOLS[i%4]+'" id="pav-'+key+'">'
-          +(p.code||'?')
+          +esc(p.code||'?')
           +(p.you?'<div class="p-av-you-pill">YOU</div>':'')
         +'</div>'
       +'</div>'
@@ -6840,7 +6878,7 @@ function renderList(){
 function buildCard(p){
   var langCode=(p.lang||'??').substring(0,2).toUpperCase();
   return '<div class="ppl-card" id="card-'+pplDomKey(p)+'">'
-    +'<div class="ppl-card-inner" onclick="Ppl.openProfile(\''+p.id+'\')" style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;">'
+    +'<div class="ppl-card-inner" onclick="Ppl.openProfile(\''+escJsAttr(p.id)+'\')" style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;">'
     +buildAvRing(p,52)
     +'<div class="ppl-card-info">'
       +'<div class="ppl-card-name">'+pplEsc(p.name)+'</div>'
@@ -7066,9 +7104,15 @@ var Stg={
   },
 
   confirmClearHistory:function(){
+    /* Was: "All saved session messages will be permanently deleted" --
+       false. This only ever clears the local Solo history key; session
+       messages live server-side (Supabase) and are untouched. Corrected
+       to say what actually happens. Server-side deletion is a real
+       backend dependency, not solved here -- see the Phase 3 handoff
+       doc. */
     _pendingAction='clearHistory';
     document.getElementById('confirm-title').textContent='CLEAR ALL HISTORY?';
-    document.getElementById('confirm-sub').textContent='All saved session messages will be permanently deleted. This cannot be undone.';
+    document.getElementById('confirm-sub').textContent='Your Solo translation history on this device will be permanently deleted. This does not affect messages in shared sessions. This cannot be undone.';
     document.getElementById('confirm-go-btn').textContent='CLEAR';
     document.getElementById('stg-sheet-bd').classList.add('visible');
     document.getElementById('confirm-sheet').classList.add('visible');
