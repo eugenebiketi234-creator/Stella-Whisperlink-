@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/join/:code",
+      "destination": "/stella-whisperlink-v1_0-phase2-wip.frontend-integrated.html?join=:code"
+    }
+  ]
+}

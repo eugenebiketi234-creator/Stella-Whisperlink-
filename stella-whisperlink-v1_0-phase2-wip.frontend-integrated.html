@@ -12,6 +12,7 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:manipulation;}
 html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif;}
+.hidden{display:none!important;}
 .wl-screen{width:100vw;height:100vh;height:100dvh;overflow:hidden;opacity:0;transition:opacity 0.18s ease;}
 .wl-screen.wl-screen-in{opacity:1;}
 /* ══════ SPLASH ══════ */
@@ -3248,7 +3249,19 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
   <div class="info-row"><span class="info-lbl">MESSAGES</span><span class="info-val" id="inf-msgs">0</span></div>
   <button class="info-action" onclick="Chat.copyId()">COPY SESSION ID</button>
   <button class="info-action" onclick="Chat.shareLink()">SHARE SESSION LINK</button>
+  <button class="info-action info-action-end hidden" id="end-session-action" onclick="Chat.closeInfo();Chat.promptEndSession()">END SESSION</button>
   <button class="info-action info-action-leave" onclick="Chat.closeInfo();Chat.promptLeave()">LEAVE SESSION</button>
+</div>
+<!-- END SESSION SHEET -->
+<div class="panel-bd" id="end-bd" onclick="Chat.closeEndSession()"></div>
+<div class="leave-sheet" id="end-sheet">
+  <div class="sheet-handle"></div>
+  <div class="leave-title">END SESSION?</div>
+  <div class="leave-sub">This closes the session for everyone. Active participants will be removed and no new messages can be sent.</div>
+  <div class="leave-btns">
+    <button class="leave-stay" onclick="Chat.closeEndSession()">CANCEL</button>
+    <button class="leave-go" id="end-go" onclick="Chat.confirmEndSession()">END SESSION</button>
+  </div>
 </div>
 <div id="chat-toast"></div>
 </div>
@@ -3848,7 +3861,7 @@ html,body{width:100%;height:100%;background:#04050d;overflow:hidden;font-family:
    ════════════════════════════════════════════════════════════ */
 window.WL = {
   State: { user: null, uid: null, onboarded: false, firstRunShown: false },
-  Session: { id: null, dbId: null, name: null, participants: [], languageMap: {}, createdAt: null, industry: null, role: null, purpose: null, status: 'inactive' },
+  Session: { id: null, dbId: null, name: null, createdBy: null, participants: [], languageMap: {}, createdAt: null, industry: null, role: null, purpose: null, status: 'inactive' },
   Settings: {},
   Languages: { list: [], tier1: [], byName: {}, byCode: {}, byName_code: {} },
   Utils: {},
@@ -4477,6 +4490,12 @@ WL.LangPicker = {
    would silently orphan both of those references. Returns a promise
    — callers that route based on WL.State must wait on it. ── */
 WL.boot = function(){
+  try{
+    var pathMatch=window.location.pathname.match(/\/join\/([A-Za-z0-9-]+)/i);
+    var queryMatch=new URLSearchParams(window.location.search).get('join');
+    var pending=pathMatch?pathMatch[1]:queryMatch;
+    if(pending) WL._pendingJoinCode=WL.Utils.extractSessionCode(pending);
+  }catch(e){ WL._pendingJoinCode=null; }
   if(!WL.State.user){
     WL.State.user = { name:'', username:'', lang:'English', ind:'General', col:0, code:'??' };
   }
@@ -4649,11 +4668,19 @@ WL.joinSessionByCode = function(code, cb){
   if(!code){ cb(new Error('EMPTY_CODE')); return; }
   WL.ensureSignedIn(function(err){
     if(err){ cb(new Error('NEEDS_CONNECTION')); return; }
-    WL.Supabase.rpc('join_session_by_code', { p_code: code }).then(function(res){
+    WL.Supabase.rpc('join_session_by_code_v2', { p_code: code }).then(function(res){
       if(res.error){ cb(res.error); return; }
-      var row = res.data;
+      var payload = res.data;
+      if(!payload || payload.ok!==true){
+        var joinErr = new Error((payload&&payload.message)||((payload&&payload.error)||'JOIN_FAILED'));
+        if(payload&&payload.error) joinErr.code=payload.error;
+        cb(joinErr); return;
+      }
+      var row = payload.session;
+      if(!row){ cb(new Error('JOIN_FAILED')); return; }
       WL.Session.id = row.code;
       WL.Session.dbId = row.id;
+      WL.Session.createdBy = row.created_by || null;
       WL.Session.name = row.name;
       WL.Session.industry = row.industry;
       WL.Session.role = row.role;
@@ -4689,6 +4716,8 @@ WL.Utils.joinErrorMessage = function(err){
   if(msg === 'NEEDS_CONNECTION') return 'SESSIONS NEED A CONNECTION · SOLO PHRASES WORK OFFLINE';
   if(msg.indexOf('SESSION_FULL') === 0) return 'SESSION FULL · MAX 4 PARTICIPANTS';
   if(msg.indexOf('Session not found') === 0) return 'SESSION NOT FOUND OR ENDED';
+  if(msg.indexOf('RATE_LIMITED:') === 0) return 'TOO MANY JOIN ATTEMPTS · TRY AGAIN SHORTLY';
+  if(msg.indexOf('CODE_RATE_LIMITED:') === 0) return 'TOO MANY ATTEMPTS FOR THIS SESSION CODE · TRY AGAIN SHORTLY';
   if(msg === 'EMPTY_CODE') return 'ENTER A SESSION CODE';
   return 'COULD NOT JOIN · CHECK CONNECTION';
 };
@@ -4762,6 +4791,18 @@ WL._flushPendingLeaves = function(){
       }
     }).catch(function(){ /* still unreachable, left queued for next boot */ });
   });
+};
+
+/* ── END SESSION SERVICE — creator-only lifecycle action. The backend is
+   authoritative for creator identity and atomically ends the session plus
+   marks every active participant as left. No client-side identity is trusted. */
+WL.endSession = function(sessionId, cb){
+  cb=cb||function(){};
+  if(!sessionId){ cb(new Error('EMPTY_SESSION')); return; }
+  WL.Supabase.rpc('end_session',{p_session_id:sessionId}).then(function(res){
+    if(res.error){cb(res.error);return;}
+    cb(null,res.data);
+  }).catch(function(err){cb(err);});
 };
 
 /* ── PROFILE SYNC ───────────────────────────────────────────────
@@ -4942,6 +4983,14 @@ WL.subscribeToSession = function(sessionDbId){
       function(payload){
         if(window.Chat && Chat.onRealtimeParticipantLeave){
           Chat.onRealtimeParticipantLeave(payload);
+        }
+      }
+    )
+    .on('postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'sessions', filter: 'id=eq.' + sessionDbId },
+      function(payload){
+        if(window.Chat && Chat.onRealtimeSessionUpdate){
+          Chat.onRealtimeSessionUpdate(payload.new);
         }
       }
     )
@@ -5656,6 +5705,15 @@ WL.Components.home = { onEnter:function(){
     }
     renderSessions(sessions);
   });
+  if(WL._pendingJoinCode){
+    var pendingCode=WL._pendingJoinCode;
+    WL._pendingJoinCode=null;
+    setTimeout(function(){
+      var inp=document.getElementById('join-input');
+      if(inp) inp.value=pendingCode;
+      Home.joinSession();
+    },250);
+  }
 }, onExit:function(){} };
 ConnBar.init();
 
@@ -6375,7 +6433,8 @@ function attachBubbleGestures(el,replyText,onLongPress,replyMessageId){
     snapBack();
     if(wasDragging&&finalDx>=THRESH){
       try{navigator.vibrate([15]);}catch(err){}
-      Chat.startReply(replyText,replyMessageId);
+      var liveReplyId=replyMessageId||el.getAttribute('data-message-id')||null;
+      Chat.startReply(replyText,liveReplyId);
     }
   }
   el.addEventListener('pointerup',release);
@@ -6486,6 +6545,8 @@ var Chat={
     if(window.WL && WL.Session && WL.Session.id){ SID=WL.Session.id; }
     var sessionName=(window.WL && WL.Session && WL.Session.name) ? WL.Session.name : (U.ind+' · '+U.name.split(' ')[0]);
     var cn=document.getElementById('chat-name'); if(cn) cn.textContent=sessionName;
+    var endAction=document.getElementById('end-session-action');
+    if(endAction) endAction.classList.toggle('hidden', WL.Session.createdBy!==WL.State.uid);
     document.getElementById('your-lang-val').textContent=U.lang;
     document.getElementById('chat-ind').textContent=((WL.Session&&WL.Session.industry)||U.ind).toUpperCase(); // the SESSION's industry, not the viewer's own profile industry -- a joiner's header used to show their own industry for someone else's session
     var vms=document.getElementById('voice-mode-sel');
@@ -6585,6 +6646,14 @@ var Chat={
         renderSystemMsg('● '+label+' JOINED SESSION');
       }
     });
+  },
+
+  /* Session lifecycle signal. end_session updates the session row once,
+     so connected participants receive one canonical ended-state event. */
+  onRealtimeSessionUpdate:function(row){
+    if(!row || !WL.Session.dbId || row.id!==WL.Session.dbId) return;
+    WL.Session.status=row.status;
+    if(row.status==='ended' || row.ended_at){ this._handleSessionEnded(false); }
   },
 
   /* Fires on a participants UPDATE for this session (Step 6's third
@@ -6799,11 +6868,40 @@ var Chat={
 
   promptLeave:function(){document.getElementById('leave-sheet').classList.add('visible');document.getElementById('leave-bd').classList.add('visible');},
   closeLeave:function(){document.getElementById('leave-sheet').classList.remove('visible');document.getElementById('leave-bd').classList.remove('visible');},
+  promptEndSession:function(){
+    if(WL.Session.createdBy!==WL.State.uid){showToast('ONLY THE SESSION CREATOR CAN END IT');return;}
+    document.getElementById('end-bd').classList.add('visible');
+    document.getElementById('end-sheet').classList.add('visible');
+  },
+  closeEndSession:function(){document.getElementById('end-sheet').classList.remove('visible');document.getElementById('end-bd').classList.remove('visible');},
+  _handleSessionEnded:function(creator){
+    var sessionDbId=WL.Session.dbId;if(!sessionDbId)return;
+    var wasActive=!!this._active;
+    clearInterval(_durT);clearInterval(this._invT);this._stopMic();window.speechSynthesis&&window.speechSynthesis.cancel();
+    this.closeLeave();this.closeEndSession();this.closeInfo();this.closeMessageActions();
+    WL._pageLeaveIssued=true;WL.unsubscribeFromSession();
+    WL.Session.id=null;WL.Session.dbId=null;WL.Session.createdBy=null;WL.Session.status='inactive';WL._participants=[];
+    this._active=false;document.getElementById('chat-dock').classList.remove('active');WL.Chips.setEnabled('chat',false);
+    showToast(creator?'SESSION ENDED':'SESSION ENDED BY CREATOR');
+    WL.Router.go('home');
+    if(wasActive&&window.Ov3)setTimeout(function(){Ov3.open(sessionDbId);},350);
+  },
+  confirmEndSession:function(){
+    if(WL.Session.createdBy!==WL.State.uid){this.closeEndSession();showToast('ONLY THE SESSION CREATOR CAN END IT');return;}
+    var sessionDbId=WL.Session.dbId;if(!sessionDbId){this.closeEndSession();return;}
+    var btn=document.getElementById('end-go');btn.disabled=true;btn.textContent='ENDING…';
+    var self=this;
+    WL.endSession(sessionDbId,function(err){
+      btn.disabled=false;btn.textContent='END SESSION';
+      if(err){console.error('[WL] end_session failed:',err);showToast(WL.Utils.joinErrorMessage(err));return;}
+      self._handleSessionEnded(true);
+    });
+  },
   confirmLeave:function(){
      this.closeLeave();hap([150,60,150,60,100]);clearInterval(_durT);clearInterval(this._invT);window.speechSynthesis&&window.speechSynthesis.cancel();
      var sessionDbId=window.WL&&WL.Session?WL.Session.dbId:null,wasActive=!!this._active;WL._pageLeaveIssued=true;
      if(window.WL&&sessionDbId)WL.leaveSession(function(err){if(err)console.error('[WL] leave_session failed after retries, queued for next boot:',err);});
-     if(window.WL){WL.Session.id=null;WL.Session.dbId=null;WL.Session.status='inactive';WL._participants=[];}WL.Router.go('home');
+     if(window.WL){WL.Session.id=null;WL.Session.dbId=null;WL.Session.createdBy=null;WL.Session.status='inactive';WL._participants=[];}WL.Router.go('home');
      if(wasActive&&sessionDbId)setTimeout(function(){if(window.Ov3)Ov3.open(sessionDbId);},350);
    },
 
@@ -7353,6 +7451,7 @@ var Ov1={
           }
           WL.Session.id = row.code;
           WL.Session.dbId = row.id;
+          WL.Session.createdBy = row.created_by || WL.State.uid;
           WL.Session.industry = row.industry;
           WL.Session.role = row.role;
           WL.Session.purpose = row.purpose;
