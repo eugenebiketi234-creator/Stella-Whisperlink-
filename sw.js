@@ -2,7 +2,7 @@
    The app remains network-first. Supabase/CDN traffic is never intercepted.
    The cache exists primarily for app-shell fallback and installed-app startup. */
 
-const CACHE_NAME = 'stella-whisperlink-shell-v2';
+const CACHE_NAME = 'stella-whisperlink-shell-v3';
 
 const APP_SHELL = [
   '/',
