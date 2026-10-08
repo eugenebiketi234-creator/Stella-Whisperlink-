@@ -2,13 +2,14 @@
    The app remains network-first. Supabase/CDN traffic is never intercepted.
    The cache exists primarily for app-shell fallback and installed-app startup. */
 
-const CACHE_NAME = 'stella-whisperlink-shell-v1';
+const CACHE_NAME = 'stella-whisperlink-shell-v2';
+
 const APP_SHELL = [
   '/',
   '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
-  '/icons/maskable-512.png'
+  '/icon-192.png',
+  '/icon-512.png',
+  '/maskable-512.png'
 ];
 
 self.addEventListener('install', event => {
@@ -54,8 +55,14 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Only cache the small, stable PWA metadata/icon resources. Do not cache app/API data.
-  if (url.pathname === '/manifest.json' || url.pathname.startsWith('/icons/')) {
+  // Only cache the small, stable PWA metadata/icon resources.
+  // Do not cache app/API data.
+  if (
+    url.pathname === '/manifest.json' ||
+    url.pathname === '/icon-192.png' ||
+    url.pathname === '/icon-512.png' ||
+    url.pathname === '/maskable-512.png'
+  ) {
     event.respondWith(
       caches.match(request).then(cached =>
         cached || fetch(request).then(response => {
