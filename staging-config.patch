@@ -1,0 +1,9 @@
+--- a/index.html
++++ b/index.html
+@@
+ WL.Supabase = supabase.createClient(
+-  'https://eklluunyjifnucleeqhc.supabase.co',
+-  'sb_publishable_-AUhd2MisNkRWXjwJa_vOA_rIEFD3J6'
++  'https://dodfgntgfosjscqewuwr.supabase.co',
++  'sb_publishable_0PVTUhxiM1NIZaWR5iUCaA_S0drYYAb'
+ );
